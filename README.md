@@ -25,6 +25,7 @@ Játszható két játékos hot-seat módban: körökre osztott lövés, szeles b
 - ▲ / ▼ nyilak: lövés ereje (±10, Shift: ±50)
 - Ctrl + ◀ / ▶: cső szöge (±1°, Shift: ±5°; ◀ a bal oldali irány felé forgat)
 - T: röppálya-előnézet (játékosonként meccsenként egyszer, az adott kör végéig)
+- M: némítás be/ki (a beállítás megmarad)
 - Szög és erő csúszók a HUD-on
 - Szóköz: tűz
 - Meccs végén: eredményképernyő statisztikával, bolt (XP-ből fejlesztés), Visszavágó és Főmenü
@@ -51,7 +52,7 @@ src/
 ├── test/               # Vitest setup
 └── game/               # Reacttől független játékmag
     ├── engine/         # Game (Pixi app, fix időlépéses loop, skálázás)
-    ├── assets/         # SVG tank sprite-ok, fx/ (Kenney Particle Pack PNG-k)
+    ├── assets/         # SVG tank sprite-ok, fx/ (Kenney Particle Pack PNG-k), audio/ (lövés, robbanás, tankmozgás)
     ├── entities/       # tank
     ├── systems/        # turnManager, upgrades, matchStats, barrelAnimation, particles, profileStorage
     ├── terrain/        # heightmap, TerrainMask (ütközés), Terrain (RenderTexture)
@@ -65,6 +66,8 @@ Elv: a nagy gyakoriságú adat (pozíciók) az engine-ben él, a Zustand store c
 ## Köszönet
 
 A robbanás- és füstsprite-ok a [Kenney Particle Pack](https://kenney.nl/assets/particle-pack) csomagból valók (CC0), a licenc a `src/game/assets/fx/License.txt` fájlban van.
+
+A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalról valók, Creative Commons 0 (CC0) licenc szerinti szűréssel letöltve, így attribúció nem kötelező. Az egyes fájlok eredeti oldalát és szerzőjét nem rögzítettem; ha később publikálod a játékot, érdemes a forrásoldalakat egyenként is megerősíteni.
 
 ## TODO
 

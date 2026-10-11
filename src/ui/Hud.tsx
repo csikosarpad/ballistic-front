@@ -1,9 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { MAX_ANGLE, MIN_ANGLE, MIN_POWER, useGameStore } from "@/game/state/gameStore";
 import { gameRef } from "./gameRef";
 
+const toCss = (color?: number) => (color === undefined ? "#ffffff" : `#${color.toString(16).padStart(6, "0")}`);
+
 export function Hud() {
-  const { angle, power, maxPower, wind, phase, currentId, tanks, previewAvailable, previewActive, setAim } = useGameStore();
+  const { angle, power, maxPower, wind, phase, currentId, tanks, previewAvailable, previewActive, muted, toggleMuted, setAim } = useGameStore();
   const locked = phase !== "aiming";
   const me = tanks.find((t) => t.id === currentId);
 
@@ -11,6 +13,10 @@ export function Hud() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const { phase, nudgePower, nudgeAngle } = useGameStore.getState();
+      if (e.key === "m" || e.key === "M") {
+        useGameStore.getState().toggleMuted();
+        return;
+      }
       if (phase !== "aiming") return;
       const step = e.shiftKey ? 50 : 10;
       const angleStep = e.shiftKey ? 5 : 1;
@@ -48,15 +54,17 @@ export function Hud() {
   }, []);
 
   return (
-    <div style={{ position: "absolute", top: 12, left: 12, color: "#fff", font: "14px sans-serif" }}>
+    <div className="hud" style={{ ...({ "--accent": toCss(me?.color) } as CSSProperties), position: "absolute", top: 12, left: 12, color: "#fff", font: "14px sans-serif" }}>
       <div>
         {tanks.map((t) => (
-          <span key={t.id} style={{ marginRight: 12, fontWeight: t.id === currentId ? "bold" : "normal" }}>
+          <span key={t.id} style={{ marginRight: 12, color: toCss(t.color), fontWeight: t.id === currentId ? "bold" : "normal" }}>
             {t.id}: {t.hp}/{t.maxHp} HP
           </span>
         ))}
       </div>
-      <div>Soron: {currentId} | Mozgás: {me?.moveLeft ?? 0}px | Szél: {wind}</div>
+      <div>
+        Soron: <strong style={{ color: toCss(me?.color) }}>{currentId}</strong> | Mozgás: {me?.moveLeft ?? 0}px | Szél: {wind}
+      </div>
       <label>
         Szög: {angle}°
         <input type="range" min={MIN_ANGLE} max={MAX_ANGLE} value={angle} disabled={locked} onChange={(e) => setAim(+e.target.value, power)} />
@@ -73,6 +81,7 @@ export function Hud() {
       <button disabled={locked || !previewAvailable} onClick={() => gameRef.current?.requestPreview()}>
         {previewActive ? "Röppálya (aktív)" : previewAvailable ? "Röppálya (T, 1x/meccs)" : "Röppálya (elhasználva)"}
       </button>
+      <button onClick={toggleMuted}>Hang: {muted ? "ki" : "be"} (M)</button>
     </div>
   );
 }

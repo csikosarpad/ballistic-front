@@ -1,4 +1,4 @@
-import { Graphics, RenderTexture, Sprite, type Renderer } from "pixi.js";
+import { Container, Graphics, RenderTexture, Sprite, type Renderer } from "pixi.js";
 import { generateHeightmap, mirrorHeightmap } from "./heightmap";
 import { TerrainMask } from "./mask";
 import { scorchDots } from "./scorch";
@@ -9,10 +9,13 @@ export class Terrain {
   mask = TerrainMask.fromHeightmap([], 0);
   private texture: RenderTexture | null = null;
   private eraser = new Graphics();
+  /** A gyökér konténer blend módját a Pixi nem alkalmazza, ezért a törlő kört egy szülőn keresztül rajzoljuk. */
+  private eraseLayer = new Container();
   private scorch = new Graphics();
 
   constructor(private renderer: Renderer) {
     this.eraser.blendMode = "erase";
+    this.eraseLayer.addChild(this.eraser);
   }
 
   build(width: number, height: number, seed = 1): void {
@@ -46,12 +49,13 @@ export class Terrain {
 
     this.mask.carveCircle(x, y, radius);
     this.eraser.clear().circle(x, y, radius).fill(0xffffff);
-    this.renderer.render({ container: this.eraser, target: this.texture, clear: false });
+    this.renderer.render({ container: this.eraseLayer, target: this.texture, clear: false });
   }
 
   destroy(): void {
     this.texture?.destroy(true);
     this.eraser.destroy();
+    this.eraseLayer.destroy();
     this.scorch.destroy();
     this.sprite.destroy();
   }

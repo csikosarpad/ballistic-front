@@ -7,12 +7,23 @@ export type Screen = "menu" | "playing";
 export const MIN_POWER = 100;
 export const MIN_ANGLE = 0;
 export const MAX_ANGLE = 180;
+const MUTE_KEY = "ballistic-front:muted";
+
+function readMuted(): boolean {
+  try {
+    return localStorage.getItem(MUTE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 export interface TankView {
   id: string;
   hp: number;
   maxHp: number;
   moveLeft: number;
+  /** A tank színe (0xRRGGBB); a HUD vezérlői ezt követik. */
+  color: number;
 }
 
 export interface GameState {
@@ -30,14 +41,16 @@ export interface GameState {
   previewAvailable: boolean;
   previewActive: boolean;
   screen: Screen;
+  muted: boolean;
   setAim: (angle: number, power: number) => void;
   /** Az erőt a [MIN_POWER, maxPower] tartományban tartva változtatja. */
   nudgePower: (delta: number) => void;
   /** A szöget a [MIN_ANGLE, MAX_ANGLE] tartományban tartva változtatja. */
   nudgeAngle: (delta: number) => void;
   setScreen: (screen: Screen) => void;
+  toggleMuted: () => void;
   /** Az engine tölti; a HUD csak olvassa. */
-  sync: (s: Partial<Omit<GameState, "setAim" | "nudgePower" | "nudgeAngle" | "setScreen" | "sync">>) => void;
+  sync: (s: Partial<Omit<GameState, "setAim" | "nudgePower" | "nudgeAngle" | "setScreen" | "toggleMuted" | "sync">>) => void;
 }
 
 /** Csak a HUD-hoz szükséges állapot; a nagy gyakoriságú adat (pozíciók) az engine-ben él. */
@@ -55,9 +68,19 @@ export const useGameStore = create<GameState>((set) => ({
   previewAvailable: false,
   previewActive: false,
   screen: "menu",
+  muted: readMuted(),
   setAim: (angle, power) => set({ angle, power }),
   nudgePower: (delta) => set((s) => ({ power: Math.min(s.maxPower, Math.max(MIN_POWER, s.power + delta)) })),
   nudgeAngle: (delta) => set((s) => ({ angle: Math.min(MAX_ANGLE, Math.max(MIN_ANGLE, s.angle + delta)) })),
   setScreen: (screen) => set({ screen }),
+  toggleMuted: () =>
+    set((s) => {
+      try {
+        localStorage.setItem(MUTE_KEY, s.muted ? "0" : "1");
+      } catch {
+        // Mentés nélkül is működik a némítás.
+      }
+      return { muted: !s.muted };
+    }),
   sync: (s) => set(s),
 }));

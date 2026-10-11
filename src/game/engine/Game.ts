@@ -8,6 +8,7 @@ import { Terrain } from "../terrain/Terrain";
 import { ParticleSystem } from "../systems/particles";
 import { FxRenderer } from "./FxRenderer";
 import { loadFxTextures } from "./fxTextures";
+import { AudioManager } from "./AudioManager";
 import { TurnManager } from "../systems/turnManager";
 import {
   applyDamage, barrelTip, createTank, explosionDamage, isAlive, moveTank, settleTank, tankContains,
@@ -48,6 +49,7 @@ export class Game {
   private shellGfx = new Graphics();
   private shellGlow = new Sprite();
   private fx: FxRenderer | null = null;
+  private audio: AudioManager | null = null;
   private previewGfx = new Graphics();
   private previewAllowance = new PreviewAllowance();
   private previewActive = false;
@@ -76,6 +78,7 @@ export class Game {
     ]);
     // Az asset-betöltés alatt is megszúnhetett a komponens (StrictMode).
     if (this.destroyed) return;
+    this.audio = new AudioManager();
     this.tankTextures = { body, barrel };
     this.fx = new FxRenderer(fxTextures);
     this.shellGlow.texture = fxTextures.glow;
@@ -186,7 +189,7 @@ export class Game {
       phase: this.turns.phase,
       currentId: this.turns.current,
       winner: this.turns.winner,
-      tanks: this.tanks.map((t) => ({ id: t.id, hp: t.hp, maxHp: t.stats.maxHp, moveLeft: t.moveLeft })),
+      tanks: this.tanks.map((t) => ({ id: t.id, hp: t.hp, maxHp: t.stats.maxHp, moveLeft: t.moveLeft, color: t.color })),
       profiles: { ...this.profiles },
       matchStats: this.matchStats,
       previewAvailable: this.turns.phase === "aiming" && this.previewAllowance.canUse(this.turns.current),
@@ -204,7 +207,10 @@ export class Game {
   /** Mozgás a jelenlegi tankkal; zárolt bemenetnél nem csinál semmit. */
   move(dir: -1 | 1): void {
     if (this.turns.inputLocked || !this.terrain) return;
-    if (moveTank(this.current, dir, this.terrain.mask)) this.syncStore();
+    if (moveTank(this.current, dir, this.terrain.mask)) {
+      this.audio?.moveTick();
+      this.syncStore();
+    }
   }
 
   /** Lövés a store-ban beállított szöggel és erővel. */
@@ -217,6 +223,7 @@ export class Game {
     this.matchStats = recordShot(this.matchStats, tank.id);
     const tip = barrelTip(tank);
     this.particles.spawnMuzzleFlash(tip.x, tip.y, angle);
+    this.audio?.play("shot", { rate: 0.95 + Math.random() * 0.1 });
     this.shell = { pos: tip, vel: launchVelocity(angle, power) };
     const view = this.tankViews.get(tank.id);
     if (view) view.anim = kick(angle);
@@ -229,6 +236,7 @@ export class Game {
     const radius = shooter.stats.blastRadius;
     this.terrain?.carve(x, y, radius);
     this.particles.spawnExplosion(x, y, radius);
+    this.audio?.play("explosion", { rate: 0.9 + Math.random() * 0.2 });
     // XP: az ellenfélnek okozott sérülés (1 HP = 1 XP).
     let dealt = 0;
     for (const t of this.tanks) {
@@ -274,6 +282,7 @@ export class Game {
       this.stepShell();
     }
     this.particles.update(frameDt);
+    this.audio?.update();
     this.draw(frameDt);
   }
 
@@ -333,6 +342,7 @@ export class Game {
 
   destroy(): void {
     this.destroyed = true;
+    this.audio?.destroy();
     if (this.app.renderer) this.app.destroy(true, { children: true });
   }
 }

@@ -62,6 +62,14 @@ describe("Hud billentyűk", () => {
     expect(screen.getByRole("button", { name: /elhasználva/i })).toBeDisabled();
   });
 
+  it("az M billentyű némítást kapcsol, lövés közben is", () => {
+    act(() => useGameStore.setState({ muted: false, phase: "flying" }));
+    fireEvent.keyDown(window, { key: "m" });
+    expect(useGameStore.getState().muted).toBe(true);
+    fireEvent.keyDown(window, { key: "M" });
+    expect(useGameStore.getState().muted).toBe(false);
+  });
+
   it("a szög a [0, 180] tartományban marad", () => {
     act(() => useGameStore.setState({ angle: 2 }));
     fireEvent.keyDown(window, { key: "ArrowRight", ctrlKey: true, shiftKey: true });

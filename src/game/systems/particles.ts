@@ -51,7 +51,7 @@ export class ParticleSystem {
   spawnExplosion(x: number, y: number, radius: number): void {
     const r = radius;
     // Lökéshullám-gyűrű.
-    this.add({ kind: "ring", x, y, size: r, grow: r * 7, life: 0.35, color: 0xffd9a0, opacity: 0.8 });
+    this.add({ kind: "ring", x, y, size: r, grow: r * 7, life: 0.25, color: 0xffb870, opacity: 0.45 });
 
     for (let i = 0; i < 6; i++) {
       const a = this.between(0, Math.PI * 2);
@@ -64,10 +64,11 @@ export class ParticleSystem {
         vy: Math.sin(a) * speed,
         size: r * this.between(1.4, 2.2),
         grow: r * 1.2,
-        life: this.between(0.35, 0.6),
+        life: this.between(0.25, 0.45),
         spin: this.between(-2, 2),
-        color: this.rng() < 0.5 ? 0xffa030 : 0xffd060,
+        color: this.rng() < 0.5 ? 0xff7a20 : 0xffa030,
         gravity: -40,
+        opacity: 0.7,
       });
     }
 

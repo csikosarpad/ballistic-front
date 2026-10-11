@@ -46,8 +46,11 @@ export class FxRenderer {
       sprite.position.set(p.x, p.y);
       sprite.rotation = p.rotation;
       sprite.tint = p.color;
-      sprite.alpha = p.opacity * Math.max(0, Math.min(1, p.life / p.maxLife));
-      sprite.blendMode = ADDITIVE.has(p.kind) ? "add" : "normal";
+      // Az additív (izzó) sprite-ok négyzetes görbével halványodnak: gyorsan, de fokozatosan és fehér folt nélkül tűnnek el.
+      const t = Math.max(0, Math.min(1, p.life / p.maxLife));
+      const additive = ADDITIVE.has(p.kind);
+      sprite.alpha = p.opacity * (additive ? t * t : t);
+      sprite.blendMode = additive ? "add" : "normal";
     });
   }
 

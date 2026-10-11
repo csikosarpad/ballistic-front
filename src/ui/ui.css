@@ -1,3 +1,38 @@
+/* A HUD a soron lévő játékos színét követi (--accent). */
+.hud {
+  --accent: #fff;
+}
+
+.hud input[type="range"] {
+  accent-color: var(--accent);
+}
+
+.hud button {
+  margin: 2px 4px 2px 0;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #04122b;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.25s, filter 0.1s;
+}
+
+.hud button:hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+
+.hud button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.hud strong {
+  transition: color 0.25s;
+}
+
 .overlay {
   position: absolute;
   inset: 0;
