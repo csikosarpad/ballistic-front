@@ -1,23 +1,26 @@
 import { useEffect, type CSSProperties } from "react";
 import { MAX_ANGLE, MIN_ANGLE, MIN_POWER, useGameStore } from "@/game/state/gameStore";
+import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { gameRef } from "./gameRef";
 
 const toCss = (color?: number) => (color === undefined ? "#ffffff" : `#${color.toString(16).padStart(6, "0")}`);
 
 export function Hud() {
-  const { angle, power, maxPower, wind, phase, currentId, tanks, previewAvailable, previewActive, muted, toggleMuted, setAim } = useGameStore();
-  const locked = phase !== "aiming";
+  const { angle, power, maxPower, wind, phase, currentId, canControl, tanks, previewAvailable, previewActive, muted, toggleMuted, setAim } = useGameStore();
+  const online = useMultiplayerStore((state) => state.credentials !== null);
+  const multiplayerError = useMultiplayerStore((state) => state.error);
+  const locked = phase !== "aiming" || !canControl;
   const me = tanks.find((t) => t.id === currentId);
 
   // Bal/jobb: mozgás, Ctrl+bal/jobb: szög (Shift: x5), fel/le: erő (Shift: x5), szóköz: tűz.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const { phase, nudgePower, nudgeAngle } = useGameStore.getState();
+      const { phase, canControl, nudgePower, nudgeAngle } = useGameStore.getState();
       if (e.key === "m" || e.key === "M") {
         useGameStore.getState().toggleMuted();
         return;
       }
-      if (phase !== "aiming") return;
+      if (phase !== "aiming" || !canControl) return;
       const step = e.shiftKey ? 50 : 10;
       const angleStep = e.shiftKey ? 5 : 1;
       switch (e.key) {
@@ -65,6 +68,11 @@ export function Hud() {
       <div>
         Soron: <strong style={{ color: toCss(me?.color) }}>{currentId}</strong> | Mozgás: {me?.moveLeft ?? 0}px | Szél: {wind}
       </div>
+      {online && (
+        <div role={multiplayerError ? "alert" : "status"}>
+          {multiplayerError ?? (phase === "flying" ? "Lövedék útban" : canControl ? "Te következel" : `${currentId} következik`)}
+        </div>
+      )}
       <label>
         Szög: {angle}°
         <input type="range" min={MIN_ANGLE} max={MAX_ANGLE} value={angle} disabled={locked} onChange={(e) => setAim(+e.target.value, power)} />

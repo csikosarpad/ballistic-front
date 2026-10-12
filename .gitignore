@@ -3,6 +3,19 @@
 /lib
 /lib-types
 /server
+!/server/
+/server/*
+!/server/README.md
+!/server/schema.sql
+!/server/config.example.php
+!/server/public/
+/server/public/*
+!/server/public/.htaccess
+!/server/public/index.php
+!/server/src/
+/server/src/*
+!/server/src/bootstrap.php
+!/server/src/.htaccess
 
 # Development
 node_modules

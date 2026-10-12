@@ -1,10 +1,12 @@
 import { useGameStore } from "@/game/state/gameStore";
+import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { gameRef } from "./gameRef";
 import { Shop } from "./Shop";
 
 /** Meccs végén: győztes, statisztika, bolt és továbblépés. */
 export function ResultScreen() {
   const { winner, matchStats, setScreen } = useGameStore();
+  const onlineMatch = useMultiplayerStore((state) => state.credentials !== null);
 
   return (
     <div className="overlay">
@@ -30,12 +32,17 @@ export function ResultScreen() {
             ))}
           </tbody>
         </table>
-        <Shop />
+        {!onlineMatch && <Shop />}
         <div style={{ marginTop: 12 }}>
-          <button className="btn" onClick={() => gameRef.current?.restart()}>
-            Visszavágó
-          </button>
-          <button className="btn secondary" onClick={() => setScreen("menu")}>
+          {!onlineMatch && (
+            <button className="btn" onClick={() => gameRef.current?.restart()}>
+              Visszavágó
+            </button>
+          )}
+          <button className="btn secondary" onClick={() => {
+            if (onlineMatch) useMultiplayerStore.getState().leave();
+            setScreen("menu");
+          }}>
             Főmenü
           </button>
         </div>
