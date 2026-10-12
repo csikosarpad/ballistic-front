@@ -37,6 +37,7 @@ function saveSession(credentials: RoomCredentials | null, session: RoomSession |
     if (credentials && session) sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ credentials, session }));
     else sessionStorage.removeItem(STORAGE_KEY);
   } catch {
+    // A szoba csak a jelenlegi fül bezárásáig él, ha a sessionStorage nem elérhető.
   }
 }
 

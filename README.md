@@ -147,8 +147,9 @@ A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalró
 - [x] MySQL-ben tárolt, verziózott JSON eseménynapló és szinkronállapot
 - [x] Determinisztikus meccsindítás (terep seedje, kezdő játékos, fejlesztések)
 - [x] Mozgás- és lövésesemények visszajátszása, körönkénti szél rögzítése
-- [ ] Lekérdezéses szinkronizálás, újracsatlakozás és ütköző frissítések kezelése
-- [ ] `single` / `multi` engine mód, Reacttől függetlenül
+- [x] Lekérdezéses szinkronizálás, újracsatlakozás és ütköző frissítések kezelése
+- [x] `single` / `multi` engine mód, Reacttől függetlenül
+- [x] Online meccs utáni upgrade és host által indított visszavágó
 - [x] Zustand-alapú lobby állapot és lobby UI
 - [ ] Két klienses szinkron- és visszajátszási tesztek, telepítési leírás
 

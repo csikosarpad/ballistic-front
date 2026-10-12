@@ -11,7 +11,7 @@ Megvalósított HTTP-végpontok:
 - Események hozzáfűzése optimista verzióellenőrzéssel.
 - Szobánkénti Bearer token és 24 órás lejárat.
 
-A lobbyból a host elindíthatja a meccset; a kliensek a közös seed és upgrade snapshot alapján szimulálják a fizikát, a mozgás- és lövésparancsokat pedig verziózott eseményként játsszák vissza. A backend jelenleg nem ellenőrzi a játékszabályokat, nem futtat fizikát, és nem nyújt csalásvédelmet.
+A lobbyból a host elindíthatja a meccset; a kliensek a közös seed és upgrade snapshot alapján szimulálják a fizikát, a mozgás- és lövésparancsokat pedig verziózott eseményként játsszák vissza. A meccs után mindkét játékos a saját tankját fejlesztheti, majd a host indíthat visszavágót. A backend a szoba státuszait és a host-only start/finish eseményeket ellenőrzi, de nem futtat fizikát és nem nyújt teljes csalásvédelmet.
 
 ## Mappastruktúra
 
@@ -181,6 +181,24 @@ Státuszok:
 - `ready` – mindkét játékos csatlakozott.
 - `playing` – `match_started` esemény érkezett.
 - `finished` – `match_finished` esemény érkezett.
+
+Engedélyezett események és állapotok:
+
+- `move`, `fire` csak `playing` állapotban írható.
+- `upgrade_purchased` csak `finished` állapotban írható; az esemény a hitelesített játékoshoz tartozik.
+- `match_started` `ready` vagy `finished` állapotból írható, kizárólag a szoba hostja (`P1`) által.
+- `match_finished` csak `playing` állapotban írható, kizárólag a host által.
+
+Ez állapot- és jogosultságellenőrzés, nem teljes játékszabály-ellenőrzés. A backend például nem vizsgálja a lövésértékek tartományát vagy azt, hogy valóban az aktuális kör játékosa küldte-e.
+
+Engedélyezett események és állapotok:
+
+- `move`, `fire` csak `playing` állapotban írható.
+- `upgrade_purchased` csak `finished` állapotban írható; az esemény a hitelesített játékoshoz tartozik.
+- `match_started` `ready` vagy `finished` állapotból írható, kizárólag a szoba hostja (`P1`) által.
+- `match_finished` csak `playing` állapotban írható, kizárólag a host által.
+
+Ez állapot- és jogosultságellenőrzés, nem teljes játékszabály-ellenőrzés. Például a backend nem vizsgálja a lövés értéktartományát vagy azt, hogy valóban az aktuális kör játékosa küldte-e.
 
 ## Adatbázis és élettartam
 

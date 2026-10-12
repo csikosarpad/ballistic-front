@@ -111,8 +111,21 @@ try {
         $pdo->beginTransaction();
         $room = roomByCode($pdo, $matches[1], true);
         $playerId = authenticateRoom($room, bearerToken());
-        if (!in_array($room['status'], ['ready', 'playing'], true)) {
-            throw new ApiException(409, 'Room is not accepting game events.');
+        $allowedStatuses = match ($type) {
+            'match_started' => ['ready', 'finished'],
+            'match_finished' => ['playing'],
+            'move', 'fire' => ['playing'],
+            'upgrade_purchased' => ['finished'],
+            default => [],
+        };
+        if ($allowedStatuses === []) {
+            throw new ApiException(400, 'Unsupported event type.');
+        }
+        if (!in_array($room['status'], $allowedStatuses, true)) {
+            throw new ApiException(409, 'Event is not allowed in the current room status.');
+        }
+        if (in_array($type, ['match_started', 'match_finished'], true) && $playerId !== 'P1') {
+            throw new ApiException(403, 'Only the host can start or finish a match.');
         }
         if ((int) $room['revision'] !== $expected) {
             throw new ApiException(409, 'Room revision conflict. Refresh before retrying.');

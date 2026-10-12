@@ -24,16 +24,21 @@ export function MultiplayerLobby({ onBack, onStartMatch }: MultiplayerLobbyProps
   const startedRevision = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!credentials || session?.status !== "playing") {
+    if (!credentials || !session || !["playing", "finished"].includes(session.status)) {
       if (!credentials) startedRevision.current = null;
       return;
     }
-    const startEvent = events.find((event) => event.type === "match_started");
+    const startEvent = events.filter((event) => event.type === "match_started").at(-1);
     if (!startEvent || startedRevision.current === startEvent.revision) return;
     const profiles = startEvent.payload.profiles;
     if (!profiles || typeof profiles !== "object") return;
+    const setup = startEvent.payload.setup;
     startedRevision.current = startEvent.revision;
-    onStartMatch(session.setup, profiles as Record<string, Profile>, startEvent.revision);
+    onStartMatch(
+      setup && typeof setup === "object" ? setup as MatchSetup : session.setup,
+      profiles as Record<string, Profile>,
+      startEvent.revision,
+    );
   }, [credentials, events, onStartMatch, session]);
 
   const back = () => {
@@ -42,7 +47,8 @@ export function MultiplayerLobby({ onBack, onStartMatch }: MultiplayerLobbyProps
   };
 
   const startMatch = () => {
-    void publish("match_started", { profiles: useGameStore.getState().profiles });
+    if (!session) return;
+    void publish("match_started", { setup: session.setup, profiles: useGameStore.getState().profiles });
   };
 
   return (
@@ -90,6 +96,7 @@ export function MultiplayerLobby({ onBack, onStartMatch }: MultiplayerLobbyProps
           )}
           {session.status === "ready" && credentials.playerId === "P2" && <small>Várakozás a szoba létrehozójára…</small>}
           {session.status === "playing" && <small>Meccs indítása…</small>}
+                  {session.status === "finished" && <small>A lezárt meccs visszaállítása…</small>}
         </div>
       )}
       {error && <p className="lobby-error" role="alert">{error}</p>}

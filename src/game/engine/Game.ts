@@ -148,6 +148,8 @@ export class Game {
     this.pendingMultiplayerStart = null;
     this.multiplayer = true;
     this.matchProfiles = profiles;
+    this.profiles = Object.fromEntries(Object.entries(profiles).map(([id, profile]) => [id, { xp: profile.xp, levels: { ...profile.levels } }]));
+    saveProfiles(this.profiles);
     this.lastMultiplayerRevision = revision;
     this.pendingMultiplayerEvents = [];
     this.unsubscribeMultiplayer?.();
@@ -205,11 +207,23 @@ export class Game {
   /** Fejlesztés vásárlása; csak meccsek között (játék végén) működik. */
   buy(playerId: string, upgradeId: string): void {
     if (this.turns.phase !== "gameOver") return;
+    if (this.multiplayer) {
+      if (useMultiplayerStore.getState().credentials?.playerId !== playerId) return;
+      void useMultiplayerStore.getState().publish("upgrade_purchased", { upgradeId });
+      return;
+    }
     const next = buyUpgrade(this.profiles[playerId]!, upgradeId);
     if (!next) return;
     this.profiles[playerId] = next;
     saveProfiles(this.profiles);
     this.syncStore();
+  }
+
+  requestMultiplayerRematch(): void {
+    const { credentials, session } = useMultiplayerStore.getState();
+    if (!this.multiplayer || this.turns.phase !== "gameOver" || credentials?.playerId !== "P1" || session?.status !== "finished") return;
+    const setup = { seed: Math.floor(Math.random() * 1_000_000), starterIndex: this.nextStarter };
+    void useMultiplayerStore.getState().publish("match_started", { setup, profiles: this.profiles });
   }
 
   private get current(): Tank {
@@ -310,6 +324,41 @@ export class Game {
     let changed = false;
     while (this.pendingMultiplayerEvents.length > 0) {
       const event = this.pendingMultiplayerEvents[0]!;
+      if (event.type === "match_started" && this.turns.phase === "gameOver") {
+        const setup = event.payload.setup;
+        const profiles = event.payload.profiles;
+        if (
+          !setup || typeof setup !== "object" ||
+          typeof (setup as MatchSetup).seed !== "number" ||
+          typeof (setup as MatchSetup).starterIndex !== "number" ||
+          !profiles || typeof profiles !== "object"
+        ) {
+          this.pendingMultiplayerEvents.shift();
+          continue;
+        }
+        this.pendingMultiplayerEvents.shift();
+        this.matchProfiles = profiles as Record<string, Profile>;
+        this.profiles = Object.fromEntries(
+          Object.entries(this.matchProfiles).map(([id, profile]) => [id, { xp: profile.xp, levels: { ...profile.levels } }]),
+        );
+        saveProfiles(this.profiles);
+        this.lastMultiplayerRevision = event.revision;
+        this.restart(setup as MatchSetup);
+        useGameStore.getState().setScreen("playing");
+        changed = false;
+        continue;
+      }
+      if (event.type === "upgrade_purchased" && this.turns.phase === "gameOver") {
+        this.pendingMultiplayerEvents.shift();
+        const upgradeId = event.payload.upgradeId;
+        if (typeof upgradeId !== "string" || !this.profiles[event.playerId]) continue;
+        const next = buyUpgrade(this.profiles[event.playerId]!, upgradeId);
+        if (!next) continue;
+        this.profiles[event.playerId] = next;
+        saveProfiles(this.profiles);
+        this.syncStore();
+        continue;
+      }
       if (event.type !== "move" && event.type !== "fire") {
         this.pendingMultiplayerEvents.shift();
         changed = true;
@@ -363,6 +412,10 @@ export class Game {
     if (this.turns.phase === "aiming") this.beginTurn();
     else {
       if (this.turns.winner) this.award(this.turns.winner, WIN_BONUS_XP);
+      const onlineRoom = useMultiplayerStore.getState();
+      if (this.multiplayer && onlineRoom.credentials?.playerId === "P1" && onlineRoom.session?.status === "playing") {
+        void useMultiplayerStore.getState().publish("match_finished", { winner: this.turns.winner });
+      }
       this.syncStore();
     }
   }

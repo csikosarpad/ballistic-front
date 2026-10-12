@@ -113,16 +113,41 @@ describe("ResultScreen", () => {
     expect(restart).toHaveBeenCalledOnce();
   });
 
-  it("online meccs után kilép a szobából, és nem mutat helyi visszavágót", () => {
+  it("online eredménynél a host rematch gombja a backend lezárásáig tiltott", () => {
     useMultiplayerStore.setState({
       credentials: { roomCode: "AB12CD", playerId: "P1", token: "secret" },
     });
     render(<ResultScreen />);
 
-    expect(screen.queryByRole("button", { name: "Visszavágó" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Visszavágó" })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "Főmenü" }));
 
     expect(useMultiplayerStore.getState().credentials).toBeNull();
     expect(useGameStore.getState().screen).toBe("menu");
+  });
+
+  it("lezárt online meccs után a host új meccset indíthat és csak a saját tankját fejlesztheti", () => {
+    const requestMultiplayerRematch = vi.fn();
+    const buy = vi.fn();
+    mockGame({ requestMultiplayerRematch, buy });
+    useMultiplayerStore.setState({
+      credentials: { roomCode: "AB12CD", playerId: "P1", token: "secret" },
+      session: {
+        code: "AB12CD",
+        status: "finished",
+        revision: 3,
+        setup: { seed: 42, starterIndex: 0 },
+        players: { P1: "Ada", P2: "Grace" },
+      },
+    });
+    render(<ResultScreen />);
+
+    expect(screen.getByRole("button", { name: "Visszavágó" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "P1: Páncél" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "P2: Páncél" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "P1: Páncél" }));
+    expect(buy).toHaveBeenCalledWith("P1", "armor");
+    fireEvent.click(screen.getByRole("button", { name: "Visszavágó" }));
+    expect(requestMultiplayerRematch).toHaveBeenCalledOnce();
   });
 });
