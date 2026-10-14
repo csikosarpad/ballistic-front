@@ -26,6 +26,8 @@ export const hu = {
 
   "hud.turn": "Soron:",
   "hud.move": "Mozgás: {value} m",
+  "hud.shield": "Pajzs",
+  "hud.armor": "Páncél",
   "hud.wind": "Szél:",
   "hud.shotInFlight": "Lövedék útban",
   "hud.yourTurn": "Te következel",
@@ -55,7 +57,9 @@ export const hu = {
   "shop.cost": "– {cost} XP",
 
   "upgrade.armor.name": "Páncél",
-  "upgrade.armor.desc": "+{value} max HP",
+  "upgrade.armor.desc": "+{value}% sebzéscsökkentés a pajzson átjutó találatokból",
+  "upgrade.shield.name": "Erőtér pajzs",
+  "upgrade.shield.desc": "+{value} pajzs; körönként a maximum 20%-a visszatöltődik",
   "upgrade.warhead.name": "Robbanófej",
   "upgrade.warhead.desc": "+{value}% sebzés",
   "upgrade.blast.name": "Nagyobb kráter",

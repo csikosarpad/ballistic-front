@@ -62,6 +62,19 @@ describe("Hud billentyűk", () => {
     expect(screen.getByRole("button", { name: /elhasználva/i })).toBeDisabled();
   });
 
+  it("a HUD mutatja a pajzsot és a páncélt, ha van", () => {
+    act(() =>
+      useGameStore.setState({
+        tanks: [
+          { id: "P1", hp: 80, maxHp: 100, shield: 12, maxShield: 40, armor: 0.15, moveLeft: 0, color: 0xffffff },
+          { id: "P2", hp: 100, maxHp: 100, shield: 0, maxShield: 0, armor: 0, moveLeft: 0, color: 0xffffff },
+        ],
+      }),
+    );
+    expect(screen.getByText(/P1: 80\/100 HP · Pajzs 12\/40 · Páncél 15%/)).toBeInTheDocument();
+    expect(screen.queryByText(/P2: 100\/100 HP ·/)).not.toBeInTheDocument();
+  });
+
   it("az M billentyű némítást kapcsol, lövés közben is", () => {
     act(() => useGameStore.setState({ muted: false, phase: "flying" }));
     fireEvent.keyDown(window, { key: "m" });

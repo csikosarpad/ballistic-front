@@ -85,12 +85,14 @@ export function Hud() {
       }}
     >
       <div>
-        {tanks.map((t) => (
+        {tanks.map((unit) => (
           <span
-            key={t.id}
-            style={{ marginRight: 12, color: toCss(t.color), fontWeight: t.id === currentId ? "bold" : "normal" }}
+            key={unit.id}
+            style={{ marginRight: 12, color: toCss(unit.color), fontWeight: unit.id === currentId ? "bold" : "normal" }}
           >
-            {t.id}: {t.hp}/{t.maxHp} HP
+            {unit.id}: {unit.hp}/{unit.maxHp} HP
+            {unit.maxShield > 0 && ` · ${t("hud.shield")} ${unit.shield}/${unit.maxShield}`}
+            {unit.armor > 0 && ` · ${t("hud.armor")} ${Math.round(unit.armor * 100)}%`}
           </span>
         ))}
       </div>

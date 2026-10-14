@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { computeStats } from "../systems/upgrades";
 import { TerrainMask } from "../terrain/mask";
-import { applyDamage, createTank, explosionDamage, moveTank, MOVE_BUDGET, settleTank } from "./tank";
+import { applyDamage, createTank, explosionDamage, moveTank, MOVE_BUDGET, regenTankShield, settleTank } from "./tank";
 
 const flat = () => TerrainMask.fromHeightmap(new Float32Array(200).fill(100), 200);
 
@@ -41,5 +42,31 @@ describe("tank", () => {
     expect(far).toBe(0);
     applyDamage(t, 999);
     expect(t.hp).toBe(0);
+  });
+
+  it("a sebzést előbb a pajzs nyeli el, a maradékot a páncél csökkenti", () => {
+    const t = createTank("a", 50, 0, 45, computeStats({ shield: 1, armor: 4 }));
+    expect(t.shield).toBe(20);
+    applyDamage(t, 10);
+    expect(t).toMatchObject({ shield: 10, hp: 100 });
+    // 10 pajzs + 40 átjutó * (1 - 0.2) = 32.
+    applyDamage(t, 50);
+    expect(t).toMatchObject({ shield: 0, hp: 68 });
+  });
+
+  it("a pajzs körönként a maximum 20%-ával töltődik vissza", () => {
+    const t = createTank("a", 50, 0, 45, computeStats({ shield: 5 }));
+    applyDamage(t, 100);
+    expect(t.shield).toBe(0);
+    regenTankShield(t);
+    expect(t.shield).toBe(20);
+    regenTankShield(t);
+    expect(t.shield).toBe(40);
+  });
+
+  it("pajzs nélküli tanknál a visszatöltés nem csinál semmit", () => {
+    const t = createTank("a", 50, 0, 45);
+    regenTankShield(t);
+    expect(t.shield).toBe(0);
   });
 });

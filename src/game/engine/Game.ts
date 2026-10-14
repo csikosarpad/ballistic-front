@@ -26,6 +26,7 @@ import {
   explosionDamage,
   isAlive,
   moveTank,
+  regenTankShield,
   settleTank,
   tankContains,
   type Tank,
@@ -274,6 +275,7 @@ export class Game {
 
   private beginTurn(): void {
     const tank = this.current;
+    regenTankShield(tank);
     tank.moveLeft = tank.stats.moveBudget;
     this.previewActive = false;
     // Új szél minden körben.
@@ -294,6 +296,9 @@ export class Game {
         id: t.id,
         hp: t.hp,
         maxHp: t.stats.maxHp,
+        shield: t.shield,
+        maxShield: t.stats.maxEnergyShield,
+        armor: t.stats.physicalArmor,
         moveLeft: t.moveLeft,
         color: t.color,
       })),
@@ -455,12 +460,12 @@ export class Game {
     this.terrain?.carve(x, y, radius);
     this.particles.spawnExplosion(x, y, radius);
     this.audio?.play("explosion", { rate: 0.9 + Math.random() * 0.2 });
-    // XP: az ellenfélnek okozott sérülés (1 HP = 1 XP).
+    // XP: az ellenfélnek okozott sérülés (1 HP vagy pajzspont = 1 XP).
     let dealt = 0;
     for (const t of this.tanks) {
-      const before = t.hp;
+      const before = t.hp + t.shield;
       applyDamage(t, explosionDamage(t, x, y, radius, shooter.stats.damage));
-      if (t !== shooter) dealt += before - t.hp;
+      if (t !== shooter) dealt += before - (t.hp + t.shield);
     }
     this.award(shooter.id, dealt);
     this.matchStats = recordDamage(this.matchStats, shooter.id, dealt);
@@ -558,6 +563,12 @@ export class Game {
       if (!isAlive(t)) continue;
       this.tanksGfx.rect(t.x - 14, t.y - 28, 28, 4).fill(this.theme.hud.hpBack);
       this.tanksGfx.rect(t.x - 14, t.y - 28, (28 * t.hp) / t.stats.maxHp, 4).fill(this.theme.hud.hpFill);
+      if (t.stats.maxEnergyShield > 0) {
+        this.tanksGfx.rect(t.x - 14, t.y - 32, 28, 3).fill(this.theme.hud.hpBack);
+        this.tanksGfx
+          .rect(t.x - 14, t.y - 32, (28 * t.shield) / t.stats.maxEnergyShield, 3)
+          .fill(this.theme.hud.shieldFill);
+      }
       if (t.id === this.turns.current && this.turns.phase === "aiming") {
         this.tanksGfx.poly([t.x - 4, t.y - 40, t.x + 4, t.y - 40, t.x, t.y - 34]).fill(this.theme.hud.turnMarker);
       }

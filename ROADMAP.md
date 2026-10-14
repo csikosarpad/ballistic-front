@@ -34,11 +34,11 @@ Hosszú távú cél: sci-fi, Galaxy Tactics-hoz hasonló látvány (több karakt
 
 ### M1 – Védelmi modell
 
-- [ ] Sebzésfüggvény (pajzs, páncél) tesztekkel
-- [ ] Pajzsregeneráció a turn managerben
-- [ ] Meglévő páncél-fejlesztés összevonása
-- [ ] HUD: pajzs- és HP-sáv, letiltott T gomb használat után
-- [ ] Profil- és snapshot-migráció verziószámmal
+- [x] Sebzésfüggvény (pajzs, páncél) tesztekkel
+- [x] Pajzsregeneráció a turn managerben (a `beginTurn`-ben, a Game és a visszajátszási teszt is ugyanazt hívja)
+- [x] Meglévő páncél-fejlesztés összevonása (az `armor` azonosító marad, mostantól fizikai páncél; új `shield` fejlesztés)
+- [x] HUD: pajzs- és HP-sáv, letiltott T gomb használat után
+- [x] Profil- és snapshot-migráció verziószámmal (`STORAGE_VERSION`)
 
 ### M2 – Egységmodell
 

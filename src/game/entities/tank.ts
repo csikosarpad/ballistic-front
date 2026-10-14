@@ -1,5 +1,6 @@
 import { BASE_STATS, type TankStats } from "../data/upgrades";
 import type { Vec2 } from "../physics/ballistics";
+import { regenShield, resolveDamage } from "../systems/damage";
 import type { TerrainMask } from "../terrain/mask";
 
 export const MOVE_BUDGET = BASE_STATS.moveBudget;
@@ -14,6 +15,8 @@ export interface Tank {
   /** A talajszint (a tank alja). */
   y: number;
   hp: number;
+  /** Az erőtér pajzs aktuális értéke. */
+  shield: number;
   angle: number;
   power: number;
   /** Az adott körben még megtehető távolság (px). */
@@ -28,6 +31,7 @@ export function createTank(id: string, x: number, color: number, angle: number, 
     x,
     y: 0,
     hp: stats.maxHp,
+    shield: stats.maxEnergyShield,
     angle,
     power: Math.min(400, stats.maxPower),
     moveLeft: stats.moveBudget,
@@ -75,6 +79,14 @@ export function explosionDamage(tank: Tank, ex: number, ey: number, radius: numb
   return Math.max(0, Math.round(60 * multiplier * (1 - d / (radius * 2))));
 }
 
+/** A sebzés a pajzson, majd a páncélon át éri a HP-t (lásd systems/damage). */
 export function applyDamage(tank: Tank, dmg: number): void {
-  tank.hp = Math.max(0, tank.hp - dmg);
+  const { hp, shield } = resolveDamage({ hp: tank.hp, shield: tank.shield, armor: tank.stats.physicalArmor }, dmg);
+  tank.hp = hp;
+  tank.shield = shield;
+}
+
+/** A kör elején az éppen soron lévő tank pajzsa részben visszatöltődik. */
+export function regenTankShield(tank: Tank): void {
+  tank.shield = regenShield(tank.shield, tank.stats.maxEnergyShield, tank.stats.shieldRegen);
 }
