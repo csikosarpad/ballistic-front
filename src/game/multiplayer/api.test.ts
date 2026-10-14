@@ -24,10 +24,13 @@ describe("multiplayer API", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(createRoom("https://game.example/api/", "Ada")).resolves.toEqual(access);
-    expect(fetchMock).toHaveBeenCalledWith("https://game.example/api/rooms", expect.objectContaining({
-      method: "POST",
-      body: JSON.stringify({ playerName: "Ada" }),
-    }));
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://game.example/api/rooms",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ playerName: "Ada" }),
+      }),
+    );
   });
 
   it("supports the production API path under the game subdirectory", async () => {
@@ -46,9 +49,12 @@ describe("multiplayer API", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await fetchRoom("/api", { ...access.credentials, roomCode: "A B" }, 4);
-    expect(fetchMock).toHaveBeenCalledWith("/api/rooms/A%20B?since=4", expect.objectContaining({
-      headers: { Authorization: "Bearer secret" },
-    }));
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/rooms/A%20B?since=4",
+      expect.objectContaining({
+        headers: { Authorization: "Bearer secret" },
+      }),
+    );
   });
 
   it("posts join and revision-checked events", async () => {

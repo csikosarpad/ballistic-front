@@ -2,7 +2,14 @@ import { Application, Assets, Container, Graphics, Sprite, type Texture } from "
 import tankBodyUrl from "../assets/tank-body.svg?url";
 import tankBarrelUrl from "../assets/tank-barrel.svg?url";
 import { kick, stepBarrel, type BarrelState } from "../systems/barrelAnimation";
-import { DEFAULT_WORLD, dashPolyline, launchVelocity, predictTrajectory, stepBody, type BallisticBody } from "../physics/ballistics";
+import {
+  DEFAULT_WORLD,
+  dashPolyline,
+  launchVelocity,
+  predictTrajectory,
+  stepBody,
+  type BallisticBody,
+} from "../physics/ballistics";
 import { PreviewAllowance } from "../systems/previewAllowance";
 import { createSeededRandom, type MatchSetup } from "../systems/seededRandom";
 import { Terrain } from "../terrain/Terrain";
@@ -12,7 +19,14 @@ import { loadFxTextures } from "./fxTextures";
 import { AudioManager } from "./AudioManager";
 import { TurnManager } from "../systems/turnManager";
 import {
-  applyDamage, barrelTip, createTank, explosionDamage, isAlive, moveTank, settleTank, tankContains,
+  applyDamage,
+  barrelTip,
+  createTank,
+  explosionDamage,
+  isAlive,
+  moveTank,
+  settleTank,
+  tankContains,
   type Tank,
 } from "../entities/tank";
 import { awardXp, buyUpgrade, computeStats, newProfile, type Profile } from "../systems/upgrades";
@@ -68,7 +82,8 @@ export class Game {
   private matchProfiles: Record<string, Profile> | null = null;
   private lastMultiplayerRevision = 0;
   private pendingMultiplayerEvents: RoomEvent[] = [];
-  private pendingMultiplayerStart: { setup: MatchSetup; profiles: Record<string, Profile>; revision: number } | null = null;
+  private pendingMultiplayerStart: { setup: MatchSetup; profiles: Record<string, Profile>; revision: number } | null =
+    null;
   private unsubscribeMultiplayer: (() => void) | null = null;
   private shell: BallisticBody | null = null;
   private shellAge = 0;
@@ -100,7 +115,16 @@ export class Game {
 
     this.terrain = new Terrain(this.app.renderer);
     const backdrop = new Graphics().rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT).fill(0x16224a);
-    this.app.stage.addChild(backdrop, this.terrain.sprite, this.previewGfx, this.tankLayer, this.tanksGfx, this.shellGfx, this.shellGlow, this.fx.layer);
+    this.app.stage.addChild(
+      backdrop,
+      this.terrain.sprite,
+      this.previewGfx,
+      this.tankLayer,
+      this.tanksGfx,
+      this.shellGfx,
+      this.shellGlow,
+      this.fx.layer,
+    );
     this.layout();
     const pendingStart = this.pendingMultiplayerStart;
     if (pendingStart) this.startMultiplayer(pendingStart.setup, pendingStart.profiles, pendingStart.revision);
@@ -132,7 +156,10 @@ export class Game {
     this.buildTankViews();
     // Az első lövő meccsenként változik, hogy ne legyen fix kezdő előny.
     const starterIndex = ((matchSetup.starterIndex % this.tanks.length) + this.tanks.length) % this.tanks.length;
-    this.turns = new TurnManager(this.tanks.map((t) => t.id), starterIndex);
+    this.turns = new TurnManager(
+      this.tanks.map((t) => t.id),
+      starterIndex,
+    );
     this.nextStarter = (starterIndex + 1) % this.tanks.length;
     this.matchStats = newMatchStats(this.tanks.map((t) => t.id));
     this.previewAllowance.reset();
@@ -148,7 +175,9 @@ export class Game {
     this.pendingMultiplayerStart = null;
     this.multiplayer = true;
     this.matchProfiles = profiles;
-    this.profiles = Object.fromEntries(Object.entries(profiles).map(([id, profile]) => [id, { xp: profile.xp, levels: { ...profile.levels } }]));
+    this.profiles = Object.fromEntries(
+      Object.entries(profiles).map(([id, profile]) => [id, { xp: profile.xp, levels: { ...profile.levels } }]),
+    );
     saveProfiles(this.profiles);
     this.lastMultiplayerRevision = revision;
     this.pendingMultiplayerEvents = [];
@@ -221,7 +250,13 @@ export class Game {
 
   requestMultiplayerRematch(): void {
     const { credentials, session } = useMultiplayerStore.getState();
-    if (!this.multiplayer || this.turns.phase !== "gameOver" || credentials?.playerId !== "P1" || session?.status !== "finished") return;
+    if (
+      !this.multiplayer ||
+      this.turns.phase !== "gameOver" ||
+      credentials?.playerId !== "P1" ||
+      session?.status !== "finished"
+    )
+      return;
     const setup = { seed: Math.floor(Math.random() * 1_000_000), starterIndex: this.nextStarter };
     void useMultiplayerStore.getState().publish("match_started", { setup, profiles: this.profiles });
   }
@@ -248,7 +283,13 @@ export class Game {
         (!this.multiplayer || useMultiplayerStore.getState().credentials?.playerId === this.turns.current) &&
         this.pendingMultiplayerEvents.length === 0,
       winner: this.turns.winner,
-      tanks: this.tanks.map((t) => ({ id: t.id, hp: t.hp, maxHp: t.stats.maxHp, moveLeft: t.moveLeft, color: t.color })),
+      tanks: this.tanks.map((t) => ({
+        id: t.id,
+        hp: t.hp,
+        maxHp: t.stats.maxHp,
+        moveLeft: t.moveLeft,
+        color: t.color,
+      })),
       profiles: { ...this.profiles },
       matchStats: this.matchStats,
       previewAvailable: this.turns.phase === "aiming" && this.previewAllowance.canUse(this.turns.current),
@@ -258,7 +299,8 @@ export class Game {
 
   /** Meccsenként és játékosonként egyszer: az aktuális kör végéig mutatja a várható röppályát. */
   requestPreview(): void {
-    if (this.turns.inputLocked || !this.canControlCurrentTurn() || !this.previewAllowance.use(this.turns.current)) return;
+    if (this.turns.inputLocked || !this.canControlCurrentTurn() || !this.previewAllowance.use(this.turns.current))
+      return;
     this.previewActive = true;
     this.syncStore();
   }
@@ -328,10 +370,12 @@ export class Game {
         const setup = event.payload.setup;
         const profiles = event.payload.profiles;
         if (
-          !setup || typeof setup !== "object" ||
+          !setup ||
+          typeof setup !== "object" ||
           typeof (setup as MatchSetup).seed !== "number" ||
           typeof (setup as MatchSetup).starterIndex !== "number" ||
-          !profiles || typeof profiles !== "object"
+          !profiles ||
+          typeof profiles !== "object"
         ) {
           this.pendingMultiplayerEvents.shift();
           continue;
@@ -339,7 +383,10 @@ export class Game {
         this.pendingMultiplayerEvents.shift();
         this.matchProfiles = profiles as Record<string, Profile>;
         this.profiles = Object.fromEntries(
-          Object.entries(this.matchProfiles).map(([id, profile]) => [id, { xp: profile.xp, levels: { ...profile.levels } }]),
+          Object.entries(this.matchProfiles).map(([id, profile]) => [
+            id,
+            { xp: profile.xp, levels: { ...profile.levels } },
+          ]),
         );
         saveProfiles(this.profiles);
         this.lastMultiplayerRevision = event.revision;
@@ -375,7 +422,11 @@ export class Game {
       changed = true;
       if (event.type === "move") {
         const direction = event.payload.direction;
-        if ((direction === -1 || direction === 1) && this.terrain && moveTank(this.current, direction, this.terrain.mask)) {
+        if (
+          (direction === -1 || direction === 1) &&
+          this.terrain &&
+          moveTank(this.current, direction, this.terrain.mask)
+        ) {
           this.audio?.moveTick();
         }
         continue;
@@ -458,13 +509,19 @@ export class Game {
     if (!this.previewActive || this.turns.phase !== "aiming" || !this.terrain || !tank || !isAlive(tank)) return;
     const { angle, power, wind } = useGameStore.getState();
     const mask = this.terrain.mask;
-    const points = predictTrajectory(barrelTip({ ...tank, angle }), angle, power, { ...DEFAULT_WORLD, wind }, {
-      dt: FIXED_DT,
-      maxSteps: 600,
-      width: mask.width,
-      height: WORLD_HEIGHT,
-      isBlocked: (x, y) => mask.isSolid(x, y),
-    });
+    const points = predictTrajectory(
+      barrelTip({ ...tank, angle }),
+      angle,
+      power,
+      { ...DEFAULT_WORLD, wind },
+      {
+        dt: FIXED_DT,
+        maxSteps: 600,
+        width: mask.width,
+        height: WORLD_HEIGHT,
+        isBlocked: (x, y) => mask.isSolid(x, y),
+      },
+    );
     for (const [a, b] of dashPolyline(points, PREVIEW_DASH, PREVIEW_GAP)) g.moveTo(a.x, a.y).lineTo(b.x, b.y);
     g.stroke({ width: 1.5, color: 0xffffff, alpha: 0.18 });
   }
@@ -482,7 +539,10 @@ export class Game {
       view.anim = stepBarrel(view.anim, target, dt);
       const rad = (view.anim.angle * Math.PI) / 180;
       view.barrel.rotation = -rad;
-      view.barrel.position.set(-Math.cos(rad) * view.anim.recoil, -BARREL_PIVOT_HEIGHT + Math.sin(rad) * view.anim.recoil);
+      view.barrel.position.set(
+        -Math.cos(rad) * view.anim.recoil,
+        -BARREL_PIVOT_HEIGHT + Math.sin(rad) * view.anim.recoil,
+      );
     }
 
     this.drawPreview();

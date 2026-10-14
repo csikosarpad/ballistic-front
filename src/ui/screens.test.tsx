@@ -36,13 +36,15 @@ describe("MainMenu", () => {
         setup: { seed: 42, starterIndex: 0 },
         players: { P1: "Ada", P2: "Grace" },
       },
-      events: [{
-        revision: 2,
-        playerId: "P1",
-        type: "match_started",
-        payload: { profiles: { P1: { xp: 0, levels: {} }, P2: { xp: 0, levels: {} } } },
-        createdAt: "2026-10-12T00:00:00Z",
-      }],
+      events: [
+        {
+          revision: 2,
+          playerId: "P1",
+          type: "match_started",
+          payload: { profiles: { P1: { xp: 0, levels: {} }, P2: { xp: 0, levels: {} } } },
+          createdAt: "2026-10-12T00:00:00Z",
+        },
+      ],
     });
 
     render(<MainMenu />);

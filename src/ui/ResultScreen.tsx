@@ -36,29 +36,36 @@ export function ResultScreen() {
             ))}
           </tbody>
         </table>
-        {onlineMatch ? (
-          <Shop editablePlayerId={credentials.playerId} disabled={!matchFinished} />
-        ) : (
-          <Shop />
-        )}
+        {onlineMatch ? <Shop editablePlayerId={credentials.playerId} disabled={!matchFinished} /> : <Shop />}
         {onlineMatch && !matchFinished && <p role="status">A meccs lezárása és az eredmény szinkronizálása…</p>}
-        {multiplayerError && onlineMatch && <p className="lobby-error" role="alert">{multiplayerError}</p>}
+        {multiplayerError && onlineMatch && (
+          <p className="lobby-error" role="alert">
+            {multiplayerError}
+          </p>
+        )}
         <div style={{ marginTop: 12 }}>
           {!onlineMatch ? (
             <button className="btn" onClick={() => gameRef.current?.restart()}>
               Visszavágó
             </button>
           ) : credentials.playerId === "P1" ? (
-            <button className="btn" disabled={!matchFinished} onClick={() => gameRef.current?.requestMultiplayerRematch()}>
+            <button
+              className="btn"
+              disabled={!matchFinished}
+              onClick={() => gameRef.current?.requestMultiplayerRematch()}
+            >
               Visszavágó
             </button>
           ) : (
             <p role="status">Várakozás a szoba létrehozójára a visszavágóhoz.</p>
           )}
-          <button className="btn secondary" onClick={() => {
-            if (onlineMatch) useMultiplayerStore.getState().leave();
-            setScreen("menu");
-          }}>
+          <button
+            className="btn secondary"
+            onClick={() => {
+              if (onlineMatch) useMultiplayerStore.getState().leave();
+              setScreen("menu");
+            }}
+          >
             Főmenü
           </button>
         </div>

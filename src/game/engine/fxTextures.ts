@@ -21,7 +21,9 @@ export interface FxTextures {
 
 export async function loadFxTextures(): Promise<FxTextures> {
   const [f1, f2, s1, s2, d1, d2, ring, glow, muzzle] = await Promise.all(
-    [fire1, fire2, smoke1, smoke2, debris1, debris2, ringUrl, glowUrl, muzzleUrl].map((url) => Assets.load<Texture>(url)),
+    [fire1, fire2, smoke1, smoke2, debris1, debris2, ringUrl, glowUrl, muzzleUrl].map((url) =>
+      Assets.load<Texture>(url),
+    ),
   );
   return { fire: [f1!, f2!], smoke: [s1!, s2!], debris: [d1!, d2!], ring: ring!, glow: glow!, muzzle: muzzle! };
 }

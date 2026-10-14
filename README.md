@@ -88,6 +88,7 @@ A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) f�
 ## TODO
 
 ### 0. Projekt inicializálása
+
 - [x] Vite + React + TS projekt létrehozása
 - [x] PixiJS telepítése
 - [x] Zustand telepítése
@@ -96,6 +97,7 @@ A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) f�
 - [x] `src/game` mappa létrehozása
 
 ### 1. Alap architektúra
+
 - [x] `game/engine` létrehozása
 - [x] `game/entities` létrehozása
 - [x] `game/systems` létrehozása
@@ -104,6 +106,7 @@ A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) f�
 - [x] `game/state` létrehozása (Zustand)
 
 ### 2. PixiJS integráció
+
 - [x] React komponens: `<GameCanvas />`
 - [x] PixiJS Application inicializálása
 - [x] Resize handler (fix pályaméret, skálázás, a meccs nem indul újra)
@@ -111,6 +114,7 @@ A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) f�
 - [x] RenderTexture alapok
 
 ### 3. Terep
+
 - [x] Zaj alapú generálás (value noise; Perlin később)
 - [x] Terrain sprite + RenderTexture
 - [x] Rombolás kör alakú `erase` körökkel + bitmaszk (barlang, kinyúló szikla is lehetséges)
@@ -118,12 +122,14 @@ A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) f�
 - [x] Terrain collision detection
 
 ### 4. Tankok
+
 - [x] Tank entity (pozíció, HP, mozgás)
 - [x] Cső animáció (simított cénzás, visszarúgás lövéskor)
 - [x] Tank sprite betöltése (SVG asset, játékosonkénti tint)
 - [x] Mozgás korlátozása körönként
 
 ### 5. Lövedékek
+
 - [x] Projectile entity
 - [x] Ballisztikus fizika implementálása
 - [x] Szél hatása
@@ -132,12 +138,14 @@ A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) f�
 - [x] Particle effect (füst, robbanás; sprite-alapú: tűz, füst, törmelék, lökéshullám, torkolattűz, lövedékcsóva)
 
 ### 6. Körökre osztott rendszer
+
 - [x] Turn manager
 - [x] Input lock/unlock
 - [x] HUD frissítése
 - [x] Kör vége → következő játékos
 
 ### 7. Fejlesztési rendszer
+
 - [x] Upgrade definíciók (adatvezérelt)
 - [x] XP rendszer
 - [x] Bolt UI
@@ -145,6 +153,7 @@ A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) f�
 - [x] XP és fejlesztések mentése (`localStorage`)
 
 ### 8. UI (React)
+
 - [x] HUD (szög, erő, szél)
 - [x] Menü (indítás, haladás törlése)
 - [x] Upgrade képernyő (bolt az eredményképernyőn)
@@ -152,6 +161,7 @@ A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) f�
 - [x] Animált UI elemek (CSS: fade-in, pop-in, gomb hover; `prefers-reduced-motion` támogatás)
 
 ### 9. Tesztelés
+
 - [x] Fizika tesztek
 - [x] Terrain collision tesztek
 - [x] Upgrade rendszer tesztek
@@ -159,6 +169,7 @@ A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) f�
 - [x] React komponens tesztek (menü, eredményképernyő)
 
 ### 10. Multiplayer (v1: PHP/MySQL, HTTP polling)
+
 - [x] Szoba létrehozása és csatlakozás PHP API-végpontokkal
 - [x] MySQL-ben tárolt, verziózott JSON eseménynapló és szinkronállapot
 - [x] Determinisztikus meccsindítás (terep seedje, kezdő játékos, fejlesztések)

@@ -6,7 +6,21 @@ import { gameRef } from "./gameRef";
 const toCss = (color?: number) => (color === undefined ? "#ffffff" : `#${color.toString(16).padStart(6, "0")}`);
 
 export function Hud() {
-  const { angle, power, maxPower, wind, phase, currentId, canControl, tanks, previewAvailable, previewActive, muted, toggleMuted, setAim } = useGameStore();
+  const {
+    angle,
+    power,
+    maxPower,
+    wind,
+    phase,
+    currentId,
+    canControl,
+    tanks,
+    previewAvailable,
+    previewActive,
+    muted,
+    toggleMuted,
+    setAim,
+  } = useGameStore();
   const online = useMultiplayerStore((state) => state.credentials !== null);
   const multiplayerError = useMultiplayerStore((state) => state.error);
   const locked = phase !== "aiming" || !canControl;
@@ -57,35 +71,70 @@ export function Hud() {
   }, []);
 
   return (
-    <div className="hud" style={{ ...({ "--accent": toCss(me?.color) } as CSSProperties), position: "absolute", top: 12, left: 12, color: "#fff", font: "14px sans-serif" }}>
+    <div
+      className="hud"
+      style={{
+        ...({ "--accent": toCss(me?.color) } as CSSProperties),
+        position: "absolute",
+        top: 12,
+        left: 12,
+        color: "#fff",
+        font: "14px sans-serif",
+      }}
+    >
       <div>
         {tanks.map((t) => (
-          <span key={t.id} style={{ marginRight: 12, color: toCss(t.color), fontWeight: t.id === currentId ? "bold" : "normal" }}>
+          <span
+            key={t.id}
+            style={{ marginRight: 12, color: toCss(t.color), fontWeight: t.id === currentId ? "bold" : "normal" }}
+          >
             {t.id}: {t.hp}/{t.maxHp} HP
           </span>
         ))}
       </div>
       <div>
-        Soron: <strong style={{ color: toCss(me?.color) }}>{currentId}</strong> | Mozgás: {me?.moveLeft ?? 0}px | Szél: {wind}
+        Soron: <strong style={{ color: toCss(me?.color) }}>{currentId}</strong> | Mozgás: {me?.moveLeft ?? 0}px | Szél:{" "}
+        {wind}
       </div>
       {online && (
         <div role={multiplayerError ? "alert" : "status"}>
-          {multiplayerError ?? (phase === "flying" ? "Lövedék útban" : canControl ? "Te következel" : `${currentId} következik`)}
+          {multiplayerError ??
+            (phase === "flying" ? "Lövedék útban" : canControl ? "Te következel" : `${currentId} következik`)}
         </div>
       )}
       <label>
         Szög: {angle}°
-        <input type="range" min={MIN_ANGLE} max={MAX_ANGLE} value={angle} disabled={locked} onChange={(e) => setAim(+e.target.value, power)} />
+        <input
+          type="range"
+          min={MIN_ANGLE}
+          max={MAX_ANGLE}
+          value={angle}
+          disabled={locked}
+          onChange={(e) => setAim(+e.target.value, power)}
+        />
       </label>
       <br />
       <label>
         Erő: {power}
-        <input type="range" min={MIN_POWER} max={maxPower} value={power} disabled={locked} onChange={(e) => setAim(angle, +e.target.value)} />
+        <input
+          type="range"
+          min={MIN_POWER}
+          max={maxPower}
+          value={power}
+          disabled={locked}
+          onChange={(e) => setAim(angle, +e.target.value)}
+        />
       </label>
       <br />
-      <button disabled={locked} onClick={() => gameRef.current?.move(-1)}>◀</button>
-      <button disabled={locked} onClick={() => gameRef.current?.move(1)}>▶</button>
-      <button disabled={locked} onClick={() => gameRef.current?.fire()}>Tűz!</button>
+      <button disabled={locked} onClick={() => gameRef.current?.move(-1)}>
+        ◀
+      </button>
+      <button disabled={locked} onClick={() => gameRef.current?.move(1)}>
+        ▶
+      </button>
+      <button disabled={locked} onClick={() => gameRef.current?.fire()}>
+        Tűz!
+      </button>
       <button disabled={locked || !previewAvailable} onClick={() => gameRef.current?.requestPreview()}>
         {previewActive ? "Röppálya (aktív)" : previewAvailable ? "Röppálya (T, 1x/meccs)" : "Röppálya (elhasználva)"}
       </button>

@@ -35,7 +35,7 @@ export function MultiplayerLobby({ onBack, onStartMatch }: MultiplayerLobbyProps
     const setup = startEvent.payload.setup;
     startedRevision.current = startEvent.revision;
     onStartMatch(
-      setup && typeof setup === "object" ? setup as MatchSetup : session.setup,
+      setup && typeof setup === "object" ? (setup as MatchSetup) : session.setup,
       profiles as Record<string, Profile>,
       startEvent.revision,
     );
@@ -94,12 +94,18 @@ export function MultiplayerLobby({ onBack, onStartMatch }: MultiplayerLobbyProps
               Meccs indítása
             </button>
           )}
-          {session.status === "ready" && credentials.playerId === "P2" && <small>Várakozás a szoba létrehozójára…</small>}
+          {session.status === "ready" && credentials.playerId === "P2" && (
+            <small>Várakozás a szoba létrehozójára…</small>
+          )}
           {session.status === "playing" && <small>Meccs indítása…</small>}
-                  {session.status === "finished" && <small>A lezárt meccs visszaállítása…</small>}
+          {session.status === "finished" && <small>A lezárt meccs visszaállítása…</small>}
         </div>
       )}
-      {error && <p className="lobby-error" role="alert">{error}</p>}
+      {error && (
+        <p className="lobby-error" role="alert">
+          {error}
+        </p>
+      )}
       <button className="btn secondary" onClick={back}>
         Vissza
       </button>

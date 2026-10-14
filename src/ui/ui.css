@@ -17,7 +17,9 @@
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.25s, filter 0.1s;
+  transition:
+    background-color 0.25s,
+    filter 0.1s;
 }
 
 .hud button:hover:not(:disabled) {
@@ -124,7 +126,9 @@
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.1s, filter 0.1s;
+  transition:
+    transform 0.1s,
+    filter 0.1s;
 }
 
 .btn:hover:not(:disabled) {
@@ -163,13 +167,21 @@
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
+  from {
+    opacity: 0;
+  }
 }
 
 @keyframes pop-in {
-  from { opacity: 0; transform: scale(0.9) translateY(10px); }
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .overlay, .panel { animation: none; }
+  .overlay,
+  .panel {
+    animation: none;
+  }
 }
