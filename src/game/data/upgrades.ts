@@ -1,4 +1,4 @@
-/** A tank játékmenetet befolyásoló értékei; az upgrade-ek ezeket módosítják. */
+/** A tank játékmenetet befolyásoló értékei; az upgrade-ek ezeket módosítják. A UI-ban 1 px = 1 méter. */
 export interface TankStats {
   maxHp: number;
   /** Sebzésszorzó. */
@@ -20,8 +20,7 @@ export const BASE_STATS: TankStats = {
 
 export interface UpgradeDef {
   id: string;
-  name: string;
-  description: string;
+  /** A megjelenített szöveg kulcsai: `upgrade.<id>.name` és `upgrade.<id>.desc` (lásd src/i18n). */
   stat: keyof TankStats;
   /** Szintenként hozzáadott érték. */
   perLevel: number;
@@ -33,9 +32,44 @@ export interface UpgradeDef {
 
 /** Adatvezérelt: új fejlesztéshez elég egy új sor ide. */
 export const UPGRADES: readonly UpgradeDef[] = [
-  { id: "armor", name: "Páncél", description: "+20 max HP", stat: "maxHp", perLevel: 20, maxLevel: 5, baseCost: 40, costGrowth: 1.5 },
-  { id: "warhead", name: "Robbanófej", description: "+15% sebzés", stat: "damage", perLevel: 0.15, maxLevel: 5, baseCost: 60, costGrowth: 1.6 },
-  { id: "blast", name: "Nagyobb kráter", description: "+4 px robbanási sugár", stat: "blastRadius", perLevel: 4, maxLevel: 5, baseCost: 50, costGrowth: 1.5 },
-  { id: "barrel", name: "Hosszabb cső", description: "+100 max erő", stat: "maxPower", perLevel: 100, maxLevel: 3, baseCost: 70, costGrowth: 1.7 },
-  { id: "engine", name: "Motor", description: "+10 px mozgás/kör", stat: "moveBudget", perLevel: 10, maxLevel: 5, baseCost: 30, costGrowth: 1.4 },
+  {
+    id: "armor",
+    stat: "maxHp",
+    perLevel: 20,
+    maxLevel: 5,
+    baseCost: 40,
+    costGrowth: 1.5,
+  },
+  {
+    id: "warhead",
+    stat: "damage",
+    perLevel: 0.15,
+    maxLevel: 5,
+    baseCost: 60,
+    costGrowth: 1.6,
+  },
+  {
+    id: "blast",
+    stat: "blastRadius",
+    perLevel: 4,
+    maxLevel: 5,
+    baseCost: 50,
+    costGrowth: 1.5,
+  },
+  {
+    id: "barrel",
+    stat: "maxPower",
+    perLevel: 100,
+    maxLevel: 3,
+    baseCost: 70,
+    costGrowth: 1.7,
+  },
+  {
+    id: "engine",
+    stat: "moveBudget",
+    perLevel: 10,
+    maxLevel: 5,
+    baseCost: 30,
+    costGrowth: 1.4,
+  },
 ];

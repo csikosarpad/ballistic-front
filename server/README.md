@@ -15,12 +15,14 @@ A lobbyból a host elindíthatja a meccset; a kliensek a közös seed és upgrad
 
 ## Mappastruktúra
 
-- `public/index.php` – HTTP router és API-végpontok.
-- `public/.htaccess` – Apache URL-átírás és Authorization fejléc továbbítása.
-- `src/bootstrap.php` – adatbázis-kapcsolat, JSON-válaszok, autentikáció és közös segédek.
+- `api/index.php` – HTTP router és API-végpontok.
+- `api/.htaccess` – Apache URL-átírás és Authorization fejléc továbbítása.
+- `lib/bootstrap.php` – adatbázis-kapcsolat, JSON-válaszok, autentikáció és közös segédek.
+- `lib/.htaccess` – tiltja a PHP forrás közvetlen HTTP-elérését.
+- `config.example.php` – konfigurációs minta; a saját `config.php` nincs verziókezelve.
 - `schema.sql` – MySQL/MariaDB táblák.
 
-A `public/` könyvtár a webes belépési pont. A `src/` PHP kód maradjon kívül a nyilvános document rooton, de a két könyvtár egymáshoz viszonyított helye telepítéskor maradjon meg, mert az `index.php` a `../src/bootstrap.php` fájlt tölti be.
+Elnevezés: az `api/` az egyetlen HTTP-n elérhető belépési pont, és telepítéskor közvetlenül az `…/ballistic-front/api/` URL-nek felel meg. A `lib/` kizárólag szerveroldali kód, soha nem végpont. (Korábban `public/` és `src/` volt a nevük; a frontend `src/` mappájával összekeveredtek, a `public/` pedig félrevezető volt.) A két mappa egymáshoz viszonyított helye telepítéskor maradjon meg, mert az `api/index.php` a `../lib/bootstrap.php` fájlt tölti be, a `lib/bootstrap.php` pedig alapértelmezetten a `lib/` melletti `config.php` fájlt keresi.
 
 ## Követelmények Windows alatt
 
@@ -68,7 +70,7 @@ Nyisd meg a `server/config.php` fájlt, majd állítsd be a saját MySQL host, a
 Ezután a projekt gyökérmappájából indítsd el a beépített PHP fejlesztői szervert:
 
 ```powershell
-php -S 127.0.0.1:8000 -t server/public server/public/index.php
+php -S 127.0.0.1:8000 -t server/api server/api/index.php
 ```
 
 Ez a terminál maradjon nyitva. Ha a configot nem a `server/config.php` helyen tartod, add meg a fájl helyét a `BALLISTIC_CONFIG_PATH` környezeti változóval.
@@ -98,7 +100,7 @@ A kliens `VITE_MULTIPLAYER_API_URL` alapértelmezése `/api`; helyi fejlesztésh
 3. Nyiss egy másik böngészőprofilt vagy privát ablakot, majd csatlakozz ugyanazzal a kóddal.
 4. Mindkét oldalon meg kell jelennie a másik játékos nevének és a csatlakozott állapotnak.
 
-Ez a próba csak a lobbyt és a backend szinkronját ellenőrzi; a távoli játékosok közötti játékmenet még nincs bekötve.
+Ez a próba a lobbyt és a backend szinkronját ellenőrzi. A meccs indítása után a két kliens a közös seed alapján játszik, a lépések eseményként szinkronizálódnak (részletek: Jelenlegi állapot).
 
 ## Konfiguráció
 
@@ -191,15 +193,6 @@ Engedélyezett események és állapotok:
 
 Ez állapot- és jogosultságellenőrzés, nem teljes játékszabály-ellenőrzés. A backend például nem vizsgálja a lövésértékek tartományát vagy azt, hogy valóban az aktuális kör játékosa küldte-e.
 
-Engedélyezett események és állapotok:
-
-- `move`, `fire` csak `playing` állapotban írható.
-- `upgrade_purchased` csak `finished` állapotban írható; az esemény a hitelesített játékoshoz tartozik.
-- `match_started` `ready` vagy `finished` állapotból írható, kizárólag a szoba hostja (`P1`) által.
-- `match_finished` csak `playing` állapotban írható, kizárólag a host által.
-
-Ez állapot- és jogosultságellenőrzés, nem teljes játékszabály-ellenőrzés. Például a backend nem vizsgálja a lövés értéktartományát vagy azt, hogy valóban az aktuális kör játékosa küldte-e.
-
 ## Adatbázis és élettartam
 
 - A `rooms` tárolja a szobakódot, státuszt, neveket, tokenhash-eket, kezdő setupot és revisiont.
@@ -218,8 +211,8 @@ Hozz létre külön MySQL/MariaDB adatbázist és korlátozott jogosultságú fe
 
 Az API-t a kívánt `https://delawer.hu/ballistic-front/api` címre telepítsd:
 
-- A `server/public/` tartalma kerüljön a `public_html/ballistic-front/api/` mappába.
-- A `server/src/` tartalma kerüljön a `public_html/ballistic-front/src/` mappába; a benne lévő `.htaccess` tiltja a PHP forrás HTTP-letöltését.
+- A `server/api/` tartalma kerüljön a `public_html/ballistic-front/api/` mappába.
+- A `server/lib/` tartalma kerüljön a `public_html/ballistic-front/lib/` mappába; a benne lévő `.htaccess` tiltja a PHP forrás HTTP-letöltését.
 - A `server/config.php` kerüljön a `public_html/ballistic-front/config.php` helyre, vagy még jobb, a webrooton kívülre, `BALLISTIC_CONFIG_PATH` beállítással.
 - Importáld a `server/schema.sql` fájlt a produkciós adatbázisba.
 
@@ -231,17 +224,11 @@ Ha a `config.php` a frontend könyvtárába kerül, a `public_html/ballistic-fro
 </Files>
 ```
 
-Az Apache API könyvtárban legyen engedélyezve a `mod_rewrite` és `mod_setenvif`; töltsd fel a `server/public/.htaccess` fájlt is. A `server/config.php` `api.base_path` értéke legyen `/ballistic-front/api`, az engedélyezett origin tartalmazza a `https://delawer.hu` értéket. Éles API-t kizárólag HTTPS-en szolgálj ki.
+Az Apache API könyvtárban legyen engedélyezve a `mod_rewrite` és `mod_setenvif`; töltsd fel a `server/api/.htaccess` fájlt is. A `server/config.php` `api.base_path` értéke legyen `/ballistic-front/api`, az engedélyezett origin tartalmazza a `https://delawer.hu` értéket. Éles API-t kizárólag HTTPS-en szolgálj ki.
 
 ### 3. Frontend build
 
-A frontend API URL-je buildidőben kerül a JS bundle-be. Alapértelmezett, azonos domainen futó API esetén elég:
-
-```powershell
-pnpm.cmd build
-```
-
-Az éles API-alap URL a `.env.production` fájlban `/ballistic-front/api` értékre van állítva, így az alap build parancs megfelelő:
+A frontend API URL-je buildidőben kerül a JS bundle-be. Az éles API-alap URL a `.env.production` fájlban `/ballistic-front/api` értékre van állítva, így az alap build parancs megfelelő:
 
 ```powershell
 pnpm.cmd build
@@ -255,8 +242,8 @@ Töltsd fel a `dist/` teljes tartalmát a `public_html/ballistic-front/` könyvt
 
 Az API szerverre a következők kerüljenek:
 
-- a `server/public/` tartalma az API publikus útvonalára;
-- a `server/src/` tartalma a `ballistic-front/src/` alá, a tiltó `.htaccess` fájllal együtt;
+- a `server/api/` tartalma az API publikus útvonalára (`ballistic-front/api/`);
+- a `server/lib/` tartalma a `ballistic-front/lib/` alá, a tiltó `.htaccess` fájllal együtt;
 - a saját `server/config.php` a frontend webroot védett gyökerébe vagy azon kívülre;
 - az adatbázisba importált séma.
 

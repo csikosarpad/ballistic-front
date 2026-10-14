@@ -51,7 +51,9 @@ export interface GameState {
   setScreen: (screen: Screen) => void;
   toggleMuted: () => void;
   /** Az engine tölti; a HUD csak olvassa. */
-  sync: (s: Partial<Omit<GameState, "setAim" | "nudgePower" | "nudgeAngle" | "setScreen" | "toggleMuted" | "sync">>) => void;
+  sync: (
+    s: Partial<Omit<GameState, "setAim" | "nudgePower" | "nudgeAngle" | "setScreen" | "toggleMuted" | "sync">>,
+  ) => void;
 }
 
 /** Csak a HUD-hoz szükséges állapot; a nagy gyakoriságú adat (pozíciók) az engine-ben él. */

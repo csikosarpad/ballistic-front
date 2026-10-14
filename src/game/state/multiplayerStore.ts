@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { t } from "../../i18n";
 import { appendRoomEvent, createRoom, fetchRoom, joinRoom, MultiplayerApiError } from "../multiplayer/api";
 import type { RoomCredentials, RoomEvent, RoomSession } from "../multiplayer/protocol";
 
@@ -62,7 +63,7 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => ({
       saveSession(access.credentials, access.update.session);
       set({ credentials: access.credentials, session: access.update.session, events: access.update.events });
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : "Nem sikerült létrehozni a szobát." });
+      set({ error: error instanceof Error ? error.message : t("error.createRoom") });
     } finally {
       set({ busy: false });
     }
@@ -74,7 +75,7 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => ({
       saveSession(access.credentials, access.update.session);
       set({ credentials: access.credentials, session: access.update.session, events: access.update.events });
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : "Nem sikerült csatlakozni a szobához." });
+      set({ error: error instanceof Error ? error.message : t("error.joinRoom") });
     } finally {
       set({ busy: false });
     }
@@ -91,7 +92,7 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => ({
       set({ session: update.session, events, error: null });
     } catch (error) {
       if (get().credentials === credentials) {
-        set({ error: error instanceof Error ? error.message : "Nem sikerült frissíteni a szobát." });
+        set({ error: error instanceof Error ? error.message : t("error.refreshRoom") });
       }
     }
   },
@@ -106,7 +107,7 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => ({
       set({ session: update.session, events, error: null });
     } catch (error) {
       if (get().credentials !== credentials) return;
-      set({ error: error instanceof Error ? error.message : "Nem sikerült elküldeni a játékeseményt." });
+      set({ error: error instanceof Error ? error.message : t("error.publishEvent") });
       if (error instanceof MultiplayerApiError && error.status === 409) void get().refresh();
     }
   },

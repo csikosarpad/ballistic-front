@@ -18,9 +18,11 @@ Windows, Node.js 24, Vite, React 18, TypeScript, PixiJS 8 (WebGL), Zustand, Vite
 
 Játszható két játékos hot-seat módban: körökre osztott lövés, szeles ballisztika, rombolható terep, robbanás- és füstrészecskék, XP és fejlesztési bolt a meccsek között. Az XP és a fejlesztések `localStorage`-ban maradnak meg. A pálya fix 1280×720 logikai méretű, az ablakhoz skálázódik.
 
+Online mód (v1): szobakódos lobby, két kliens közös seed alapján futtatott determinisztikus szimulációval, a mozgás- és lövésesemények HTTP-pollinggal szinkronizálódnak egy PHP/MySQL backenden. Meccs után fejlesztés és host által indított visszavágó. A backend részletei, helyi indítás és telepítés: [server/README.md](server/README.md). A két klienses szinkront és a determinisztikus visszajátszást tesztek fedik; az éles telepítési próba még hátravan.
+
 ## Irányítás
 
-- Főmenü: Játék indítása, Haladás törlése (megerősítéssel)
+- Főmenü: Játék indítása, Online játék, Haladás törlése (megerősítéssel), nyelvválasztó (Magyar / English)
 - ◀ / ▶ nyilak: mozgás (körönként korlátozott távolság)
 - ▲ / ▼ nyilak: lövés ereje (±10, Shift: ±50)
 - Ctrl + ◀ / ▶: cső szöge (±1°, Shift: ±5°; ◀ a bal oldali irány felé forgat)
@@ -43,23 +45,34 @@ pnpm fmt
 
 > PowerShellben, ha a `pnpm` szkript le van tiltva, használd a `pnpm.cmd`-t.
 
+Online módhoz a PHP API is kell (`php -S 127.0.0.1:8000 -t server/api server/api/index.php`); a Vite a `/api` kéréseket ide proxyzza. Részletek: [server/README.md](server/README.md).
+
 ## Struktúra
 
 ```
+server/                 # PHP/MySQL multiplayer backend (nem része a Vite buildnek)
+├── api/                # HTTP belépési pont (index.php, .htaccess) → deploy: public_html/ballistic-front/api/
+├── lib/                # szerveroldali PHP kód, HTTP-ről tiltva → deploy: public_html/ballistic-front/lib/
+├── config.example.php  # konfigurációs minta (a config.php nincs verziókezelve)
+└── schema.sql
 src/
 ├── main.tsx, App.tsx
-├── ui/                 # React: GameCanvas, HUD, MainMenu, ResultScreen, Shop, ui.css
+├── ui/                 # React: GameCanvas, HUD, MainMenu, MultiplayerLobby, ResultScreen, Shop, LanguageSwitch, ui.css
+├── i18n/               # többnyelvűség (hu/en): messages.hu.ts (forrásnyelv), messages.en.ts, t() / useT()
 ├── test/               # Vitest setup
 └── game/               # Reacttől független játékmag
-    ├── engine/         # Game (Pixi app, fix időlépéses loop, skálázás)
+    ├── engine/         # Game (Pixi app, fix időlépéses loop, skálázás), AudioManager, FxRenderer
     ├── assets/         # SVG tank sprite-ok, fx/ (Kenney Particle Pack PNG-k), audio/ (lövés, robbanás, tankmozgás)
     ├── entities/       # tank
-    ├── systems/        # turnManager, upgrades, matchStats, barrelAnimation, particles, profileStorage
+    ├── multiplayer/    # API kliens és protokoll (HTTP polling)
+    ├── systems/        # turnManager, upgrades, matchStats, barrelAnimation, particles, profileStorage, seededRandom
     ├── terrain/        # heightmap, TerrainMask (ütközés), Terrain (RenderTexture)
     ├── physics/        # ballisztika
-    ├── state/          # Zustand store (HUD-nézet)
+    ├── state/          # Zustand store (HUD-nézet, multiplayer lobby)
     └── data/           # adatvezérelt definíciók (upgrade-ek)
 ```
+
+A frontend (`src/`) és a backend (`server/`) szétválasztott: a Vite és a `tsc` csak a `src/` mappát látja, a szerver mappák átnevezése nem érinti a buildet. A frontend az API-t kizárólag a `VITE_MULTIPLAYER_API_URL` URL-en éri el (éles: `/ballistic-front/api`, lásd `.env.production`), ami az `server/api/` telepítési helyének felel meg.
 
 Elv: a nagy gyakoriságú adat (pozíciók) az engine-ben él, a Zustand store csak a HUD-hoz szükséges állapotot tartja.
 
@@ -69,17 +82,46 @@ A robbanás- és füstsprite-ok a [Kenney Particle Pack](https://kenney.nl/asset
 
 A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalról valók, Creative Commons 0 (CC0) licenc szerinti szűréssel letöltve, így attribúció nem kötelező. Az egyes fájlok eredeti oldalát és szerzőjét nem rögzítettem; ha később publikálod a játékot, érdemes a forrásoldalakat egyenként is megerősíteni.
 
+## Nyelvek
+
+A felület magyarul és angolul érhető el. Az első indításkor a böngésző nyelve dönt (magyar böngészőnél magyar, egyébként angol), a választás a főmenüben módosítható, és `localStorage`-ban (`ballistic-front:locale`) marad meg.
+
+Új szöveg hozzáadása: vedd fel a kulcsot a `src/i18n/messages.hu.ts` fájlba (ez a forrásnyelv), majd az `messages.en.ts`-be is; a TypeScript és az `i18n.test.ts` jelzi, ha hiányzik vagy a `{helyőrzők}` eltérnek. Komponensben `useT()`, Reacton kívül `t()` használható. Új fejlesztésnél a név és a leírás kulcsa `upgrade.<id>.name` és `upgrade.<id>.desc`.
+
+Mértékegység: a játékban 1 px = 1 méter, a hosszok (mozgás, robbanási sugár) méterben jelennek meg. A szerver hibaüzenetei egyelőre angolul érkeznek.
+
+Tervezett: a nyelvi fájlok a build-elt verzión kívülről is betölthetők lesznek (a beépített katalógus marad a tartalék), később admin felületről szerkeszthetően és új nyelvekkel; részletek a [ROADMAP.md](ROADMAP.md)-ben.
+
+## Skinezhetőség
+
+A felület színei a `src/ui/ui.css` elején lévő CSS változókból jönnek (`--bf-text`, `--bf-panel`, `--bf-primary`, …). Másik kinézethez elég felülírni őket, például:
+
+```css
+:root[data-skin="neon"] {
+  --bf-panel: #0b0220;
+  --bf-primary: #00f0ff;
+}
+```
+
+és a gyökérelemen beállítani a `data-skin="neon"` attribútumot. A játéktér (Pixi) színei a `src/game/theme.ts` `Theme` objektumából jönnek (`DEFAULT_THEME`): háttér, égbolt, terep, játékosszínek, HUD-sávok, lövedék és effektek. Más kinézethez új `Theme` értéket kell adni a `Game`-nek (`theme` mező); a külső, betölthető skin még nincs meg. A tank SVG-k saját színei még nem tartoznak ide.
+
+## Ütemterv
+
+A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) fájlban vannak.
+
 ## TODO
 
 ### 0. Projekt inicializálása
+
 - [x] Vite + React + TS projekt létrehozása
 - [x] PixiJS telepítése
 - [x] Zustand telepítése
 - [x] Vitest + RTL telepítése
-- [ ] ESLint + Prettier konfigurálása (ESLint kész, Prettier konfig hiányzik)
+- [x] ESLint + Prettier konfigurálása (a meglévő fájlok Prettier-formázása még hátravan)
 - [x] `src/game` mappa létrehozása
 
 ### 1. Alap architektúra
+
 - [x] `game/engine` létrehozása
 - [x] `game/entities` létrehozása
 - [x] `game/systems` létrehozása
@@ -88,6 +130,7 @@ A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalró
 - [x] `game/state` létrehozása (Zustand)
 
 ### 2. PixiJS integráció
+
 - [x] React komponens: `<GameCanvas />`
 - [x] PixiJS Application inicializálása
 - [x] Resize handler (fix pályaméret, skálázás, a meccs nem indul újra)
@@ -95,6 +138,7 @@ A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalró
 - [x] RenderTexture alapok
 
 ### 3. Terep
+
 - [x] Zaj alapú generálás (value noise; Perlin később)
 - [x] Terrain sprite + RenderTexture
 - [x] Rombolás kör alakú `erase` körökkel + bitmaszk (barlang, kinyúló szikla is lehetséges)
@@ -102,12 +146,14 @@ A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalró
 - [x] Terrain collision detection
 
 ### 4. Tankok
+
 - [x] Tank entity (pozíció, HP, mozgás)
 - [x] Cső animáció (simított cénzás, visszarúgás lövéskor)
 - [x] Tank sprite betöltése (SVG asset, játékosonkénti tint)
 - [x] Mozgás korlátozása körönként
 
 ### 5. Lövedékek
+
 - [x] Projectile entity
 - [x] Ballisztikus fizika implementálása
 - [x] Szél hatása
@@ -116,12 +162,14 @@ A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalró
 - [x] Particle effect (füst, robbanás; sprite-alapú: tűz, füst, törmelék, lökéshullám, torkolattűz, lövedékcsóva)
 
 ### 6. Körökre osztott rendszer
+
 - [x] Turn manager
 - [x] Input lock/unlock
 - [x] HUD frissítése
 - [x] Kör vége → következő játékos
 
 ### 7. Fejlesztési rendszer
+
 - [x] Upgrade definíciók (adatvezérelt)
 - [x] XP rendszer
 - [x] Bolt UI
@@ -129,6 +177,7 @@ A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalró
 - [x] XP és fejlesztések mentése (`localStorage`)
 
 ### 8. UI (React)
+
 - [x] HUD (szög, erő, szél)
 - [x] Menü (indítás, haladás törlése)
 - [x] Upgrade képernyő (bolt az eredményképernyőn)
@@ -136,6 +185,7 @@ A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalró
 - [x] Animált UI elemek (CSS: fade-in, pop-in, gomb hover; `prefers-reduced-motion` támogatás)
 
 ### 9. Tesztelés
+
 - [x] Fizika tesztek
 - [x] Terrain collision tesztek
 - [x] Upgrade rendszer tesztek
@@ -143,6 +193,7 @@ A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalró
 - [x] React komponens tesztek (menü, eredményképernyő)
 
 ### 10. Multiplayer (v1: PHP/MySQL, HTTP polling)
+
 - [x] Szoba létrehozása és csatlakozás PHP API-végpontokkal
 - [x] MySQL-ben tárolt, verziózott JSON eseménynapló és szinkronállapot
 - [x] Determinisztikus meccsindítás (terep seedje, kezdő játékos, fejlesztések)
@@ -151,6 +202,6 @@ A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalró
 - [x] `single` / `multi` engine mód, Reacttől függetlenül
 - [x] Online meccs utáni upgrade és host által indított visszavágó
 - [x] Zustand-alapú lobby állapot és lobby UI
-- [ ] Két klienses szinkron- és visszajátszási tesztek, telepítési leírás
+- [x] Két klienses szinkron- és visszajátszási tesztek, telepítési leírás
 
 WebSocket, szerveroldali fizika és anti-cheat nem része az első verziónak.

@@ -24,10 +24,18 @@ afterEach(() => {
 describe("multiplayer store", () => {
   it("stores room credentials for this browser session and merges polled events", async () => {
     const readyUpdate = {
-      session: { ...waitingRoom.update.session, status: "ready" as const, revision: 1, players: { P1: "Ada", P2: "Grace" } },
-      events: [{ revision: 1, playerId: "P2" as const, type: "player_joined", payload: { name: "Grace" }, createdAt: "now" }],
+      session: {
+        ...waitingRoom.update.session,
+        status: "ready" as const,
+        revision: 1,
+        players: { P1: "Ada", P2: "Grace" },
+      },
+      events: [
+        { revision: 1, playerId: "P2" as const, type: "player_joined", payload: { name: "Grace" }, createdAt: "now" },
+      ],
     };
-    const fetchMock = vi.fn()
+    const fetchMock = vi
+      .fn()
       .mockResolvedValueOnce(Response.json(waitingRoom))
       .mockResolvedValueOnce(Response.json(readyUpdate));
     vi.stubGlobal("fetch", fetchMock);

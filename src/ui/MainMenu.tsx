@@ -3,10 +3,13 @@ import { useGameStore } from "@/game/state/gameStore";
 import type { MatchSetup } from "@/game/systems/seededRandom";
 import type { Profile } from "@/game/systems/upgrades";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
+import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
+import { LanguageSwitch } from "./LanguageSwitch";
 import { MultiplayerLobby } from "./MultiplayerLobby";
 
 export function MainMenu() {
+  const t = useT();
   const setScreen = useGameStore((s) => s.setScreen);
   const [showLobby, setShowLobby] = useState(false);
 
@@ -22,7 +25,7 @@ export function MainMenu() {
   };
 
   const reset = () => {
-    if (window.confirm("Biztosan törlöd az összes XP-t és fejlesztést?")) gameRef.current?.resetProgress();
+    if (window.confirm(t("menu.resetConfirm"))) gameRef.current?.resetProgress();
   };
 
   return (
@@ -31,22 +34,23 @@ export function MainMenu() {
         <MultiplayerLobby onBack={() => setShowLobby(false)} onStartMatch={startMultiplayer} />
       ) : (
         <div className="panel">
-          <h1>Ballistic Front</h1>
-          <p>Két játékos, egy gép. Lődd ki az ellenfeled tankját!</p>
+          <h1>{t("menu.title")}</h1>
+          <p>{t("menu.tagline")}</p>
           <p>
-            <small>◀ ▶ mozgás · csúszkák: szög és erő · szóköz: tűz</small>
+            <small>{t("menu.controls")}</small>
           </p>
           <button className="btn" onClick={start}>
-            Játék indítása
+            {t("menu.start")}
           </button>
           <br />
           <button className="btn secondary" onClick={() => setShowLobby(true)}>
-            Online játék
+            {t("menu.online")}
           </button>
           <br />
           <button className="btn secondary" onClick={reset}>
-            Haladás törlése
+            {t("menu.reset")}
           </button>
+          <LanguageSwitch />
         </div>
       )}
     </div>

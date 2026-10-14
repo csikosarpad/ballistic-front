@@ -17,6 +17,15 @@ describe("MainMenu", () => {
     useMultiplayerStore.getState().leave();
   });
 
+  it("a nyelvváltó angolra állítja a menüt, majd vissza magyarra", () => {
+    render(<MainMenu />);
+    fireEvent.click(screen.getByRole("button", { name: "English" }));
+    expect(screen.getByRole("button", { name: "Start game" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Play online" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Magyar" }));
+    expect(screen.getByRole("button", { name: "Játék indítása" })).toBeInTheDocument();
+  });
+
   it("az online játék gomb megnyitja a szobalobbyt", () => {
     render(<MainMenu />);
     fireEvent.click(screen.getByRole("button", { name: "Online játék" }));
@@ -36,13 +45,15 @@ describe("MainMenu", () => {
         setup: { seed: 42, starterIndex: 0 },
         players: { P1: "Ada", P2: "Grace" },
       },
-      events: [{
-        revision: 2,
-        playerId: "P1",
-        type: "match_started",
-        payload: { profiles: { P1: { xp: 0, levels: {} }, P2: { xp: 0, levels: {} } } },
-        createdAt: "2026-10-12T00:00:00Z",
-      }],
+      events: [
+        {
+          revision: 2,
+          playerId: "P1",
+          type: "match_started",
+          payload: { profiles: { P1: { xp: 0, levels: {} }, P2: { xp: 0, levels: {} } } },
+          createdAt: "2026-10-12T00:00:00Z",
+        },
+      ],
     });
 
     render(<MainMenu />);

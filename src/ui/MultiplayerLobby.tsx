@@ -3,6 +3,7 @@ import type { MatchSetup } from "@/game/systems/seededRandom";
 import type { Profile } from "@/game/systems/upgrades";
 import { useGameStore } from "@/game/state/gameStore";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
+import { useT } from "@/i18n";
 
 interface MultiplayerLobbyProps {
   onBack: () => void;
@@ -10,6 +11,7 @@ interface MultiplayerLobbyProps {
 }
 
 export function MultiplayerLobby({ onBack, onStartMatch }: MultiplayerLobbyProps) {
+  const t = useT();
   const credentials = useMultiplayerStore((state) => state.credentials);
   const session = useMultiplayerStore((state) => state.session);
   const events = useMultiplayerStore((state) => state.events);
@@ -35,7 +37,7 @@ export function MultiplayerLobby({ onBack, onStartMatch }: MultiplayerLobbyProps
     const setup = startEvent.payload.setup;
     startedRevision.current = startEvent.revision;
     onStartMatch(
-      setup && typeof setup === "object" ? setup as MatchSetup : session.setup,
+      setup && typeof setup === "object" ? (setup as MatchSetup) : session.setup,
       profiles as Record<string, Profile>,
       startEvent.revision,
     );
@@ -53,19 +55,19 @@ export function MultiplayerLobby({ onBack, onStartMatch }: MultiplayerLobbyProps
 
   return (
     <div className="panel multiplayer-panel">
-      <h2>Online multiplayer</h2>
+      <h2>{t("lobby.title")}</h2>
       {!credentials || !session ? (
         <>
           <label className="lobby-field">
-            Játékosnév
+            {t("lobby.playerName")}
             <input maxLength={24} value={playerName} onChange={(event) => setPlayerName(event.target.value)} />
           </label>
           <button className="btn" disabled={busy || !playerName.trim()} onClick={() => void create(playerName.trim())}>
-            Szoba létrehozása
+            {t("lobby.create")}
           </button>
           <div className="lobby-divider" />
           <label className="lobby-field">
-            Szobakód
+            {t("lobby.roomCode")}
             <input
               autoCapitalize="characters"
               maxLength={6}
@@ -78,30 +80,35 @@ export function MultiplayerLobby({ onBack, onStartMatch }: MultiplayerLobbyProps
             disabled={busy || !playerName.trim() || roomCode.trim().length !== 6}
             onClick={() => void join(roomCode, playerName.trim())}
           >
-            Csatlakozás
+            {t("lobby.join")}
           </button>
         </>
       ) : (
         <div className="lobby-room" aria-live="polite">
-          <p className="lobby-code-label">Szobakód</p>
+          <p className="lobby-code-label">{t("lobby.roomCode")}</p>
           <strong className="lobby-code">{session.code}</strong>
-          <p>{session.status === "waiting" ? "Várakozás a másik játékosra…" : "Mindkét játékos csatlakozott."}</p>
+          <p>{session.status === "waiting" ? t("lobby.waitingForGuest") : t("lobby.bothJoined")}</p>
           <p className="lobby-players">
-            {session.players.P1 ?? "P1: várakozik"} <span>vs.</span> {session.players.P2 ?? "P2: várakozik"}
+            {session.players.P1 ?? t("lobby.slotWaiting", { id: "P1" })} <span>{t("lobby.versus")}</span>{" "}
+            {session.players.P2 ?? t("lobby.slotWaiting", { id: "P2" })}
           </p>
           {session.status === "ready" && credentials.playerId === "P1" && (
             <button className="btn" disabled={busy} onClick={startMatch}>
-              Meccs indítása
+              {t("lobby.startMatch")}
             </button>
           )}
-          {session.status === "ready" && credentials.playerId === "P2" && <small>Várakozás a szoba létrehozójára…</small>}
-          {session.status === "playing" && <small>Meccs indítása…</small>}
-                  {session.status === "finished" && <small>A lezárt meccs visszaállítása…</small>}
+          {session.status === "ready" && credentials.playerId === "P2" && <small>{t("lobby.waitingForHost")}</small>}
+          {session.status === "playing" && <small>{t("lobby.matchStarting")}</small>}
+          {session.status === "finished" && <small>{t("lobby.restoring")}</small>}
         </div>
       )}
-      {error && <p className="lobby-error" role="alert">{error}</p>}
+      {error && (
+        <p className="lobby-error" role="alert">
+          {error}
+        </p>
+      )}
       <button className="btn secondary" onClick={back}>
-        Vissza
+        {t("lobby.back")}
       </button>
     </div>
   );

@@ -20,15 +20,36 @@ describe("ballistics", () => {
 
   describe("dashPolyline", () => {
     it("egyenes vonalat a megadott ritmusban szaggat", () => {
-      const dashes = dashPolyline([{ x: 0, y: 0 }, { x: 100, y: 0 }], 4, 4);
+      const dashes = dashPolyline(
+        [
+          { x: 0, y: 0 },
+          { x: 100, y: 0 },
+        ],
+        4,
+        4,
+      );
       expect(dashes).toHaveLength(13);
-      expect(dashes[0]).toEqual([{ x: 0, y: 0 }, { x: 4, y: 0 }]);
+      expect(dashes[0]).toEqual([
+        { x: 0, y: 0 },
+        { x: 4, y: 0 },
+      ]);
       expect(dashes.at(-1)![1].x).toBeCloseTo(100);
     });
 
     it("a csomópontokon átvezeti a ritmust", () => {
-      const dashes = dashPolyline([{ x: 0, y: 0 }, { x: 6, y: 0 }, { x: 12, y: 0 }], 4, 4);
-      expect(dashes.map(([a, b]) => [a.x, b.x])).toEqual([[0, 4], [8, 12]]);
+      const dashes = dashPolyline(
+        [
+          { x: 0, y: 0 },
+          { x: 6, y: 0 },
+          { x: 12, y: 0 },
+        ],
+        4,
+        4,
+      );
+      expect(dashes.map(([a, b]) => [a.x, b.x])).toEqual([
+        [0, 4],
+        [8, 12],
+      ]);
     });
 
     it("üres bemenetre üreset ad", () => {
@@ -37,7 +58,13 @@ describe("ballistics", () => {
   });
 
   describe("predictTrajectory", () => {
-    const opts = { dt: 1 / 240, maxSteps: 5000, width: 1000, height: 1000, isBlocked: (_x: number, y: number) => y >= 0 };
+    const opts = {
+      dt: 1 / 240,
+      maxSteps: 5000,
+      width: 1000,
+      height: 1000,
+      isBlocked: (_x: number, y: number) => y >= 0,
+    };
 
     it("45 fokon a távolság P²/g (üresjárati képlet)", () => {
       const pts = predictTrajectory({ x: 0, y: -0.001 }, 45, 300, { gravity: 600, wind: 0 }, opts);

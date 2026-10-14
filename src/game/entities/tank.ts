@@ -23,7 +23,17 @@ export interface Tank {
 }
 
 export function createTank(id: string, x: number, color: number, angle: number, stats: TankStats = BASE_STATS): Tank {
-  return { id, x, y: 0, hp: stats.maxHp, angle, power: Math.min(400, stats.maxPower), moveLeft: stats.moveBudget, color, stats };
+  return {
+    id,
+    x,
+    y: 0,
+    hp: stats.maxHp,
+    angle,
+    power: Math.min(400, stats.maxPower),
+    moveLeft: stats.moveBudget,
+    color,
+    stats,
+  };
 }
 
 export const isAlive = (t: Tank) => t.hp > 0;
