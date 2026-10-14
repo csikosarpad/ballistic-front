@@ -18,7 +18,7 @@ Windows, Node.js 24, Vite, React 18, TypeScript, PixiJS 8 (WebGL), Zustand, Vite
 
 Játszható két játékos hot-seat módban: körökre osztott lövés, szeles ballisztika, rombolható terep, robbanás- és füstrészecskék, XP és fejlesztési bolt a meccsek között. Az XP és a fejlesztések `localStorage`-ban maradnak meg. A pálya fix 1280×720 logikai méretű, az ablakhoz skálázódik.
 
-Online mód (v1): szobakódos lobby, két kliens közös seed alapján futtatott determinisztikus szimulációval, a mozgás- és lövésesemények HTTP-pollinggal szinkronizálódnak egy PHP/MySQL backenden. Meccs után fejlesztés és host által indított visszavágó. A backend részletei, helyi indítás és telepítés: [server/README.md](server/README.md). Két klienses szinkrontesztek és a teljes telepítési próba még hátravannak.
+Online mód (v1): szobakódos lobby, két kliens közös seed alapján futtatott determinisztikus szimulációval, a mozgás- és lövésesemények HTTP-pollinggal szinkronizálódnak egy PHP/MySQL backenden. Meccs után fejlesztés és host által indított visszavágó. A backend részletei, helyi indítás és telepítés: [server/README.md](server/README.md). A két klienses szinkront és a determinisztikus visszajátszást tesztek fedik; az éles telepítési próba még hátravan.
 
 ## Irányítás
 
@@ -81,6 +81,10 @@ A robbanás- és füstsprite-ok a [Kenney Particle Pack](https://kenney.nl/asset
 
 A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalról valók, Creative Commons 0 (CC0) licenc szerinti szűréssel letöltve, így attribúció nem kötelező. Az egyes fájlok eredeti oldalát és szerzőjét nem rögzítettem; ha később publikálod a játékot, érdemes a forrásoldalakat egyenként is megerősíteni.
 
+## Ütemterv
+
+A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) fájlban vannak.
+
 ## TODO
 
 ### 0. Projekt inicializálása
@@ -88,7 +92,7 @@ A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalró
 - [x] PixiJS telepítése
 - [x] Zustand telepítése
 - [x] Vitest + RTL telepítése
-- [ ] ESLint + Prettier konfigurálása (ESLint kész, Prettier konfig hiányzik)
+- [x] ESLint + Prettier konfigurálása (a meglévő fájlok Prettier-formázása még hátravan)
 - [x] `src/game` mappa létrehozása
 
 ### 1. Alap architektúra
@@ -163,6 +167,6 @@ A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalró
 - [x] `single` / `multi` engine mód, Reacttől függetlenül
 - [x] Online meccs utáni upgrade és host által indított visszavágó
 - [x] Zustand-alapú lobby állapot és lobby UI
-- [ ] Két klienses szinkron- és visszajátszási tesztek, telepítési leírás
+- [x] Két klienses szinkron- és visszajátszási tesztek, telepítési leírás
 
 WebSocket, szerveroldali fizika és anti-cheat nem része az első verziónak.
