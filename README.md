@@ -90,6 +90,21 @@ A felület magyarul és angolul érhető el. Az első indításkor a böngésző
 
 Mértékegység: a játékban 1 px = 1 méter, a hosszok (mozgás, robbanási sugár) méterben jelennek meg. A szerver hibaüzenetei egyelőre angolul érkeznek.
 
+Tervezett: a nyelvi fájlok a build-elt verzión kívülről is betölthetők lesznek (a beépített katalógus marad a tartalék), később admin felületről szerkeszthetően és új nyelvekkel; részletek a [ROADMAP.md](ROADMAP.md)-ben.
+
+## Skinezhetőség
+
+A felület színei a `src/ui/ui.css` elején lévő CSS változókból jönnek (`--bf-text`, `--bf-panel`, `--bf-primary`, …). Másik kinézethez elég felülírni őket, például:
+
+```css
+:root[data-skin="neon"] {
+  --bf-panel: #0b0220;
+  --bf-primary: #00f0ff;
+}
+```
+
+és a gyökérelemen beállítani a `data-skin="neon"` attribútumot. A játéktér (Pixi) színei egyelőre a `Game.ts`-ben vannak; ezek `Theme` objektumba szervezése a ROADMAP-ban szerepel.
+
 ## Ütemterv
 
 A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) fájlban vannak.
