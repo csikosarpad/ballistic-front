@@ -1,6 +1,12 @@
 /** A tank játékmenetet befolyásoló értékei; az upgrade-ek ezeket módosítják. A UI-ban 1 px = 1 méter. */
 export interface TankStats {
   maxHp: number;
+  /** Erőtér pajzs maximuma; a pajzs elsőként nyeli el a sebzést. */
+  maxEnergyShield: number;
+  /** A pajzs körönkénti visszatöltődése a maximum arányában (0.2 = 20%). */
+  shieldRegen: number;
+  /** A pajzson átjutó sebzést elnyelő fizikai páncélpontok maximuma; nem töltődik vissza. */
+  maxArmor: number;
   /** Sebzésszorzó. */
   damage: number;
   /** Robbanás sugara (px). */
@@ -12,6 +18,9 @@ export interface TankStats {
 
 export const BASE_STATS: TankStats = {
   maxHp: 100,
+  maxEnergyShield: 0,
+  shieldRegen: 0.2,
+  maxArmor: 0,
   damage: 1,
   blastRadius: 30,
   maxPower: 600,
@@ -33,11 +42,21 @@ export interface UpgradeDef {
 /** Adatvezérelt: új fejlesztéshez elég egy új sor ide. */
 export const UPGRADES: readonly UpgradeDef[] = [
   {
+    // A régi „armor” (max HP) fejlesztés azonosítója megmarad, hogy a mentett szintek érvényesek maradjanak;
+    // mostantól fogyó fizikai páncélpontokat ad.
     id: "armor",
-    stat: "maxHp",
+    stat: "maxArmor",
     perLevel: 20,
     maxLevel: 5,
     baseCost: 40,
+    costGrowth: 1.5,
+  },
+  {
+    id: "shield",
+    stat: "maxEnergyShield",
+    perLevel: 20,
+    maxLevel: 5,
+    baseCost: 50,
     costGrowth: 1.5,
   },
   {

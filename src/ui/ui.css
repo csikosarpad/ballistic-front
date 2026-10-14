@@ -11,6 +11,79 @@
   --bf-highlight: #ffd34d;
   --bf-muted: #aebbd7;
   --bf-error: #ff8b82;
+  --bf-hp: #55dd66;
+  --bf-shield: #4dd0ff;
+  --bf-armor: #ffb347;
+  --bf-stripe-back: #222;
+}
+
+.hud-units {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.hud-unit {
+  display: grid;
+  gap: 2px;
+  min-width: 110px;
+}
+
+.stripe {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--bf-stripe-back);
+}
+
+.stripe-fill {
+  height: 100%;
+  transition: width 0.25s;
+}
+
+.stripe-hp .stripe-fill {
+  background: var(--bf-hp);
+}
+
+.stripe-shield .stripe-fill {
+  background: var(--bf-shield);
+}
+
+.stripe-armor .stripe-fill {
+  background: var(--bf-armor);
+}
+
+.hud-legend {
+  display: grid;
+  gap: 1px;
+  margin: 0 0 4px;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  color: var(--bf-text);
+  opacity: 0.8;
+}
+
+.hud-legend li::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 4px;
+  margin-right: 6px;
+  vertical-align: middle;
+  border-radius: 2px;
+}
+
+.legend-hp::before {
+  background: var(--bf-hp);
+}
+
+.legend-shield::before {
+  background: var(--bf-shield);
+}
+
+.legend-armor::before {
+  background: var(--bf-armor);
 }
 
 /* A HUD a soron lévő játékos színét követi (--accent). */

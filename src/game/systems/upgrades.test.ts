@@ -3,6 +3,7 @@ import { BASE_STATS, UPGRADES } from "../data/upgrades";
 import { awardXp, buyUpgrade, computeStats, newProfile, upgradeCost } from "./upgrades";
 
 const armor = UPGRADES.find((u) => u.id === "armor")!;
+const shield = UPGRADES.find((u) => u.id === "shield")!;
 
 describe("upgrades", () => {
   it("fejlesztés nélkül az alapértékek érvényesek", () => {
@@ -10,7 +11,12 @@ describe("upgrades", () => {
   });
 
   it("a szintek hozzáadódnak az alapértékhez", () => {
-    expect(computeStats({ armor: 2 }).maxHp).toBe(BASE_STATS.maxHp + 2 * armor.perLevel);
+    expect(computeStats({ armor: 2 }).maxArmor).toBe(BASE_STATS.maxArmor + 2 * armor.perLevel);
+    expect(computeStats({ shield: 2 }).maxEnergyShield).toBe(BASE_STATS.maxEnergyShield + 2 * shield.perLevel);
+  });
+
+  it("a régi mentés páncélszintje már nem ad max HP-t", () => {
+    expect(computeStats({ armor: 5 }).maxHp).toBe(BASE_STATS.maxHp);
   });
 
   it("a költség szintenként nő", () => {

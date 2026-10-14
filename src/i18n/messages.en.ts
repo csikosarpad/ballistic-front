@@ -27,6 +27,12 @@ export const en: Record<MessageKey, string> = {
 
   "hud.turn": "Turn:",
   "hud.move": "Movement: {value} m",
+  "hud.legend": "Legend",
+  "hud.legend.hp": "Top stripe: health (HP)",
+  "hud.legend.shield": "Blue stripe: energy shield, recharges each turn",
+  "hud.legend.armor": "Orange stripe: armor, wears down, no recharge",
+  "hud.shield": "Shield",
+  "hud.armor": "Armor",
   "hud.wind": "Wind:",
   "hud.shotInFlight": "Shell in flight",
   "hud.yourTurn": "Your turn",
@@ -56,7 +62,9 @@ export const en: Record<MessageKey, string> = {
   "shop.cost": "– {cost} XP",
 
   "upgrade.armor.name": "Armor",
-  "upgrade.armor.desc": "+{value} max HP",
+  "upgrade.armor.desc": "+{value} armor points; wears down after the shield and does not recharge",
+  "upgrade.shield.name": "Energy shield",
+  "upgrade.shield.desc": "+{value} shield; recharges 20% of its maximum each turn",
   "upgrade.warhead.name": "Warhead",
   "upgrade.warhead.desc": "+{value}% damage",
   "upgrade.blast.name": "Bigger crater",

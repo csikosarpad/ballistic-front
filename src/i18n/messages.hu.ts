@@ -26,6 +26,12 @@ export const hu = {
 
   "hud.turn": "Soron:",
   "hud.move": "Mozgás: {value} m",
+  "hud.legend": "Jelmagyarázat",
+  "hud.legend.hp": "Felső csík: életerő (HP)",
+  "hud.legend.shield": "Kék csík: erőtér pajzs, körönként töltődik",
+  "hud.legend.armor": "Narancs csík: páncél, kopik, nem töltődik",
+  "hud.shield": "Pajzs",
+  "hud.armor": "Páncél",
   "hud.wind": "Szél:",
   "hud.shotInFlight": "Lövedék útban",
   "hud.yourTurn": "Te következel",
@@ -55,7 +61,9 @@ export const hu = {
   "shop.cost": "– {cost} XP",
 
   "upgrade.armor.name": "Páncél",
-  "upgrade.armor.desc": "+{value} max HP",
+  "upgrade.armor.desc": "+{value} páncélpont; a pajzs után kopik, nem töltődik vissza",
+  "upgrade.shield.name": "Erőtér pajzs",
+  "upgrade.shield.desc": "+{value} pajzs; körönként a maximum 20%-a visszatöltődik",
   "upgrade.warhead.name": "Robbanófej",
   "upgrade.warhead.desc": "+{value}% sebzés",
   "upgrade.blast.name": "Nagyobb kráter",

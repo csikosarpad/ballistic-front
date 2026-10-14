@@ -18,7 +18,7 @@ Windows, Node.js 24, Vite, React 18, TypeScript, PixiJS 8 (WebGL), Zustand, Vite
 
 Játszható két játékos hot-seat módban: körökre osztott lövés, szeles ballisztika, rombolható terep, robbanás- és füstrészecskék, XP és fejlesztési bolt a meccsek között. Az XP és a fejlesztések `localStorage`-ban maradnak meg. A pálya fix 1280×720 logikai méretű, az ablakhoz skálázódik.
 
-Online mód (v1): szobakódos lobby, két kliens közös seed alapján futtatott determinisztikus szimulációval, a mozgás- és lövésesemények HTTP-pollinggal szinkronizálódnak egy PHP/MySQL backenden. Meccs után fejlesztés és host által indított visszavágó. A backend részletei, helyi indítás és telepítés: [server/README.md](server/README.md). A két klienses szinkront és a determinisztikus visszajátszást tesztek fedik; az éles telepítési próba még hátravan.
+Online mód (v1): szobakódos lobby, két kliens közös seed alapján futtatott determinisztikus szimulációval, a mozgás- és lövésesemények HTTP-pollinggal szinkronizálódnak egy PHP/MySQL backenden. Meccs után fejlesztés és host által indított visszavágó. A backend részletei, helyi indítás és telepítés: [server/README.md](server/README.md). A két klienses szinkront és a determinisztikus visszajátszást tesztek fedik; az éles telepítés megtörtént.
 
 ## Irányítás
 
@@ -31,6 +31,8 @@ Online mód (v1): szobakódos lobby, két kliens közös seed alapján futtatott
 - Szög és erő csúszók a HUD-on
 - Szóköz: tűz
 - Meccs végén: eredményképernyő statisztikával, bolt (XP-ből fejlesztés), Visszavágó és Főmenü
+- Védelem: három réteg, ebben a sorrendben kopnak: erőtér pajzs → fizikai páncél → HP (1:1 arányban, `src/game/systems/damage.ts`). A pajzs a soron lévő egységnél körönként a maximum 20%-ával töltődik vissza, kivéve ha az egységet a két köre között találat érte (akkor abban a körben nem). A páncél nem töltődik vissza. A HUD és a tank fölötti kijelzés egymás feletti vékony csíkokat mutat: HP, pajzs, páncél; a pajzs és a páncél csíkja csak akkor látszik, ha az egységnek van (alapból nincs, a boltban vehető: Erőtér pajzs, Páncél). Az XP a pajzsnak, a páncélnak és a HP-nak okozott sebzés után is jár.
+- Mentés: az XP és a szintek verziózott borítékban (`ballistic-front:profiles`, `version: 2`) maradnak meg; a régi `…:profiles:v1` mentést a játék első betöltéskor átveszi. Online meccsen mindkét kliensnek ugyanazt a buildet kell futtatnia.
 
 ## Parancsok
 
@@ -178,7 +180,7 @@ A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) f�
 
 ### 8. UI (React)
 
-- [x] HUD (szög, erő, szél)
+- [x] HUD (szög, erő, szél, HP/pajzs/páncél csíkok jelmagyarázattal)
 - [x] Menü (indítás, haladás törlése)
 - [x] Upgrade képernyő (bolt az eredményképernyőn)
 - [x] Eredmény kijelzés (győztes, lövés/sebzés/XP statisztika)
@@ -190,6 +192,8 @@ A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) f�
 - [x] Terrain collision tesztek
 - [x] Upgrade rendszer tesztek
 - [x] Turn manager tesztek
+- [x] Védelmi modell tesztek (sebzésfüggvény, pajzsregeneráció)
+- [x] i18n és nyelvváltó tesztek
 - [x] React komponens tesztek (menü, eredményképernyő)
 
 ### 10. Multiplayer (v1: PHP/MySQL, HTTP polling)

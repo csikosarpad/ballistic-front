@@ -6,6 +6,33 @@ import { gameRef } from "./gameRef";
 
 const toCss = (color?: number) => (color === undefined ? "#ffffff" : `#${color.toString(16).padStart(6, "0")}`);
 
+interface StripeProps {
+  kind: "hp" | "shield" | "armor";
+  label: string;
+  value: number;
+  max: number;
+}
+
+/** Vékony, jelölt csík; a pontos érték a tooltipben és a képernyőolvasónak szóló attribútumokban van. */
+function Stripe({ kind, label, value, max }: StripeProps) {
+  const percent = max > 0 ? Math.min(100, Math.max(0, (value / max) * 100)) : 0;
+  const shown = `${value}/${max}`;
+  return (
+    <div
+      className={`stripe stripe-${kind}`}
+      role="meter"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={max}
+      aria-valuenow={value}
+      aria-valuetext={shown}
+      title={`${label}: ${shown}`}
+    >
+      <div className="stripe-fill" style={{ width: `${percent}%` }} />
+    </div>
+  );
+}
+
 export function Hud() {
   const t = useT();
   const {
@@ -84,16 +111,25 @@ export function Hud() {
         font: "14px sans-serif",
       }}
     >
-      <div>
-        {tanks.map((t) => (
-          <span
-            key={t.id}
-            style={{ marginRight: 12, color: toCss(t.color), fontWeight: t.id === currentId ? "bold" : "normal" }}
-          >
-            {t.id}: {t.hp}/{t.maxHp} HP
-          </span>
+      <div className="hud-units">
+        {tanks.map((unit) => (
+          <div key={unit.id} className="hud-unit" style={{ color: toCss(unit.color) }}>
+            <span style={{ fontWeight: unit.id === currentId ? "bold" : "normal" }}>
+              {unit.id}: {unit.hp}/{unit.maxHp} HP
+            </span>
+            <Stripe kind="hp" label="HP" value={unit.hp} max={unit.maxHp} />
+            {unit.maxShield > 0 && (
+              <Stripe kind="shield" label={t("hud.shield")} value={unit.shield} max={unit.maxShield} />
+            )}
+            {unit.maxArmor > 0 && <Stripe kind="armor" label={t("hud.armor")} value={unit.armor} max={unit.maxArmor} />}
+          </div>
         ))}
       </div>
+      <ul className="hud-legend" aria-label={t("hud.legend")}>
+        <li className="legend-hp">{t("hud.legend.hp")}</li>
+        {tanks.some((u) => u.maxShield > 0) && <li className="legend-shield">{t("hud.legend.shield")}</li>}
+        {tanks.some((u) => u.maxArmor > 0) && <li className="legend-armor">{t("hud.legend.armor")}</li>}
+      </ul>
       <div>
         {t("hud.turn")} <strong style={{ color: toCss(me?.color) }}>{currentId}</strong> |{" "}
         {t("hud.move", { value: me?.moveLeft ?? 0 })} | {t("hud.wind")} {wind}

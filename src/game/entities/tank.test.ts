@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { computeStats } from "../systems/upgrades";
 import { TerrainMask } from "../terrain/mask";
-import { applyDamage, createTank, explosionDamage, moveTank, MOVE_BUDGET, settleTank } from "./tank";
+import { applyDamage, createTank, explosionDamage, moveTank, MOVE_BUDGET, regenTankShield, settleTank } from "./tank";
 
 const flat = () => TerrainMask.fromHeightmap(new Float32Array(200).fill(100), 200);
 
@@ -41,5 +42,52 @@ describe("tank", () => {
     expect(far).toBe(0);
     applyDamage(t, 999);
     expect(t.hp).toBe(0);
+  });
+
+  it("a sebzést előbb a pajzs, majd a páncél nyeli el, a HP csak utána sérül", () => {
+    const t = createTank("a", 50, 0, 45, computeStats({ shield: 1, armor: 1 }));
+    expect(t).toMatchObject({ shield: 20, armor: 20, hp: 100 });
+    applyDamage(t, 10);
+    expect(t).toMatchObject({ shield: 10, armor: 20, hp: 100 });
+    applyDamage(t, 25);
+    expect(t).toMatchObject({ shield: 0, armor: 5, hp: 100 });
+    applyDamage(t, 15);
+    expect(t).toMatchObject({ shield: 0, armor: 0, hp: 90 });
+  });
+
+  it("a páncél nem töltődik vissza, a pajzs igen", () => {
+    const t = createTank("a", 50, 0, 45, computeStats({ shield: 1, armor: 1 }));
+    applyDamage(t, 40);
+    expect(t).toMatchObject({ shield: 0, armor: 0 });
+    regenTankShield(t);
+    regenTankShield(t);
+    expect(t).toMatchObject({ shield: 4, armor: 0 });
+  });
+
+  it("találat után a következő körben nincs pajzsvisszatöltés, utána újra van", () => {
+    const t = createTank("a", 50, 0, 45, computeStats({ shield: 1 }));
+    applyDamage(t, 10);
+    regenTankShield(t);
+    expect(t.shield).toBe(10);
+    regenTankShield(t);
+    expect(t.shield).toBe(14);
+  });
+
+  it("a pajzs körönként a maximum 20%-ával töltődik vissza", () => {
+    const t = createTank("a", 50, 0, 45, computeStats({ shield: 5 }));
+    applyDamage(t, 100);
+    expect(t.shield).toBe(0);
+    regenTankShield(t);
+    expect(t.shield).toBe(0);
+    regenTankShield(t);
+    expect(t.shield).toBe(20);
+    regenTankShield(t);
+    expect(t.shield).toBe(40);
+  });
+
+  it("pajzs nélküli tanknál a visszatöltés nem csinál semmit", () => {
+    const t = createTank("a", 50, 0, 45);
+    regenTankShield(t);
+    expect(t.shield).toBe(0);
   });
 });

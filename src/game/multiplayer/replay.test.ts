@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BASE_STATS } from "../data/upgrades";
+import { BASE_STATS, type TankStats } from "../data/upgrades";
 import {
   applyDamage,
   barrelTip,
@@ -7,12 +7,14 @@ import {
   explosionDamage,
   isAlive,
   moveTank,
+  regenTankShield,
   settleTank,
   tankContains,
   type Tank,
 } from "../entities/tank";
 import { DEFAULT_WORLD, launchVelocity, stepBody, type BallisticBody } from "../physics/ballistics";
 import { createSeededRandom, type MatchSetup } from "../systems/seededRandom";
+import { computeStats } from "../systems/upgrades";
 import { TurnManager } from "../systems/turnManager";
 import { generateHeightmap, mirrorHeightmap } from "../terrain/heightmap";
 import { TerrainMask } from "../terrain/mask";
@@ -35,10 +37,10 @@ class HeadlessMatch {
   private wind = 0;
   lastRevision = 0;
 
-  constructor(setup: MatchSetup) {
+  constructor(setup: MatchSetup, stats: [TankStats, TankStats] = [BASE_STATS, BASE_STATS]) {
     this.mask = TerrainMask.fromHeightmap(mirrorHeightmap(generateHeightmap(WIDTH, HEIGHT, setup.seed)), HEIGHT);
     this.random = createSeededRandom(setup.seed);
-    this.tanks = [createTank("P1", WIDTH * 0.12, 0, 45), createTank("P2", WIDTH * 0.88, 0, 135)];
+    this.tanks = [createTank("P1", WIDTH * 0.12, 0, 45, stats[0]), createTank("P2", WIDTH * 0.88, 0, 135, stats[1])];
     for (const tank of this.tanks) settleTank(tank, this.mask);
     this.turns = new TurnManager(["P1", "P2"], setup.starterIndex);
     this.beginTurn();
@@ -49,6 +51,7 @@ class HeadlessMatch {
   }
 
   private beginTurn(): void {
+    regenTankShield(this.current);
     this.current.moveLeft = this.current.stats.moveBudget;
     this.wind = Math.round((this.random() - 0.5) * 120);
   }
@@ -113,7 +116,17 @@ class HeadlessMatch {
       winner: this.turns.winner,
       current: this.turns.current,
       wind: this.wind,
-      tanks: this.tanks.map(({ id, x, y, hp, angle, power, moveLeft }) => ({ id, x, y, hp, angle, power, moveLeft })),
+      tanks: this.tanks.map(({ id, x, y, hp, shield, armor, angle, power, moveLeft }) => ({
+        id,
+        x,
+        y,
+        hp,
+        shield,
+        armor,
+        angle,
+        power,
+        moveLeft,
+      })),
       surface: Array.from({ length: WIDTH }, (_, x) => this.mask.surfaceY(x)),
     };
   }
@@ -184,6 +197,24 @@ describe("determinisztikus visszajátszás két kliensen", () => {
     expect(first.snapshot().current).toBe("P2");
     expect(first.snapshot().wind).toBe(second.snapshot().wind);
     expect(first.snapshot().surface).not.toEqual(other.snapshot().surface);
+  });
+
+  it("pajzzsal és páncéllal is bitre azonos a két kliens, és a védett játékos kevesebbet veszít", () => {
+    const log = buildLog();
+    const defended = computeStats({ shield: 3, armor: 3 });
+    const a = new HeadlessMatch(setup, [BASE_STATS, defended]);
+    const b = new HeadlessMatch(setup, [BASE_STATS, defended]);
+    const plain = new HeadlessMatch(setup);
+    a.receive(log);
+    b.receive(log);
+    plain.receive(log);
+
+    expect(a.snapshot()).toEqual(b.snapshot());
+    const total = (m: HeadlessMatch) => {
+      const unit = m.snapshot().tanks[1]!;
+      return unit.hp + unit.shield + unit.armor;
+    };
+    expect(total(a)).toBeGreaterThan(total(plain));
   });
 
   it("nem soron lévő játékos eseményét mindkét kliens ugyanúgy eldobja", () => {

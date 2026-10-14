@@ -11,9 +11,9 @@ Hosszú távú cél: sci-fi, Galaxy Tactics-hoz hasonló látvány (több karakt
 
 ## Döntések
 
-- **Védelmi modell** (M1-ben véglegesítendő): az erőtér pajzs először nyeli el a sebzést; a fizikai páncél a HP-t érő sebzést százalékosan csökkenti. A pontos sorrendet egyetlen tiszta függvény rögzíti, tesztekkel.
-- A meglévő „páncél” fejlesztés az új `physicalArmor`-ral összevonandó, nem mellé kerül.
-- A pajzsregeneráció (kezdeti érték: a maximum 20%-a körönként) konfigurálható és fejleszthető.
+- **Védelmi modell**: három réteg kopik sorban: erőtér pajzs → fizikai páncélpontok → HP, 1:1 arányban. A pajzs körönként visszatöltődik, a páncél nem. A sorrendet egyetlen tiszta függvény rögzíti, tesztekkel.
+- A meglévő „páncél” fejlesztés (`armor`) a páncélpontokat adja; az azonosító megmarad, így a mentett szintek érvényesek.
+- A pajzsregeneráció (kezdeti érték: a maximum 20%-a körönként, `shieldRegen`) a statokban konfigurálható; külön fejlesztés még nincs rá. Ha az egységet a két köre között találat érte, abban a körben nem töltődik.
 - A T röppálya-előnézet meccsenként és játékosonként egyszer használható; használat után a HUD-on letiltott.
 
 ## Milestone-ok
@@ -34,11 +34,13 @@ Hosszú távú cél: sci-fi, Galaxy Tactics-hoz hasonló látvány (több karakt
 
 ### M1 – Védelmi modell
 
-- [ ] Sebzésfüggvény (pajzs, páncél) tesztekkel
-- [ ] Pajzsregeneráció a turn managerben
-- [ ] Meglévő páncél-fejlesztés összevonása
-- [ ] HUD: pajzs- és HP-sáv, letiltott T gomb használat után
-- [ ] Profil- és snapshot-migráció verziószámmal
+- [x] Sebzésfüggvény (pajzs, páncél) tesztekkel
+- [x] Pajzsregeneráció a turn managerben (a `beginTurn`-ben, a Game és a visszajátszási teszt is ugyanazt hívja)
+- [x] Meglévő páncél-fejlesztés összevonása (az `armor` azonosító marad, mostantól fogyó páncélpont; új `shield` fejlesztés)
+- [x] HUD és tank fölötti kijelzés: külön HP-, pajzs- és páncélcsík (csak ha van), jelmagyarázat, letiltott T gomb használat után
+- [x] Találat utáni kör: nincs pajzsvisszatöltés
+- [x] Profil- és snapshot-migráció verziószámmal (`STORAGE_VERSION`)
+- [ ] Értékek hangolása játékpróbával (pajzs/páncél +20 szintenként, 20% regeneráció); döntés az alap pajzsról/páncélról (most 0)
 
 ### M2 – Egységmodell
 

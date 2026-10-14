@@ -26,6 +26,7 @@ import {
   explosionDamage,
   isAlive,
   moveTank,
+  regenTankShield,
   settleTank,
   tankContains,
   type Tank,
@@ -274,6 +275,7 @@ export class Game {
 
   private beginTurn(): void {
     const tank = this.current;
+    regenTankShield(tank);
     tank.moveLeft = tank.stats.moveBudget;
     this.previewActive = false;
     // Új szél minden körben.
@@ -294,6 +296,10 @@ export class Game {
         id: t.id,
         hp: t.hp,
         maxHp: t.stats.maxHp,
+        shield: t.shield,
+        maxShield: t.stats.maxEnergyShield,
+        armor: t.armor,
+        maxArmor: t.stats.maxArmor,
         moveLeft: t.moveLeft,
         color: t.color,
       })),
@@ -455,12 +461,12 @@ export class Game {
     this.terrain?.carve(x, y, radius);
     this.particles.spawnExplosion(x, y, radius);
     this.audio?.play("explosion", { rate: 0.9 + Math.random() * 0.2 });
-    // XP: az ellenfélnek okozott sérülés (1 HP = 1 XP).
+    // XP: az ellenfélnek okozott sérülés (1 HP, pajzs- vagy páncélpont = 1 XP).
     let dealt = 0;
     for (const t of this.tanks) {
-      const before = t.hp;
+      const before = t.hp + t.shield + t.armor;
       applyDamage(t, explosionDamage(t, x, y, radius, shooter.stats.damage));
-      if (t !== shooter) dealt += before - t.hp;
+      if (t !== shooter) dealt += before - (t.hp + t.shield + t.armor);
     }
     this.award(shooter.id, dealt);
     this.matchStats = recordDamage(this.matchStats, shooter.id, dealt);
@@ -533,6 +539,13 @@ export class Game {
     g.stroke({ width: 1.5, color: this.theme.hud.previewLine, alpha: 0.18 });
   }
 
+  /** Vékony (3 px) csík a tank fölött; a háttér a hiányzó részt jelzi. */
+  private drawStripe(x: number, y: number, fraction: number, color: number): void {
+    const filled = 28 * Math.min(1, Math.max(0, fraction));
+    this.tanksGfx.rect(x - 14, y, 28, 3).fill(this.theme.hud.hpBack);
+    if (filled > 0) this.tanksGfx.rect(x - 14, y, filled, 3).fill(color);
+  }
+
   private draw(dt: number): void {
     const aiming = this.turns.phase === "aiming";
     const aimAngle = useGameStore.getState().angle;
@@ -556,10 +569,20 @@ export class Game {
     this.tanksGfx.clear();
     for (const t of this.tanks) {
       if (!isAlive(t)) continue;
-      this.tanksGfx.rect(t.x - 14, t.y - 28, 28, 4).fill(this.theme.hud.hpBack);
-      this.tanksGfx.rect(t.x - 14, t.y - 28, (28 * t.hp) / t.stats.maxHp, 4).fill(this.theme.hud.hpFill);
+      // Egymás feletti vékony csíkok: HP, pajzs, páncél (a pajzs és a páncél csak ha van).
+      this.drawStripe(t.x, t.y - 28, t.hp / t.stats.maxHp, this.theme.hud.hpFill);
+      let top = t.y - 28;
+      if (t.stats.maxEnergyShield > 0) {
+        top -= 4;
+        this.drawStripe(t.x, top, t.shield / t.stats.maxEnergyShield, this.theme.hud.shieldFill);
+      }
+      if (t.stats.maxArmor > 0) {
+        top -= 4;
+        this.drawStripe(t.x, top, t.armor / t.stats.maxArmor, this.theme.hud.armorFill);
+      }
       if (t.id === this.turns.current && this.turns.phase === "aiming") {
-        this.tanksGfx.poly([t.x - 4, t.y - 40, t.x + 4, t.y - 40, t.x, t.y - 34]).fill(this.theme.hud.turnMarker);
+        const my = top - 8;
+        this.tanksGfx.poly([t.x - 4, my, t.x + 4, my, t.x, my + 6]).fill(this.theme.hud.turnMarker);
       }
     }
 
