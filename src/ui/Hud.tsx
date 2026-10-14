@@ -1,11 +1,13 @@
 import { useEffect, type CSSProperties } from "react";
 import { MAX_ANGLE, MIN_ANGLE, MIN_POWER, useGameStore } from "@/game/state/gameStore";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
+import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
 
 const toCss = (color?: number) => (color === undefined ? "#ffffff" : `#${color.toString(16).padStart(6, "0")}`);
 
 export function Hud() {
+  const t = useT();
   const {
     angle,
     power,
@@ -93,17 +95,21 @@ export function Hud() {
         ))}
       </div>
       <div>
-        Soron: <strong style={{ color: toCss(me?.color) }}>{currentId}</strong> | Mozgás: {me?.moveLeft ?? 0}px | Szél:{" "}
-        {wind}
+        {t("hud.turn")} <strong style={{ color: toCss(me?.color) }}>{currentId}</strong> |{" "}
+        {t("hud.move", { value: me?.moveLeft ?? 0 })} | {t("hud.wind")} {wind}
       </div>
       {online && (
         <div role={multiplayerError ? "alert" : "status"}>
           {multiplayerError ??
-            (phase === "flying" ? "Lövedék útban" : canControl ? "Te következel" : `${currentId} következik`)}
+            (phase === "flying"
+              ? t("hud.shotInFlight")
+              : canControl
+                ? t("hud.yourTurn")
+                : t("hud.opponentTurn", { id: currentId }))}
         </div>
       )}
       <label>
-        Szög: {angle}°
+        {t("hud.angle", { value: angle })}
         <input
           type="range"
           min={MIN_ANGLE}
@@ -115,7 +121,7 @@ export function Hud() {
       </label>
       <br />
       <label>
-        Erő: {power}
+        {t("hud.power", { value: power })}
         <input
           type="range"
           min={MIN_POWER}
@@ -133,12 +139,12 @@ export function Hud() {
         ▶
       </button>
       <button disabled={locked} onClick={() => gameRef.current?.fire()}>
-        Tűz!
+        {t("hud.fire")}
       </button>
       <button disabled={locked || !previewAvailable} onClick={() => gameRef.current?.requestPreview()}>
-        {previewActive ? "Röppálya (aktív)" : previewAvailable ? "Röppálya (T, 1x/meccs)" : "Röppálya (elhasználva)"}
+        {previewActive ? t("hud.previewActive") : previewAvailable ? t("hud.previewAvailable") : t("hud.previewUsed")}
       </button>
-      <button onClick={toggleMuted}>Hang: {muted ? "ki" : "be"} (M)</button>
+      <button onClick={toggleMuted}>{t("hud.sound", { state: muted ? t("hud.soundOff") : t("hud.soundOn") })}</button>
     </div>
   );
 }

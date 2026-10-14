@@ -17,6 +17,15 @@ describe("MainMenu", () => {
     useMultiplayerStore.getState().leave();
   });
 
+  it("a nyelvváltó angolra állítja a menüt, majd vissza magyarra", () => {
+    render(<MainMenu />);
+    fireEvent.click(screen.getByRole("button", { name: "English" }));
+    expect(screen.getByRole("button", { name: "Start game" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Play online" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Magyar" }));
+    expect(screen.getByRole("button", { name: "Játék indítása" })).toBeInTheDocument();
+  });
+
   it("az online játék gomb megnyitja a szobalobbyt", () => {
     render(<MainMenu />);
     fireEvent.click(screen.getByRole("button", { name: "Online játék" }));

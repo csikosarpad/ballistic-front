@@ -1,10 +1,12 @@
 import { useGameStore } from "@/game/state/gameStore";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
+import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
 import { Shop } from "./Shop";
 
 /** Meccs végén: győztes, statisztika, bolt és továbblépés. */
 export function ResultScreen() {
+  const t = useT();
   const { winner, matchStats, setScreen } = useGameStore();
   const credentials = useMultiplayerStore((state) => state.credentials);
   const session = useMultiplayerStore((state) => state.session);
@@ -15,14 +17,14 @@ export function ResultScreen() {
   return (
     <div className="overlay">
       <div className="panel">
-        <h2 className="winner">{winner ? `${winner} nyert!` : "Döntetlen"}</h2>
+        <h2 className="winner">{winner ? t("result.wins", { name: winner }) : t("result.draw")}</h2>
         <table className="stats">
           <thead>
             <tr>
-              <th>Játékos</th>
-              <th>Lövés</th>
-              <th>Sebzés</th>
-              <th>XP</th>
+              <th>{t("result.player")}</th>
+              <th>{t("result.shots")}</th>
+              <th>{t("result.damage")}</th>
+              <th>{t("result.xp")}</th>
             </tr>
           </thead>
           <tbody>
@@ -37,7 +39,7 @@ export function ResultScreen() {
           </tbody>
         </table>
         {onlineMatch ? <Shop editablePlayerId={credentials.playerId} disabled={!matchFinished} /> : <Shop />}
-        {onlineMatch && !matchFinished && <p role="status">A meccs lezárása és az eredmény szinkronizálása…</p>}
+        {onlineMatch && !matchFinished && <p role="status">{t("result.syncing")}</p>}
         {multiplayerError && onlineMatch && (
           <p className="lobby-error" role="alert">
             {multiplayerError}
@@ -46,7 +48,7 @@ export function ResultScreen() {
         <div style={{ marginTop: 12 }}>
           {!onlineMatch ? (
             <button className="btn" onClick={() => gameRef.current?.restart()}>
-              Visszavágó
+              {t("result.rematch")}
             </button>
           ) : credentials.playerId === "P1" ? (
             <button
@@ -54,10 +56,10 @@ export function ResultScreen() {
               disabled={!matchFinished}
               onClick={() => gameRef.current?.requestMultiplayerRematch()}
             >
-              Visszavágó
+              {t("result.rematch")}
             </button>
           ) : (
-            <p role="status">Várakozás a szoba létrehozójára a visszavágóhoz.</p>
+            <p role="status">{t("result.waitingRematch")}</p>
           )}
           <button
             className="btn secondary"
@@ -66,7 +68,7 @@ export function ResultScreen() {
               setScreen("menu");
             }}
           >
-            Főmenü
+            {t("result.mainMenu")}
           </button>
         </div>
       </div>

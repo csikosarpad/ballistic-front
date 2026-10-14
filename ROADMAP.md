@@ -23,7 +23,9 @@ Hosszú távú cél: sci-fi, Galaxy Tactics-hoz hasonló látvány (több karakt
 - [x] Szerver mappák átnevezése (`api/`, `lib/`), README-k frissítése
 - [x] Két klienses szinkron- és visszajátszási tesztek (`multiplayerSync.test.ts`, `replay.test.ts`)
 - [x] Prettier konfiguráció (`.prettierrc.json`); a meglévő fájlok egységesítése még hátravan (`pnpm fmt`)
-- [ ] Éles telepítés és smoke test új mappanevekkel
+- [x] Éles telepítés és smoke test új mappanevekkel
+- [x] Fejlesztések életszerűbb elnevezése és méterben megadott értékei
+- [x] Többnyelvűség (magyar/angol), `src/i18n`
 
 ### M1 – Védelmi modell
 

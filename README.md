@@ -22,7 +22,7 @@ Online mód (v1): szobakódos lobby, két kliens közös seed alapján futtatott
 
 ## Irányítás
 
-- Főmenü: Játék indítása, Online játék, Haladás törlése (megerősítéssel)
+- Főmenü: Játék indítása, Online játék, Haladás törlése (megerősítéssel), nyelvválasztó (Magyar / English)
 - ◀ / ▶ nyilak: mozgás (körönként korlátozott távolság)
 - ▲ / ▼ nyilak: lövés ereje (±10, Shift: ±50)
 - Ctrl + ◀ / ▶: cső szöge (±1°, Shift: ±5°; ◀ a bal oldali irány felé forgat)
@@ -57,7 +57,8 @@ server/                 # PHP/MySQL multiplayer backend (nem része a Vite build
 └── schema.sql
 src/
 ├── main.tsx, App.tsx
-├── ui/                 # React: GameCanvas, HUD, MainMenu, MultiplayerLobby, ResultScreen, Shop, ui.css
+├── ui/                 # React: GameCanvas, HUD, MainMenu, MultiplayerLobby, ResultScreen, Shop, LanguageSwitch, ui.css
+├── i18n/               # többnyelvűség (hu/en): messages.hu.ts (forrásnyelv), messages.en.ts, t() / useT()
 ├── test/               # Vitest setup
 └── game/               # Reacttől független játékmag
     ├── engine/         # Game (Pixi app, fix időlépéses loop, skálázás), AudioManager, FxRenderer
@@ -80,6 +81,14 @@ Elv: a nagy gyakoriságú adat (pozíciók) az engine-ben él, a Zustand store c
 A robbanás- és füstsprite-ok a [Kenney Particle Pack](https://kenney.nl/assets/particle-pack) csomagból valók (CC0), a licenc a `src/game/assets/fx/License.txt` fájlban van.
 
 A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalról valók, Creative Commons 0 (CC0) licenc szerinti szűréssel letöltve, így attribúció nem kötelező. Az egyes fájlok eredeti oldalát és szerzőjét nem rögzítettem; ha később publikálod a játékot, érdemes a forrásoldalakat egyenként is megerősíteni.
+
+## Nyelvek
+
+A felület magyarul és angolul érhető el. Az első indításkor a böngésző nyelve dönt (magyar böngészőnél magyar, egyébként angol), a választás a főmenüben módosítható, és `localStorage`-ban (`ballistic-front:locale`) marad meg.
+
+Új szöveg hozzáadása: vedd fel a kulcsot a `src/i18n/messages.hu.ts` fájlba (ez a forrásnyelv), majd az `messages.en.ts`-be is; a TypeScript és az `i18n.test.ts` jelzi, ha hiányzik vagy a `{helyőrzők}` eltérnek. Komponensben `useT()`, Reacton kívül `t()` használható. Új fejlesztésnél a név és a leírás kulcsa `upgrade.<id>.name` és `upgrade.<id>.desc`.
+
+Mértékegység: a játékban 1 px = 1 méter, a hosszok (mozgás, robbanási sugár) méterben jelennek meg. A szerver hibaüzenetei egyelőre angolul érkeznek.
 
 ## Ütemterv
 

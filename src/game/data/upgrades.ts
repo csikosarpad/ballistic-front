@@ -1,4 +1,4 @@
-/** A tank játékmenetet befolyásoló értékei; az upgrade-ek ezeket módosítják. */
+/** A tank játékmenetet befolyásoló értékei; az upgrade-ek ezeket módosítják. A UI-ban 1 px = 1 méter. */
 export interface TankStats {
   maxHp: number;
   /** Sebzésszorzó. */
@@ -20,8 +20,7 @@ export const BASE_STATS: TankStats = {
 
 export interface UpgradeDef {
   id: string;
-  name: string;
-  description: string;
+  /** A megjelenített szöveg kulcsai: `upgrade.<id>.name` és `upgrade.<id>.desc` (lásd src/i18n). */
   stat: keyof TankStats;
   /** Szintenként hozzáadott érték. */
   perLevel: number;
@@ -35,8 +34,6 @@ export interface UpgradeDef {
 export const UPGRADES: readonly UpgradeDef[] = [
   {
     id: "armor",
-    name: "Páncél",
-    description: "+20 max HP",
     stat: "maxHp",
     perLevel: 20,
     maxLevel: 5,
@@ -45,8 +42,6 @@ export const UPGRADES: readonly UpgradeDef[] = [
   },
   {
     id: "warhead",
-    name: "Robbanófej",
-    description: "+15% sebzés",
     stat: "damage",
     perLevel: 0.15,
     maxLevel: 5,
@@ -55,8 +50,6 @@ export const UPGRADES: readonly UpgradeDef[] = [
   },
   {
     id: "blast",
-    name: "Nagyobb kráter",
-    description: "+4 px robbanási sugár",
     stat: "blastRadius",
     perLevel: 4,
     maxLevel: 5,
@@ -65,8 +58,6 @@ export const UPGRADES: readonly UpgradeDef[] = [
   },
   {
     id: "barrel",
-    name: "Hosszabb cső",
-    description: "+100 max erő",
     stat: "maxPower",
     perLevel: 100,
     maxLevel: 3,
@@ -75,8 +66,6 @@ export const UPGRADES: readonly UpgradeDef[] = [
   },
   {
     id: "engine",
-    name: "Motor",
-    description: "+10 px mozgás/kör",
     stat: "moveBudget",
     perLevel: 10,
     maxLevel: 5,
