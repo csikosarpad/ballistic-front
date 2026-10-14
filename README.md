@@ -18,9 +18,11 @@ Windows, Node.js 24, Vite, React 18, TypeScript, PixiJS 8 (WebGL), Zustand, Vite
 
 Játszható két játékos hot-seat módban: körökre osztott lövés, szeles ballisztika, rombolható terep, robbanás- és füstrészecskék, XP és fejlesztési bolt a meccsek között. Az XP és a fejlesztések `localStorage`-ban maradnak meg. A pálya fix 1280×720 logikai méretű, az ablakhoz skálázódik.
 
+Online mód (v1): szobakódos lobby, két kliens közös seed alapján futtatott determinisztikus szimulációval, a mozgás- és lövésesemények HTTP-pollinggal szinkronizálódnak egy PHP/MySQL backenden. Meccs után fejlesztés és host által indított visszavágó. A backend részletei, helyi indítás és telepítés: [server/README.md](server/README.md). Két klienses szinkrontesztek és a teljes telepítési próba még hátravannak.
+
 ## Irányítás
 
-- Főmenü: Játék indítása, Haladás törlése (megerősítéssel)
+- Főmenü: Játék indítása, Online játék, Haladás törlése (megerősítéssel)
 - ◀ / ▶ nyilak: mozgás (körönként korlátozott távolság)
 - ▲ / ▼ nyilak: lövés ereje (±10, Shift: ±50)
 - Ctrl + ◀ / ▶: cső szöge (±1°, Shift: ±5°; ◀ a bal oldali irány felé forgat)
@@ -43,23 +45,33 @@ pnpm fmt
 
 > PowerShellben, ha a `pnpm` szkript le van tiltva, használd a `pnpm.cmd`-t.
 
+Online módhoz a PHP API is kell (`php -S 127.0.0.1:8000 -t server/api server/api/index.php`); a Vite a `/api` kéréseket ide proxyzza. Részletek: [server/README.md](server/README.md).
+
 ## Struktúra
 
 ```
+server/                 # PHP/MySQL multiplayer backend (nem része a Vite buildnek)
+├── api/                # HTTP belépési pont (index.php, .htaccess) → deploy: public_html/ballistic-front/api/
+├── lib/                # szerveroldali PHP kód, HTTP-ről tiltva → deploy: public_html/ballistic-front/lib/
+├── config.example.php  # konfigurációs minta (a config.php nincs verziókezelve)
+└── schema.sql
 src/
 ├── main.tsx, App.tsx
-├── ui/                 # React: GameCanvas, HUD, MainMenu, ResultScreen, Shop, ui.css
+├── ui/                 # React: GameCanvas, HUD, MainMenu, MultiplayerLobby, ResultScreen, Shop, ui.css
 ├── test/               # Vitest setup
 └── game/               # Reacttől független játékmag
-    ├── engine/         # Game (Pixi app, fix időlépéses loop, skálázás)
+    ├── engine/         # Game (Pixi app, fix időlépéses loop, skálázás), AudioManager, FxRenderer
     ├── assets/         # SVG tank sprite-ok, fx/ (Kenney Particle Pack PNG-k), audio/ (lövés, robbanás, tankmozgás)
     ├── entities/       # tank
-    ├── systems/        # turnManager, upgrades, matchStats, barrelAnimation, particles, profileStorage
+    ├── multiplayer/    # API kliens és protokoll (HTTP polling)
+    ├── systems/        # turnManager, upgrades, matchStats, barrelAnimation, particles, profileStorage, seededRandom
     ├── terrain/        # heightmap, TerrainMask (ütközés), Terrain (RenderTexture)
     ├── physics/        # ballisztika
-    ├── state/          # Zustand store (HUD-nézet)
+    ├── state/          # Zustand store (HUD-nézet, multiplayer lobby)
     └── data/           # adatvezérelt definíciók (upgrade-ek)
 ```
+
+A frontend (`src/`) és a backend (`server/`) szétválasztott: a Vite és a `tsc` csak a `src/` mappát látja, a szerver mappák átnevezése nem érinti a buildet. A frontend az API-t kizárólag a `VITE_MULTIPLAYER_API_URL` URL-en éri el (éles: `/ballistic-front/api`, lásd `.env.production`), ami az `server/api/` telepítési helyének felel meg.
 
 Elv: a nagy gyakoriságú adat (pozíciók) az engine-ben él, a Zustand store csak a HUD-hoz szükséges állapotot tartja.
 
