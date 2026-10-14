@@ -125,6 +125,11 @@ export function Hud() {
           </div>
         ))}
       </div>
+      <ul className="hud-legend" aria-label={t("hud.legend")}>
+        <li className="legend-hp">{t("hud.legend.hp")}</li>
+        {tanks.some((u) => u.maxShield > 0) && <li className="legend-shield">{t("hud.legend.shield")}</li>}
+        {tanks.some((u) => u.maxArmor > 0) && <li className="legend-armor">{t("hud.legend.armor")}</li>}
+      </ul>
       <div>
         {t("hud.turn")} <strong style={{ color: toCss(me?.color) }}>{currentId}</strong> |{" "}
         {t("hud.move", { value: me?.moveLeft ?? 0 })} | {t("hud.wind")} {wind}

@@ -60,12 +60,24 @@ describe("tank", () => {
     applyDamage(t, 40);
     expect(t).toMatchObject({ shield: 0, armor: 0 });
     regenTankShield(t);
+    regenTankShield(t);
     expect(t).toMatchObject({ shield: 4, armor: 0 });
+  });
+
+  it("találat után a következő körben nincs pajzsvisszatöltés, utána újra van", () => {
+    const t = createTank("a", 50, 0, 45, computeStats({ shield: 1 }));
+    applyDamage(t, 10);
+    regenTankShield(t);
+    expect(t.shield).toBe(10);
+    regenTankShield(t);
+    expect(t.shield).toBe(14);
   });
 
   it("a pajzs körönként a maximum 20%-ával töltődik vissza", () => {
     const t = createTank("a", 50, 0, 45, computeStats({ shield: 5 }));
     applyDamage(t, 100);
+    expect(t.shield).toBe(0);
+    regenTankShield(t);
     expect(t.shield).toBe(0);
     regenTankShield(t);
     expect(t.shield).toBe(20);

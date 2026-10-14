@@ -31,7 +31,7 @@ Online mód (v1): szobakódos lobby, két kliens közös seed alapján futtatott
 - Szög és erő csúszók a HUD-on
 - Szóköz: tűz
 - Meccs végén: eredményképernyő statisztikával, bolt (XP-ből fejlesztés), Visszavágó és Főmenü
-- Védelem: három réteg, ebben a sorrendben kopnak: erőtér pajzs → fizikai páncél → HP (1:1 arányban, `src/game/systems/damage.ts`). A pajzs a soron lévő egységnél körönként a maximum 20%-ával töltődik vissza, a páncél nem. A HUD és a tank fölötti kijelzés egymás feletti vékony csíkokat mutat: HP, pajzs, páncél; a pajzs és a páncél csíkja csak akkor látszik, ha az egységnek van (alapból nincs, a boltban vehető: Erőtér pajzs, Páncél). Az XP a pajzsnak, a páncélnak és a HP-nak okozott sebzés után is jár.
+- Védelem: három réteg, ebben a sorrendben kopnak: erőtér pajzs → fizikai páncél → HP (1:1 arányban, `src/game/systems/damage.ts`). A pajzs a soron lévő egységnél körönként a maximum 20%-ával töltődik vissza, kivéve ha az egységet a két köre között találat érte (akkor abban a körben nem). A páncél nem töltődik vissza. A HUD és a tank fölötti kijelzés egymás feletti vékony csíkokat mutat: HP, pajzs, páncél; a pajzs és a páncél csíkja csak akkor látszik, ha az egységnek van (alapból nincs, a boltban vehető: Erőtér pajzs, Páncél). Az XP a pajzsnak, a páncélnak és a HP-nak okozott sebzés után is jár.
 - Mentés: az XP és a szintek verziózott borítékban (`ballistic-front:profiles`, `version: 2`) maradnak meg; a régi `…:profiles:v1` mentést a játék első betöltéskor átveszi. Online meccsen mindkét kliensnek ugyanazt a buildet kell futtatnia.
 
 ## Parancsok

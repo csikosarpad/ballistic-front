@@ -26,6 +26,10 @@ export const hu = {
 
   "hud.turn": "Soron:",
   "hud.move": "Mozgás: {value} m",
+  "hud.legend": "Jelmagyarázat",
+  "hud.legend.hp": "Felső csík: életerő (HP)",
+  "hud.legend.shield": "Kék csík: erőtér pajzs, körönként töltődik",
+  "hud.legend.armor": "Narancs csík: páncél, kopik, nem töltődik",
   "hud.shield": "Pajzs",
   "hud.armor": "Páncél",
   "hud.wind": "Szél:",

@@ -53,6 +53,39 @@
   background: var(--bf-armor);
 }
 
+.hud-legend {
+  display: grid;
+  gap: 1px;
+  margin: 0 0 4px;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  color: var(--bf-text);
+  opacity: 0.8;
+}
+
+.hud-legend li::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 4px;
+  margin-right: 6px;
+  vertical-align: middle;
+  border-radius: 2px;
+}
+
+.legend-hp::before {
+  background: var(--bf-hp);
+}
+
+.legend-shield::before {
+  background: var(--bf-shield);
+}
+
+.legend-armor::before {
+  background: var(--bf-armor);
+}
+
 /* A HUD a soron lévő játékos színét követi (--accent). */
 .hud {
   --accent: var(--bf-text);

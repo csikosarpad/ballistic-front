@@ -27,6 +27,10 @@ export const en: Record<MessageKey, string> = {
 
   "hud.turn": "Turn:",
   "hud.move": "Movement: {value} m",
+  "hud.legend": "Legend",
+  "hud.legend.hp": "Top stripe: health (HP)",
+  "hud.legend.shield": "Blue stripe: energy shield, recharges each turn",
+  "hud.legend.armor": "Orange stripe: armor, wears down, no recharge",
   "hud.shield": "Shield",
   "hud.armor": "Armor",
   "hud.wind": "Wind:",
