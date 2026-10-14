@@ -62,7 +62,7 @@ describe("Hud billentyűk", () => {
     expect(screen.getByRole("button", { name: /elhasználva/i })).toBeDisabled();
   });
 
-  it("a HUD mutatja a pajzsot és a páncélt, ha van", () => {
+  it("a HUD külön csíkot mutat a HP-nak, a pajzsnak és a páncélnak, ha vannak", () => {
     act(() =>
       useGameStore.setState({
         tanks: [
@@ -71,8 +71,14 @@ describe("Hud billentyűk", () => {
         ],
       }),
     );
-    expect(screen.getByText(/P1: 80\/100 HP · Pajzs 12\/40 · Páncél 15%/)).toBeInTheDocument();
-    expect(screen.queryByText(/P2: 100\/100 HP ·/)).not.toBeInTheDocument();
+    expect(screen.getByText("P1: 80/100 HP")).toBeInTheDocument();
+    const meters = screen.getAllByRole("meter");
+    // P1: HP + pajzs + páncél, P2: csak HP.
+    expect(meters).toHaveLength(4);
+    const shield = screen.getByRole("meter", { name: "Pajzs" });
+    expect(shield).toHaveAttribute("aria-valuenow", "12");
+    expect(shield).toHaveAttribute("aria-valuemax", "40");
+    expect(screen.getByRole("meter", { name: "Páncél" })).toHaveAttribute("aria-valuetext", "15%");
   });
 
   it("az M billentyű némítást kapcsol, lövés közben is", () => {

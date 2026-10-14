@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAX_ARMOR, regenShield, resolveDamage } from "./damage";
+import { armorFraction, MAX_ARMOR, regenShield, resolveDamage } from "./damage";
 
 describe("resolveDamage", () => {
   it("védelem nélkül a teljes sebzés a HP-ból vonódik le", () => {
@@ -32,6 +32,15 @@ describe("resolveDamage", () => {
     const defense = { hp: 100, shield: 10, armor: 0.1 };
     resolveDamage(defense, 50);
     expect(defense).toEqual({ hp: 100, shield: 10, armor: 0.1 });
+  });
+});
+
+describe("armorFraction", () => {
+  it("a páncélt a korláthoz viszonyítja és 0–1 közt tartja", () => {
+    expect(armorFraction(0)).toBe(0);
+    expect(armorFraction(MAX_ARMOR / 2)).toBeCloseTo(0.5);
+    expect(armorFraction(5)).toBe(1);
+    expect(armorFraction(-1)).toBe(0);
   });
 });
 

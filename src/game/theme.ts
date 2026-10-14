@@ -6,7 +6,14 @@ export interface Theme {
   terrain: { fill: number; grass: number; scorch: number };
   /** Játékosonkénti színek, a csapatindex szerint. */
   players: readonly number[];
-  hud: { hpBack: number; hpFill: number; shieldFill: number; turnMarker: number; previewLine: number };
+  hud: {
+    hpBack: number;
+    hpFill: number;
+    shieldFill: number;
+    armorFill: number;
+    turnMarker: number;
+    previewLine: number;
+  };
   shell: { core: number; glow: number };
   fx: {
     shockwave: number;
@@ -23,7 +30,14 @@ export const DEFAULT_THEME: Theme = {
   sky: 0x16224a,
   terrain: { fill: 0x6b4a2b, grass: 0x3d7a3a, scorch: 0x14100a },
   players: [0x4da3ff, 0xff6b5a],
-  hud: { hpBack: 0x222222, hpFill: 0x55dd66, shieldFill: 0x4dd0ff, turnMarker: 0xffffff, previewLine: 0xffffff },
+  hud: {
+    hpBack: 0x222222,
+    hpFill: 0x55dd66,
+    shieldFill: 0x4dd0ff,
+    armorFill: 0xffb347,
+    turnMarker: 0xffffff,
+    previewLine: 0xffffff,
+  },
   shell: { core: 0xfff2c0, glow: 0xffd070 },
   fx: {
     shockwave: 0xffb870,

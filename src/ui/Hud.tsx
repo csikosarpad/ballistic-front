@@ -1,10 +1,40 @@
 import { useEffect, type CSSProperties } from "react";
 import { MAX_ANGLE, MIN_ANGLE, MIN_POWER, useGameStore } from "@/game/state/gameStore";
+import { armorFraction } from "@/game/systems/damage";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
 
 const toCss = (color?: number) => (color === undefined ? "#ffffff" : `#${color.toString(16).padStart(6, "0")}`);
+
+interface StripeProps {
+  kind: "hp" | "shield" | "armor";
+  label: string;
+  value: number;
+  max: number;
+  /** A képernyőolvasónak szánt érték, ha eltér a számtól (pl. a páncél százaléka). */
+  text?: string;
+}
+
+/** Vékony, jelölt csík; a szám a címkében és a tooltipben van, nem a rajzolt sávban. */
+function Stripe({ kind, label, value, max, text }: StripeProps) {
+  const percent = max > 0 ? Math.min(100, Math.max(0, (value / max) * 100)) : 0;
+  const shown = text ?? `${value}/${max}`;
+  return (
+    <div
+      className={`stripe stripe-${kind}`}
+      role="meter"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={max}
+      aria-valuenow={value}
+      aria-valuetext={shown}
+      title={`${label}: ${shown}`}
+    >
+      <div className="stripe-fill" style={{ width: `${percent}%` }} />
+    </div>
+  );
+}
 
 export function Hud() {
   const t = useT();
@@ -84,16 +114,26 @@ export function Hud() {
         font: "14px sans-serif",
       }}
     >
-      <div>
+      <div className="hud-units">
         {tanks.map((unit) => (
-          <span
-            key={unit.id}
-            style={{ marginRight: 12, color: toCss(unit.color), fontWeight: unit.id === currentId ? "bold" : "normal" }}
-          >
-            {unit.id}: {unit.hp}/{unit.maxHp} HP
-            {unit.maxShield > 0 && ` · ${t("hud.shield")} ${unit.shield}/${unit.maxShield}`}
-            {unit.armor > 0 && ` · ${t("hud.armor")} ${Math.round(unit.armor * 100)}%`}
-          </span>
+          <div key={unit.id} className="hud-unit" style={{ color: toCss(unit.color) }}>
+            <span style={{ fontWeight: unit.id === currentId ? "bold" : "normal" }}>
+              {unit.id}: {unit.hp}/{unit.maxHp} HP
+            </span>
+            <Stripe kind="hp" label="HP" value={unit.hp} max={unit.maxHp} />
+            {unit.maxShield > 0 && (
+              <Stripe kind="shield" label={t("hud.shield")} value={unit.shield} max={unit.maxShield} />
+            )}
+            {unit.armor > 0 && (
+              <Stripe
+                kind="armor"
+                label={t("hud.armor")}
+                value={Math.round(armorFraction(unit.armor) * 100)}
+                max={100}
+                text={`${Math.round(unit.armor * 100)}%`}
+              />
+            )}
+          </div>
         ))}
       </div>
       <div>

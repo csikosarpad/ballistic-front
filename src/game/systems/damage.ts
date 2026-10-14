@@ -29,6 +29,11 @@ export function resolveDamage(defense: Defense, damage: number): DamageResult {
   return { shield: defense.shield - absorbed, hp: Math.max(0, defense.hp - hpLoss) };
 }
 
+/** A páncél csíkjának töltöttsége (0–1): a páncél a korláthoz (MAX_ARMOR) képest. */
+export function armorFraction(armor: number): number {
+  return Math.min(MAX_ARMOR, Math.max(0, armor)) / MAX_ARMOR;
+}
+
 /** Körönkénti pajzsvisszatöltés: a maximum `fraction` része, a maximumig. */
 export function regenShield(shield: number, maxShield: number, fraction: number): number {
   if (maxShield <= 0) return 0;
