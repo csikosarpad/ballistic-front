@@ -61,6 +61,59 @@
   margin: 0 0 12px;
 }
 
+.multiplayer-panel {
+  width: min(420px, calc(100vw - 32px));
+  min-width: 0;
+}
+
+.lobby-field {
+  display: grid;
+  gap: 6px;
+  margin: 12px auto;
+  text-align: left;
+}
+
+.lobby-field input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #60729d;
+  border-radius: 4px;
+  background: #101a38;
+  color: #fff;
+  font: inherit;
+}
+
+.lobby-divider {
+  height: 1px;
+  margin: 16px 0;
+  background: #33406b;
+}
+
+.lobby-room {
+  margin: 20px 0;
+}
+
+.lobby-code-label {
+  margin-bottom: 4px;
+}
+
+.lobby-code {
+  display: block;
+  font-size: 32px;
+  letter-spacing: 4px;
+  color: #ffd34d;
+}
+
+.lobby-players span {
+  padding: 0 6px;
+  color: #aebbd7;
+}
+
+.lobby-error {
+  color: #ff8b82;
+}
+
 .btn {
   margin: 4px;
   padding: 8px 18px;

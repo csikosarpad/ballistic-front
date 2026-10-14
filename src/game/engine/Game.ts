@@ -4,6 +4,7 @@ import tankBarrelUrl from "../assets/tank-barrel.svg?url";
 import { kick, stepBarrel, type BarrelState } from "../systems/barrelAnimation";
 import { DEFAULT_WORLD, dashPolyline, launchVelocity, predictTrajectory, stepBody, type BallisticBody } from "../physics/ballistics";
 import { PreviewAllowance } from "../systems/previewAllowance";
+import { createSeededRandom, type MatchSetup } from "../systems/seededRandom";
 import { Terrain } from "../terrain/Terrain";
 import { ParticleSystem } from "../systems/particles";
 import { FxRenderer } from "./FxRenderer";
@@ -17,7 +18,9 @@ import {
 import { awardXp, buyUpgrade, computeStats, newProfile, type Profile } from "../systems/upgrades";
 import { newMatchStats, recordDamage, recordShot, recordXp, type MatchStats } from "../systems/matchStats";
 import { loadProfiles, saveProfiles } from "../systems/profileStorage";
-import { useGameStore } from "../state/gameStore";
+import { MAX_ANGLE, MIN_POWER, useGameStore } from "../state/gameStore";
+import { useMultiplayerStore } from "../state/multiplayerStore";
+import type { RoomEvent } from "../multiplayer/protocol";
 
 const FIXED_DT = 1 / 60;
 /** Fix logikai pályaméret; az ablak mérete csak a skálázást befolyásolja. */
@@ -60,6 +63,13 @@ export class Game {
   private matchStats: MatchStats = newMatchStats(["P1", "P2"]);
   private turns = new TurnManager([]);
   private nextStarter = Math.floor(Math.random() * 2);
+  private matchRandom = Math.random;
+  private multiplayer = false;
+  private matchProfiles: Record<string, Profile> | null = null;
+  private lastMultiplayerRevision = 0;
+  private pendingMultiplayerEvents: RoomEvent[] = [];
+  private pendingMultiplayerStart: { setup: MatchSetup; profiles: Record<string, Profile>; revision: number } | null = null;
+  private unsubscribeMultiplayer: (() => void) | null = null;
   private shell: BallisticBody | null = null;
   private shellAge = 0;
   private acc = 0;
@@ -92,7 +102,9 @@ export class Game {
     const backdrop = new Graphics().rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT).fill(0x16224a);
     this.app.stage.addChild(backdrop, this.terrain.sprite, this.previewGfx, this.tankLayer, this.tanksGfx, this.shellGfx, this.shellGlow, this.fx.layer);
     this.layout();
-    this.restart();
+    const pendingStart = this.pendingMultiplayerStart;
+    if (pendingStart) this.startMultiplayer(pendingStart.setup, pendingStart.profiles, pendingStart.revision);
+    else this.restart();
     this.app.renderer.on("resize", () => this.layout());
     this.app.ticker.add((t) => this.update(t.deltaMS / 1000));
   }
@@ -106,10 +118,12 @@ export class Game {
   }
 
   /** Új meccs: terep újragenerálása, tankok újraszórása. */
-  restart(): void {
+  restart(setup?: MatchSetup): void {
     if (!this.terrain) return;
     const width = WORLD_WIDTH;
-    this.terrain.build(WORLD_WIDTH, WORLD_HEIGHT, Math.floor(Math.random() * 1_000_000));
+    const matchSetup = setup ?? { seed: Math.floor(Math.random() * 1_000_000), starterIndex: this.nextStarter };
+    this.matchRandom = createSeededRandom(matchSetup.seed);
+    this.terrain.build(WORLD_WIDTH, WORLD_HEIGHT, matchSetup.seed);
     this.tanks = [
       createTank("P1", width * 0.12, 0x4da3ff, 45, this.statsFor("P1")),
       createTank("P2", width * 0.88, 0xff6b5a, 135, this.statsFor("P2")),
@@ -117,16 +131,46 @@ export class Game {
     this.tanks.forEach((t) => settleTank(t, this.terrain!.mask));
     this.buildTankViews();
     // Az első lövő meccsenként változik, hogy ne legyen fix kezdő előny.
-    this.turns = new TurnManager(this.tanks.map((t) => t.id), this.nextStarter);
-    this.nextStarter = (this.nextStarter + 1) % this.tanks.length;
+    const starterIndex = ((matchSetup.starterIndex % this.tanks.length) + this.tanks.length) % this.tanks.length;
+    this.turns = new TurnManager(this.tanks.map((t) => t.id), starterIndex);
+    this.nextStarter = (starterIndex + 1) % this.tanks.length;
     this.matchStats = newMatchStats(this.tanks.map((t) => t.id));
     this.previewAllowance.reset();
     this.shell = null;
     this.beginTurn();
   }
 
+  startMultiplayer(setup: MatchSetup, profiles: Record<string, Profile>, revision: number): void {
+    if (!this.terrain) {
+      this.pendingMultiplayerStart = { setup, profiles, revision };
+      return;
+    }
+    this.pendingMultiplayerStart = null;
+    this.multiplayer = true;
+    this.matchProfiles = profiles;
+    this.profiles = Object.fromEntries(Object.entries(profiles).map(([id, profile]) => [id, { xp: profile.xp, levels: { ...profile.levels } }]));
+    saveProfiles(this.profiles);
+    this.lastMultiplayerRevision = revision;
+    this.pendingMultiplayerEvents = [];
+    this.unsubscribeMultiplayer?.();
+    this.unsubscribeMultiplayer = useMultiplayerStore.subscribe((state) => this.receiveMultiplayerEvents(state.events));
+    this.restart(setup);
+    this.receiveMultiplayerEvents(useMultiplayerStore.getState().events);
+  }
+
+  startOffline(): void {
+    this.pendingMultiplayerStart = null;
+    this.unsubscribeMultiplayer?.();
+    this.unsubscribeMultiplayer = null;
+    this.multiplayer = false;
+    this.matchProfiles = null;
+    this.pendingMultiplayerEvents = [];
+    this.lastMultiplayerRevision = 0;
+    this.restart();
+  }
+
   private statsFor(id: string) {
-    return computeStats(this.profiles[id]!.levels);
+    return computeStats((this.matchProfiles?.[id] ?? this.profiles[id]!).levels);
   }
 
   /** Tankonként egy sprite-pár: a cső a test mögött forog a saját forgáspontja körü. */
@@ -163,11 +207,23 @@ export class Game {
   /** Fejlesztés vásárlása; csak meccsek között (játék végén) működik. */
   buy(playerId: string, upgradeId: string): void {
     if (this.turns.phase !== "gameOver") return;
+    if (this.multiplayer) {
+      if (useMultiplayerStore.getState().credentials?.playerId !== playerId) return;
+      void useMultiplayerStore.getState().publish("upgrade_purchased", { upgradeId });
+      return;
+    }
     const next = buyUpgrade(this.profiles[playerId]!, upgradeId);
     if (!next) return;
     this.profiles[playerId] = next;
     saveProfiles(this.profiles);
     this.syncStore();
+  }
+
+  requestMultiplayerRematch(): void {
+    const { credentials, session } = useMultiplayerStore.getState();
+    if (!this.multiplayer || this.turns.phase !== "gameOver" || credentials?.playerId !== "P1" || session?.status !== "finished") return;
+    const setup = { seed: Math.floor(Math.random() * 1_000_000), starterIndex: this.nextStarter };
+    void useMultiplayerStore.getState().publish("match_started", { setup, profiles: this.profiles });
   }
 
   private get current(): Tank {
@@ -179,7 +235,7 @@ export class Game {
     tank.moveLeft = tank.stats.moveBudget;
     this.previewActive = false;
     // Új szél minden körben.
-    const wind = Math.round((Math.random() - 0.5) * 120);
+    const wind = Math.round((this.matchRandom() - 0.5) * 120);
     useGameStore.getState().sync({ angle: tank.angle, power: tank.power, maxPower: tank.stats.maxPower, wind });
     this.syncStore();
   }
@@ -188,6 +244,9 @@ export class Game {
     useGameStore.getState().sync({
       phase: this.turns.phase,
       currentId: this.turns.current,
+      canControl:
+        (!this.multiplayer || useMultiplayerStore.getState().credentials?.playerId === this.turns.current) &&
+        this.pendingMultiplayerEvents.length === 0,
       winner: this.turns.winner,
       tanks: this.tanks.map((t) => ({ id: t.id, hp: t.hp, maxHp: t.stats.maxHp, moveLeft: t.moveLeft, color: t.color })),
       profiles: { ...this.profiles },
@@ -199,7 +258,7 @@ export class Game {
 
   /** Meccsenként és játékosonként egyszer: az aktuális kör végéig mutatja a várható röppályát. */
   requestPreview(): void {
-    if (this.turns.inputLocked || !this.previewAllowance.use(this.turns.current)) return;
+    if (this.turns.inputLocked || !this.canControlCurrentTurn() || !this.previewAllowance.use(this.turns.current)) return;
     this.previewActive = true;
     this.syncStore();
   }
@@ -207,6 +266,10 @@ export class Game {
   /** Mozgás a jelenlegi tankkal; zárolt bemenetnél nem csinál semmit. */
   move(dir: -1 | 1): void {
     if (this.turns.inputLocked || !this.terrain) return;
+    if (this.multiplayer) {
+      if (this.canControlCurrentTurn()) void useMultiplayerStore.getState().publish("move", { direction: dir });
+      return;
+    }
     if (moveTank(this.current, dir, this.terrain.mask)) {
       this.audio?.moveTick();
       this.syncStore();
@@ -215,11 +278,23 @@ export class Game {
 
   /** Lövés a store-ban beállított szöggel és erővel. */
   fire(): void {
-    if (!this.turns.fire()) return;
+    if (this.turns.inputLocked) return;
+    if (this.multiplayer) {
+      if (!this.canControlCurrentTurn()) return;
+      const { angle, power } = useGameStore.getState();
+      void useMultiplayerStore.getState().publish("fire", { angle, power });
+      return;
+    }
     const { angle, power } = useGameStore.getState();
+    this.launchShot(angle, power);
+  }
+
+  private launchShot(angle: number, power: number): void {
+    if (!this.turns.fire()) return;
     const tank = this.current;
     tank.angle = angle;
     tank.power = power;
+    useGameStore.getState().setAim(angle, power);
     this.matchStats = recordShot(this.matchStats, tank.id);
     const tip = barrelTip(tank);
     this.particles.spawnMuzzleFlash(tip.x, tip.y, angle);
@@ -229,6 +304,91 @@ export class Game {
     if (view) view.anim = kick(angle);
     this.shellAge = 0;
     this.syncStore();
+  }
+
+  private canControlCurrentTurn(): boolean {
+    return !this.multiplayer || useMultiplayerStore.getState().credentials?.playerId === this.turns.current;
+  }
+
+  private receiveMultiplayerEvents(events: RoomEvent[]): void {
+    if (!this.multiplayer) return;
+    for (const event of events) {
+      if (event.revision <= this.lastMultiplayerRevision) continue;
+      this.lastMultiplayerRevision = event.revision;
+      this.pendingMultiplayerEvents.push(event);
+    }
+    this.processPendingMultiplayerEvents();
+  }
+
+  private processPendingMultiplayerEvents(): void {
+    let changed = false;
+    while (this.pendingMultiplayerEvents.length > 0) {
+      const event = this.pendingMultiplayerEvents[0]!;
+      if (event.type === "match_started" && this.turns.phase === "gameOver") {
+        const setup = event.payload.setup;
+        const profiles = event.payload.profiles;
+        if (
+          !setup || typeof setup !== "object" ||
+          typeof (setup as MatchSetup).seed !== "number" ||
+          typeof (setup as MatchSetup).starterIndex !== "number" ||
+          !profiles || typeof profiles !== "object"
+        ) {
+          this.pendingMultiplayerEvents.shift();
+          continue;
+        }
+        this.pendingMultiplayerEvents.shift();
+        this.matchProfiles = profiles as Record<string, Profile>;
+        this.profiles = Object.fromEntries(
+          Object.entries(this.matchProfiles).map(([id, profile]) => [id, { xp: profile.xp, levels: { ...profile.levels } }]),
+        );
+        saveProfiles(this.profiles);
+        this.lastMultiplayerRevision = event.revision;
+        this.restart(setup as MatchSetup);
+        useGameStore.getState().setScreen("playing");
+        changed = false;
+        continue;
+      }
+      if (event.type === "upgrade_purchased" && this.turns.phase === "gameOver") {
+        this.pendingMultiplayerEvents.shift();
+        const upgradeId = event.payload.upgradeId;
+        if (typeof upgradeId !== "string" || !this.profiles[event.playerId]) continue;
+        const next = buyUpgrade(this.profiles[event.playerId]!, upgradeId);
+        if (!next) continue;
+        this.profiles[event.playerId] = next;
+        saveProfiles(this.profiles);
+        this.syncStore();
+        continue;
+      }
+      if (event.type !== "move" && event.type !== "fire") {
+        this.pendingMultiplayerEvents.shift();
+        changed = true;
+        continue;
+      }
+      if (event.playerId !== this.turns.current) {
+        this.pendingMultiplayerEvents.shift();
+        changed = true;
+        continue;
+      }
+      if (this.turns.inputLocked) break;
+
+      this.pendingMultiplayerEvents.shift();
+      changed = true;
+      if (event.type === "move") {
+        const direction = event.payload.direction;
+        if ((direction === -1 || direction === 1) && this.terrain && moveTank(this.current, direction, this.terrain.mask)) {
+          this.audio?.moveTick();
+        }
+        continue;
+      }
+
+      const angle = event.payload.angle;
+      const power = event.payload.power;
+      if (typeof angle !== "number" || angle < 0 || angle > MAX_ANGLE) continue;
+      if (typeof power !== "number" || power < MIN_POWER || power > this.current.stats.maxPower) continue;
+      this.launchShot(angle, power);
+      break;
+    }
+    if (changed && !this.turns.inputLocked) this.syncStore();
   }
 
   private explode(x: number, y: number): void {
@@ -252,6 +412,10 @@ export class Game {
     if (this.turns.phase === "aiming") this.beginTurn();
     else {
       if (this.turns.winner) this.award(this.turns.winner, WIN_BONUS_XP);
+      const onlineRoom = useMultiplayerStore.getState();
+      if (this.multiplayer && onlineRoom.credentials?.playerId === "P1" && onlineRoom.session?.status === "playing") {
+        void useMultiplayerStore.getState().publish("match_finished", { winner: this.turns.winner });
+      }
       this.syncStore();
     }
   }
@@ -281,6 +445,7 @@ export class Game {
       this.acc -= FIXED_DT;
       this.stepShell();
     }
+    this.processPendingMultiplayerEvents();
     this.particles.update(frameDt);
     this.audio?.update();
     this.draw(frameDt);
@@ -342,6 +507,9 @@ export class Game {
 
   destroy(): void {
     this.destroyed = true;
+    this.unsubscribeMultiplayer?.();
+    this.unsubscribeMultiplayer = null;
+    this.pendingMultiplayerEvents = [];
     this.audio?.destroy();
     if (this.app.renderer) this.app.destroy(true, { children: true });
   }

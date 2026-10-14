@@ -3,8 +3,13 @@ import { upgradeCost } from "@/game/systems/upgrades";
 import { useGameStore } from "@/game/state/gameStore";
 import { gameRef } from "./gameRef";
 
+interface ShopProps {
+  editablePlayerId?: string;
+  disabled?: boolean;
+}
+
 /** Meccs utáni bolt: minden játékos a saját XP-jét költi. */
-export function Shop() {
+export function Shop({ editablePlayerId, disabled = false }: ShopProps) {
   const profiles = useGameStore((s) => s.profiles);
 
   return (
@@ -20,7 +25,11 @@ export function Shop() {
             const cost = upgradeCost(def, level);
             return (
               <div key={def.id}>
-                <button disabled={maxed || profile.xp < cost} onClick={() => gameRef.current?.buy(id, def.id)}>
+                <button
+                  aria-label={`${id}: ${def.name}`}
+                  disabled={disabled || (editablePlayerId !== undefined && editablePlayerId !== id) || maxed || profile.xp < cost}
+                  onClick={() => gameRef.current?.buy(id, def.id)}
+                >
                   {def.name} {level}/{def.maxLevel} {maxed ? "(max)" : `– ${cost} XP`}
                 </button>{" "}
                 <small>{def.description}</small>

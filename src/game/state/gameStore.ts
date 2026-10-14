@@ -33,6 +33,7 @@ export interface GameState {
   wind: number;
   phase: Phase;
   currentId: string;
+  canControl: boolean;
   winner: string | null;
   tanks: TankView[];
   profiles: Record<string, Profile>;
@@ -61,6 +62,7 @@ export const useGameStore = create<GameState>((set) => ({
   wind: 0,
   phase: "aiming",
   currentId: "P1",
+  canControl: true,
   winner: null,
   tanks: [],
   profiles: {},
