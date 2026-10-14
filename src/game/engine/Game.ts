@@ -14,6 +14,7 @@ import { PreviewAllowance } from "../systems/previewAllowance";
 import { createSeededRandom, type MatchSetup } from "../systems/seededRandom";
 import { Terrain } from "../terrain/Terrain";
 import { ParticleSystem } from "../systems/particles";
+import { DEFAULT_THEME, type Theme } from "../theme";
 import { FxRenderer } from "./FxRenderer";
 import { loadFxTextures } from "./fxTextures";
 import { AudioManager } from "./AudioManager";
@@ -70,7 +71,8 @@ export class Game {
   private previewGfx = new Graphics();
   private previewAllowance = new PreviewAllowance();
   private previewActive = false;
-  private particles = new ParticleSystem();
+  private theme: Theme = DEFAULT_THEME;
+  private particles = new ParticleSystem(Math.random, this.theme.fx);
   private tanks: Tank[] = [];
   /** A meccsek között megmaradó fejlődés (meta-progresszió). */
   private profiles: Record<string, Profile> = loadProfiles(["P1", "P2"]);
@@ -91,7 +93,7 @@ export class Game {
   private destroyed = false;
 
   async init(host: HTMLElement): Promise<void> {
-    await this.app.init({ resizeTo: host, background: "#0b1020", antialias: true });
+    await this.app.init({ resizeTo: host, background: this.theme.background, antialias: true });
     // Ha az init közben unmountoltak (StrictMode), azonnal takarítunk.
     if (this.destroyed) return this.app.destroy(true);
     host.appendChild(this.app.canvas);
@@ -109,12 +111,12 @@ export class Game {
     this.shellGlow.texture = fxTextures.glow;
     this.shellGlow.anchor.set(0.5);
     this.shellGlow.scale.set(30 / fxTextures.glow.width);
-    this.shellGlow.tint = 0xffd070;
+    this.shellGlow.tint = this.theme.shell.glow;
     this.shellGlow.blendMode = "add";
     this.shellGlow.visible = false;
 
-    this.terrain = new Terrain(this.app.renderer);
-    const backdrop = new Graphics().rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT).fill(0x16224a);
+    this.terrain = new Terrain(this.app.renderer, this.theme.terrain);
+    const backdrop = new Graphics().rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT).fill(this.theme.sky);
     this.app.stage.addChild(
       backdrop,
       this.terrain.sprite,
@@ -133,6 +135,11 @@ export class Game {
     this.app.ticker.add((t) => this.update(t.deltaMS / 1000));
   }
 
+  private playerColor(index: number): number {
+    const { players } = this.theme;
+    return players[index % players.length]!;
+  }
+
   /** A pályát középre illeszti az ablakba, arányt tartva. */
   private layout(): void {
     const { width, height } = this.app.screen;
@@ -149,8 +156,8 @@ export class Game {
     this.matchRandom = createSeededRandom(matchSetup.seed);
     this.terrain.build(WORLD_WIDTH, WORLD_HEIGHT, matchSetup.seed);
     this.tanks = [
-      createTank("P1", width * 0.12, 0x4da3ff, 45, this.statsFor("P1")),
-      createTank("P2", width * 0.88, 0xff6b5a, 135, this.statsFor("P2")),
+      createTank("P1", width * 0.12, this.playerColor(0), 45, this.statsFor("P1")),
+      createTank("P2", width * 0.88, this.playerColor(1), 135, this.statsFor("P2")),
     ];
     this.tanks.forEach((t) => settleTank(t, this.terrain!.mask));
     this.buildTankViews();
@@ -523,7 +530,7 @@ export class Game {
       },
     );
     for (const [a, b] of dashPolyline(points, PREVIEW_DASH, PREVIEW_GAP)) g.moveTo(a.x, a.y).lineTo(b.x, b.y);
-    g.stroke({ width: 1.5, color: 0xffffff, alpha: 0.18 });
+    g.stroke({ width: 1.5, color: this.theme.hud.previewLine, alpha: 0.18 });
   }
 
   private draw(dt: number): void {
@@ -549,10 +556,10 @@ export class Game {
     this.tanksGfx.clear();
     for (const t of this.tanks) {
       if (!isAlive(t)) continue;
-      this.tanksGfx.rect(t.x - 14, t.y - 28, 28, 4).fill(0x222222);
-      this.tanksGfx.rect(t.x - 14, t.y - 28, (28 * t.hp) / t.stats.maxHp, 4).fill(0x55dd66);
+      this.tanksGfx.rect(t.x - 14, t.y - 28, 28, 4).fill(this.theme.hud.hpBack);
+      this.tanksGfx.rect(t.x - 14, t.y - 28, (28 * t.hp) / t.stats.maxHp, 4).fill(this.theme.hud.hpFill);
       if (t.id === this.turns.current && this.turns.phase === "aiming") {
-        this.tanksGfx.poly([t.x - 4, t.y - 40, t.x + 4, t.y - 40, t.x, t.y - 34]).fill(0xffffff);
+        this.tanksGfx.poly([t.x - 4, t.y - 40, t.x + 4, t.y - 40, t.x, t.y - 34]).fill(this.theme.hud.turnMarker);
       }
     }
 
@@ -561,7 +568,7 @@ export class Game {
     this.shellGlow.visible = !!this.shell;
     if (this.shell) {
       this.shellGlow.position.set(this.shell.pos.x, this.shell.pos.y);
-      this.shellGfx.circle(this.shell.pos.x, this.shell.pos.y, 3).fill(0xfff2c0);
+      this.shellGfx.circle(this.shell.pos.x, this.shell.pos.y, 3).fill(this.theme.shell.core);
     }
   }
 

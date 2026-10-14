@@ -1,3 +1,5 @@
+import { DEFAULT_THEME, type Theme } from "../theme";
+
 export type ParticleKind = "fire" | "smoke" | "debris" | "ring" | "muzzle";
 
 export interface Particle {
@@ -26,7 +28,10 @@ export interface Particle {
 export class ParticleSystem {
   particles: Particle[] = [];
 
-  constructor(private rng: () => number = Math.random) {}
+  constructor(
+    private rng: () => number = Math.random,
+    private colors: Theme["fx"] = DEFAULT_THEME.fx,
+  ) {}
 
   private between(min: number, max: number): number {
     return min + (max - min) * this.rng();
@@ -51,7 +56,7 @@ export class ParticleSystem {
   spawnExplosion(x: number, y: number, radius: number): void {
     const r = radius;
     // Lökéshullám-gyűrű.
-    this.add({ kind: "ring", x, y, size: r, grow: r * 7, life: 0.25, color: 0xffb870, opacity: 0.45 });
+    this.add({ kind: "ring", x, y, size: r, grow: r * 7, life: 0.25, color: this.colors.shockwave, opacity: 0.45 });
 
     for (let i = 0; i < 6; i++) {
       const a = this.between(0, Math.PI * 2);
@@ -66,7 +71,7 @@ export class ParticleSystem {
         grow: r * 1.2,
         life: this.between(0.25, 0.45),
         spin: this.between(-2, 2),
-        color: this.rng() < 0.5 ? 0xff7a20 : 0xffa030,
+        color: this.rng() < 0.5 ? this.colors.fire[0] : this.colors.fire[1],
         gravity: -40,
         opacity: 0.7,
       });
@@ -84,7 +89,7 @@ export class ParticleSystem {
         size: r * this.between(0.8, 1.3),
         life: this.between(0.6, 1),
         spin: this.between(-4, 4),
-        color: 0x7a5530,
+        color: this.colors.debris,
         gravity: 600,
       });
     }
@@ -100,7 +105,7 @@ export class ParticleSystem {
         grow: r * 0.6,
         life: this.between(1.2, 2.2),
         spin: this.between(-0.5, 0.5),
-        color: 0x777777,
+        color: this.colors.smoke,
         gravity: -12,
         opacity: 0.55,
       });
@@ -116,7 +121,7 @@ export class ParticleSystem {
       size: 36,
       life: 0.12,
       rotation: ((90 - angleDeg) * Math.PI) / 180,
-      color: 0xffe0a0,
+      color: this.colors.muzzle,
     });
   }
 
@@ -130,7 +135,7 @@ export class ParticleSystem {
       grow: 14,
       life: 0.6,
       spin: this.between(-1, 1),
-      color: 0xcccccc,
+      color: this.colors.trail,
       opacity: 0.3,
     });
   }

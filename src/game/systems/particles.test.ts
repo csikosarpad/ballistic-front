@@ -1,9 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { ParticleSystem } from "./particles";
+import { DEFAULT_THEME } from "../theme";
 
 const make = () => new ParticleSystem(() => 0.5);
 
 describe("ParticleSystem", () => {
+  it("a részecskék a témából kapják a színüket", () => {
+    const fx = { ...DEFAULT_THEME.fx, shockwave: 0x123456, debris: 0x654321 };
+    const ps = new ParticleSystem(() => 0.5, fx);
+    ps.spawnExplosion(0, 0, 30);
+    expect(ps.particles.find((p) => p.kind === "ring")?.color).toBe(0x123456);
+    expect(ps.particles.find((p) => p.kind === "debris")?.color).toBe(0x654321);
+  });
   it("a robbanás tüzet, füstöt, törmeléket és lökéshullámot is létrehoz", () => {
     const ps = make();
     ps.spawnExplosion(0, 0, 30);

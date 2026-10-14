@@ -103,7 +103,7 @@ A felület színei a `src/ui/ui.css` elején lévő CSS változókból jönnek (
 }
 ```
 
-és a gyökérelemen beállítani a `data-skin="neon"` attribútumot. A játéktér (Pixi) színei egyelőre a `Game.ts`-ben vannak; ezek `Theme` objektumba szervezése a ROADMAP-ban szerepel.
+és a gyökérelemen beállítani a `data-skin="neon"` attribútumot. A játéktér (Pixi) színei a `src/game/theme.ts` `Theme` objektumából jönnek (`DEFAULT_THEME`): háttér, égbolt, terep, játékosszínek, HUD-sávok, lövedék és effektek. Más kinézethez új `Theme` értéket kell adni a `Game`-nek (`theme` mező); a külső, betölthető skin még nincs meg. A tank SVG-k saját színei még nem tartoznak ide.
 
 ## Ütemterv
 

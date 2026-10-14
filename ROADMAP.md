@@ -27,7 +27,7 @@ Hosszú távú cél: sci-fi, Galaxy Tactics-hoz hasonló látvány (több karakt
 - [x] Fejlesztések életszerűbb elnevezése és méterben megadott értékei
 - [x] Többnyelvűség (magyar/angol), `src/i18n`
 - [x] UI skin alapja: a `ui.css` színei CSS változókban (`--bf-*`)
-- [ ] Pixi `Theme` objektum: a `Game.ts` színeinek kiemelése (terep, égbolt, játékosok, lövedék)
+- [x] Pixi `Theme` objektum (`src/game/theme.ts`): terep, égbolt, játékosok, HUD-sáv, lövedék és effektek színei
 - [ ] Külső nyelvfájlok (`locales/<kód>.json`, `locales/index.json`): beépített katalógus a tartalék, kulcsonkénti felülírás, helyőrző-validáció, gyorsítótár, dinamikus nyelvlista
 - [ ] Külső skin JSON (csak színek és textúra-útvonalak, kódvégrehajtás nélkül)
 - [ ] Admin felület a fordításokhoz (API-ból; jogosultságkezeléssel), új nyelvek felvétele
