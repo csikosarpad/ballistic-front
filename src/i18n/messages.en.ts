@@ -58,7 +58,7 @@ export const en: Record<MessageKey, string> = {
   "shop.cost": "– {cost} XP",
 
   "upgrade.armor.name": "Armor",
-  "upgrade.armor.desc": "+{value}% damage reduction on hits that get past the shield",
+  "upgrade.armor.desc": "+{value} armor points; wears down after the shield and does not recharge",
   "upgrade.shield.name": "Energy shield",
   "upgrade.shield.desc": "+{value} shield; recharges 20% of its maximum each turn",
   "upgrade.warhead.name": "Warhead",

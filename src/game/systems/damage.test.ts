@@ -1,46 +1,37 @@
 import { describe, expect, it } from "vitest";
-import { armorFraction, MAX_ARMOR, regenShield, resolveDamage } from "./damage";
+import { regenShield, resolveDamage } from "./damage";
 
 describe("resolveDamage", () => {
   it("védelem nélkül a teljes sebzés a HP-ból vonódik le", () => {
-    expect(resolveDamage({ hp: 100, shield: 0, armor: 0 }, 30)).toEqual({ hp: 70, shield: 0 });
+    expect(resolveDamage({ hp: 100, shield: 0, armor: 0 }, 30)).toEqual({ hp: 70, shield: 0, armor: 0 });
   });
 
-  it("a pajzs előbb nyeli el a sebzést, a HP érintetlen marad", () => {
-    expect(resolveDamage({ hp: 100, shield: 40, armor: 0.5 }, 30)).toEqual({ hp: 100, shield: 10 });
+  it("a pajzs előbb nyeli el a sebzést, a páncél és a HP érintetlen marad", () => {
+    expect(resolveDamage({ hp: 100, shield: 40, armor: 30 }, 30)).toEqual({ hp: 100, shield: 10, armor: 30 });
   });
 
-  it("a pajzson átjutó maradékot a páncél százalékosan csökkenti", () => {
-    // 50 nyers: 20 a pajzsba, 30 átjut, 20% páncél után 24.
-    expect(resolveDamage({ hp: 100, shield: 20, armor: 0.2 }, 50)).toEqual({ hp: 76, shield: 0 });
+  it("a pajzson átjutó sebzést a páncélpontok nyelik el", () => {
+    expect(resolveDamage({ hp: 100, shield: 20, armor: 30 }, 40)).toEqual({ hp: 100, shield: 0, armor: 10 });
   });
 
-  it("a páncél csak a HP-t érő részt csökkenti, a pajzsot nem", () => {
-    expect(resolveDamage({ hp: 100, shield: 100, armor: 0.5 }, 60).shield).toBe(40);
+  it("a pajzs és a páncél után a HP sérül", () => {
+    // 50 nyers: 20 pajzs, 15 páncél, 15 a HP-ból.
+    expect(resolveDamage({ hp: 100, shield: 20, armor: 15 }, 50)).toEqual({ hp: 85, shield: 0, armor: 0 });
   });
 
-  it("a HP nem megy nulla alá, a sebzés negatívja pedig nem gyógyít", () => {
+  it("páncél pajzs nélkül is kopik", () => {
+    expect(resolveDamage({ hp: 100, shield: 0, armor: 25 }, 10)).toEqual({ hp: 100, shield: 0, armor: 15 });
+  });
+
+  it("a HP nem megy nulla alá, a negatív sebzés pedig nem gyógyít", () => {
     expect(resolveDamage({ hp: 10, shield: 0, armor: 0 }, 999).hp).toBe(0);
-    expect(resolveDamage({ hp: 10, shield: 5, armor: 0 }, -20)).toEqual({ hp: 10, shield: 5 });
-  });
-
-  it("a páncél a korlátnál (MAX_ARMOR) többet nem véd", () => {
-    expect(resolveDamage({ hp: 100, shield: 0, armor: 5 }, 100).hp).toBe(100 - Math.round(100 * (1 - MAX_ARMOR)));
+    expect(resolveDamage({ hp: 10, shield: 5, armor: 5 }, -20)).toEqual({ hp: 10, shield: 5, armor: 5 });
   });
 
   it("nem módosítja a bemenetet", () => {
-    const defense = { hp: 100, shield: 10, armor: 0.1 };
+    const defense = { hp: 100, shield: 10, armor: 10 };
     resolveDamage(defense, 50);
-    expect(defense).toEqual({ hp: 100, shield: 10, armor: 0.1 });
-  });
-});
-
-describe("armorFraction", () => {
-  it("a páncélt a korláthoz viszonyítja és 0–1 közt tartja", () => {
-    expect(armorFraction(0)).toBe(0);
-    expect(armorFraction(MAX_ARMOR / 2)).toBeCloseTo(0.5);
-    expect(armorFraction(5)).toBe(1);
-    expect(armorFraction(-1)).toBe(0);
+    expect(defense).toEqual({ hp: 100, shield: 10, armor: 10 });
   });
 });
 

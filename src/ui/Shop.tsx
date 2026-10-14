@@ -26,8 +26,7 @@ export function Shop({ editablePlayerId, disabled = false }: ShopProps) {
             const maxed = level >= def.maxLevel;
             const cost = upgradeCost(def, level);
             const name = t(`upgrade.${def.id}.name` as MessageKey);
-            const value =
-              def.stat === "damage" || def.stat === "physicalArmor" ? Math.round(def.perLevel * 100) : def.perLevel;
+            const value = def.stat === "damage" ? Math.round(def.perLevel * 100) : def.perLevel;
             return (
               <div key={def.id}>
                 <button

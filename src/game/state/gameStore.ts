@@ -24,8 +24,9 @@ export interface TankView {
   /** Az erőtér pajzs aktuális és maximális értéke; maximum 0 esetén nincs pajzs. */
   shield: number;
   maxShield: number;
-  /** Fizikai páncél (0.2 = 20% sebzéscsökkentés). */
+  /** Fizikai páncél aktuális és maximális pontjai; maximum 0 esetén nincs páncél. */
   armor: number;
+  maxArmor: number;
   moveLeft: number;
   /** A tank színe (0xRRGGBB); a HUD vezérlői ezt követik. */
   color: number;

@@ -57,7 +57,7 @@ export const hu = {
   "shop.cost": "– {cost} XP",
 
   "upgrade.armor.name": "Páncél",
-  "upgrade.armor.desc": "+{value}% sebzéscsökkentés a pajzson átjutó találatokból",
+  "upgrade.armor.desc": "+{value} páncélpont; a pajzs után kopik, nem töltődik vissza",
   "upgrade.shield.name": "Erőtér pajzs",
   "upgrade.shield.desc": "+{value} pajzs; körönként a maximum 20%-a visszatöltődik",
   "upgrade.warhead.name": "Robbanófej",

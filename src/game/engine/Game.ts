@@ -18,7 +18,6 @@ import { DEFAULT_THEME, type Theme } from "../theme";
 import { FxRenderer } from "./FxRenderer";
 import { loadFxTextures } from "./fxTextures";
 import { AudioManager } from "./AudioManager";
-import { armorFraction } from "../systems/damage";
 import { TurnManager } from "../systems/turnManager";
 import {
   applyDamage,
@@ -299,7 +298,8 @@ export class Game {
         maxHp: t.stats.maxHp,
         shield: t.shield,
         maxShield: t.stats.maxEnergyShield,
-        armor: t.stats.physicalArmor,
+        armor: t.armor,
+        maxArmor: t.stats.maxArmor,
         moveLeft: t.moveLeft,
         color: t.color,
       })),
@@ -461,12 +461,12 @@ export class Game {
     this.terrain?.carve(x, y, radius);
     this.particles.spawnExplosion(x, y, radius);
     this.audio?.play("explosion", { rate: 0.9 + Math.random() * 0.2 });
-    // XP: az ellenfélnek okozott sérülés (1 HP vagy pajzspont = 1 XP).
+    // XP: az ellenfélnek okozott sérülés (1 HP, pajzs- vagy páncélpont = 1 XP).
     let dealt = 0;
     for (const t of this.tanks) {
-      const before = t.hp + t.shield;
+      const before = t.hp + t.shield + t.armor;
       applyDamage(t, explosionDamage(t, x, y, radius, shooter.stats.damage));
-      if (t !== shooter) dealt += before - (t.hp + t.shield);
+      if (t !== shooter) dealt += before - (t.hp + t.shield + t.armor);
     }
     this.award(shooter.id, dealt);
     this.matchStats = recordDamage(this.matchStats, shooter.id, dealt);
@@ -576,9 +576,9 @@ export class Game {
         top -= 4;
         this.drawStripe(t.x, top, t.shield / t.stats.maxEnergyShield, this.theme.hud.shieldFill);
       }
-      if (t.stats.physicalArmor > 0) {
+      if (t.stats.maxArmor > 0) {
         top -= 4;
-        this.drawStripe(t.x, top, armorFraction(t.stats.physicalArmor), this.theme.hud.armorFill);
+        this.drawStripe(t.x, top, t.armor / t.stats.maxArmor, this.theme.hud.armorFill);
       }
       if (t.id === this.turns.current && this.turns.phase === "aiming") {
         const my = top - 8;

@@ -116,12 +116,13 @@ class HeadlessMatch {
       winner: this.turns.winner,
       current: this.turns.current,
       wind: this.wind,
-      tanks: this.tanks.map(({ id, x, y, hp, shield, angle, power, moveLeft }) => ({
+      tanks: this.tanks.map(({ id, x, y, hp, shield, armor, angle, power, moveLeft }) => ({
         id,
         x,
         y,
         hp,
         shield,
+        armor,
         angle,
         power,
         moveLeft,
@@ -209,7 +210,10 @@ describe("determinisztikus visszajátszás két kliensen", () => {
     plain.receive(log);
 
     expect(a.snapshot()).toEqual(b.snapshot());
-    const total = (m: HeadlessMatch) => m.snapshot().tanks[1]!.hp + m.snapshot().tanks[1]!.shield;
+    const total = (m: HeadlessMatch) => {
+      const unit = m.snapshot().tanks[1]!;
+      return unit.hp + unit.shield + unit.armor;
+    };
     expect(total(a)).toBeGreaterThan(total(plain));
   });
 

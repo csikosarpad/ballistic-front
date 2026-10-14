@@ -5,8 +5,8 @@ export interface TankStats {
   maxEnergyShield: number;
   /** A pajzs körönkénti visszatöltődése a maximum arányában (0.2 = 20%). */
   shieldRegen: number;
-  /** A pajzson átjutó sebzés százalékos csökkentése (0.2 = 20%). */
-  physicalArmor: number;
+  /** A pajzson átjutó sebzést elnyelő fizikai páncélpontok maximuma; nem töltődik vissza. */
+  maxArmor: number;
   /** Sebzésszorzó. */
   damage: number;
   /** Robbanás sugara (px). */
@@ -20,7 +20,7 @@ export const BASE_STATS: TankStats = {
   maxHp: 100,
   maxEnergyShield: 0,
   shieldRegen: 0.2,
-  physicalArmor: 0,
+  maxArmor: 0,
   damage: 1,
   blastRadius: 30,
   maxPower: 600,
@@ -43,10 +43,10 @@ export interface UpgradeDef {
 export const UPGRADES: readonly UpgradeDef[] = [
   {
     // A régi „armor” (max HP) fejlesztés azonosítója megmarad, hogy a mentett szintek érvényesek maradjanak;
-    // mostantól a fizikai páncélt növeli.
+    // mostantól fogyó fizikai páncélpontokat ad.
     id: "armor",
-    stat: "physicalArmor",
-    perLevel: 0.05,
+    stat: "maxArmor",
+    perLevel: 20,
     maxLevel: 5,
     baseCost: 40,
     costGrowth: 1.5,

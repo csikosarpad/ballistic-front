@@ -17,6 +17,8 @@ export interface Tank {
   hp: number;
   /** Az erőtér pajzs aktuális értéke. */
   shield: number;
+  /** A fizikai páncél aktuális pontjai. */
+  armor: number;
   angle: number;
   power: number;
   /** Az adott körben még megtehető távolság (px). */
@@ -32,6 +34,7 @@ export function createTank(id: string, x: number, color: number, angle: number, 
     y: 0,
     hp: stats.maxHp,
     shield: stats.maxEnergyShield,
+    armor: stats.maxArmor,
     angle,
     power: Math.min(400, stats.maxPower),
     moveLeft: stats.moveBudget,
@@ -79,11 +82,12 @@ export function explosionDamage(tank: Tank, ex: number, ey: number, radius: numb
   return Math.max(0, Math.round(60 * multiplier * (1 - d / (radius * 2))));
 }
 
-/** A sebzés a pajzson, majd a páncélon át éri a HP-t (lásd systems/damage). */
+/** A sebzés előbb a pajzsot, majd a páncélt koptatja, végül a HP-t (lásd systems/damage). */
 export function applyDamage(tank: Tank, dmg: number): void {
-  const { hp, shield } = resolveDamage({ hp: tank.hp, shield: tank.shield, armor: tank.stats.physicalArmor }, dmg);
-  tank.hp = hp;
-  tank.shield = shield;
+  const result = resolveDamage({ hp: tank.hp, shield: tank.shield, armor: tank.armor }, dmg);
+  tank.hp = result.hp;
+  tank.shield = result.shield;
+  tank.armor = result.armor;
 }
 
 /** A kör elején az éppen soron lévő tank pajzsa részben visszatöltődik. */

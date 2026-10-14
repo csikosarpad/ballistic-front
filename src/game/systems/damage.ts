@@ -1,37 +1,28 @@
 /** A beérkező sebzés felosztása a védelmi rétegek között. Tiszta függvények, hogy az online szimuláció determinisztikus maradjon. */
 
-/** A fizikai páncél felső korlátja: sosem lehet sebezhetetlen. */
-export const MAX_ARMOR = 0.75;
-
 export interface Defense {
   hp: number;
-  /** Az erőtér pajzs aktuális értéke. */
+  /** Az erőtér pajzs aktuális értéke; körönként visszatöltődik. */
   shield: number;
-  /** A HP-t érő sebzés százalékos csökkentése (0.2 = 20%). */
+  /** A fizikai páncél aktuális pontjai; a pajzs után kopik, nem töltődik vissza. */
   armor: number;
 }
 
-export interface DamageResult {
-  hp: number;
-  shield: number;
-}
-
 /**
- * Sorrend: 1) a nyers sebzést először az erőtér pajzs nyeli el; 2) a pajzson átjutó maradékot a fizikai páncél
- * százalékosan csökkenti (kerekítve); 3) az így kapott érték vonódik le a HP-ból.
+ * Sorrend: 1) a nyers sebzést először az erőtér pajzs nyeli el; 2) a maradékot a fizikai páncélpontok;
+ * 3) ami ezeken is átjut, a HP-ból vonódik le. Minden réteg 1:1 arányban nyel el.
  */
-export function resolveDamage(defense: Defense, damage: number): DamageResult {
-  const raw = Math.max(0, damage);
-  const absorbed = Math.min(defense.shield, raw);
-  const armor = Math.min(MAX_ARMOR, Math.max(0, defense.armor));
-  const throughShield = raw - absorbed;
-  const hpLoss = Math.round(throughShield * (1 - armor));
-  return { shield: defense.shield - absorbed, hp: Math.max(0, defense.hp - hpLoss) };
-}
-
-/** A páncél csíkjának töltöttsége (0–1): a páncél a korláthoz (MAX_ARMOR) képest. */
-export function armorFraction(armor: number): number {
-  return Math.min(MAX_ARMOR, Math.max(0, armor)) / MAX_ARMOR;
+export function resolveDamage(defense: Defense, damage: number): Defense {
+  let rest = Math.max(0, damage);
+  const shieldAbsorbed = Math.min(defense.shield, rest);
+  rest -= shieldAbsorbed;
+  const armorAbsorbed = Math.min(defense.armor, rest);
+  rest -= armorAbsorbed;
+  return {
+    shield: defense.shield - shieldAbsorbed,
+    armor: defense.armor - armorAbsorbed,
+    hp: Math.max(0, defense.hp - rest),
+  };
 }
 
 /** Körönkénti pajzsvisszatöltés: a maximum `fraction` része, a maximumig. */

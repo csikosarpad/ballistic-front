@@ -44,14 +44,23 @@ describe("tank", () => {
     expect(t.hp).toBe(0);
   });
 
-  it("a sebzést előbb a pajzs nyeli el, a maradékot a páncél csökkenti", () => {
-    const t = createTank("a", 50, 0, 45, computeStats({ shield: 1, armor: 4 }));
-    expect(t.shield).toBe(20);
+  it("a sebzést előbb a pajzs, majd a páncél nyeli el, a HP csak utána sérül", () => {
+    const t = createTank("a", 50, 0, 45, computeStats({ shield: 1, armor: 1 }));
+    expect(t).toMatchObject({ shield: 20, armor: 20, hp: 100 });
     applyDamage(t, 10);
-    expect(t).toMatchObject({ shield: 10, hp: 100 });
-    // 10 pajzs + 40 átjutó * (1 - 0.2) = 32.
-    applyDamage(t, 50);
-    expect(t).toMatchObject({ shield: 0, hp: 68 });
+    expect(t).toMatchObject({ shield: 10, armor: 20, hp: 100 });
+    applyDamage(t, 25);
+    expect(t).toMatchObject({ shield: 0, armor: 5, hp: 100 });
+    applyDamage(t, 15);
+    expect(t).toMatchObject({ shield: 0, armor: 0, hp: 90 });
+  });
+
+  it("a páncél nem töltődik vissza, a pajzs igen", () => {
+    const t = createTank("a", 50, 0, 45, computeStats({ shield: 1, armor: 1 }));
+    applyDamage(t, 40);
+    expect(t).toMatchObject({ shield: 0, armor: 0 });
+    regenTankShield(t);
+    expect(t).toMatchObject({ shield: 4, armor: 0 });
   });
 
   it("a pajzs körönként a maximum 20%-ával töltődik vissza", () => {

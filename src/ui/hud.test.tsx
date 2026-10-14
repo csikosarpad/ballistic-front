@@ -66,8 +66,28 @@ describe("Hud billentyűk", () => {
     act(() =>
       useGameStore.setState({
         tanks: [
-          { id: "P1", hp: 80, maxHp: 100, shield: 12, maxShield: 40, armor: 0.15, moveLeft: 0, color: 0xffffff },
-          { id: "P2", hp: 100, maxHp: 100, shield: 0, maxShield: 0, armor: 0, moveLeft: 0, color: 0xffffff },
+          {
+            id: "P1",
+            hp: 80,
+            maxHp: 100,
+            shield: 12,
+            maxShield: 40,
+            armor: 15,
+            maxArmor: 60,
+            moveLeft: 0,
+            color: 0xffffff,
+          },
+          {
+            id: "P2",
+            hp: 100,
+            maxHp: 100,
+            shield: 0,
+            maxShield: 0,
+            armor: 0,
+            maxArmor: 0,
+            moveLeft: 0,
+            color: 0xffffff,
+          },
         ],
       }),
     );
@@ -78,7 +98,7 @@ describe("Hud billentyűk", () => {
     const shield = screen.getByRole("meter", { name: "Pajzs" });
     expect(shield).toHaveAttribute("aria-valuenow", "12");
     expect(shield).toHaveAttribute("aria-valuemax", "40");
-    expect(screen.getByRole("meter", { name: "Páncél" })).toHaveAttribute("aria-valuetext", "15%");
+    expect(screen.getByRole("meter", { name: "Páncél" })).toHaveAttribute("aria-valuetext", "15/60");
   });
 
   it("az M billentyű némítást kapcsol, lövés közben is", () => {

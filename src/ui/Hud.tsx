@@ -1,6 +1,5 @@
 import { useEffect, type CSSProperties } from "react";
 import { MAX_ANGLE, MIN_ANGLE, MIN_POWER, useGameStore } from "@/game/state/gameStore";
-import { armorFraction } from "@/game/systems/damage";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
@@ -12,14 +11,12 @@ interface StripeProps {
   label: string;
   value: number;
   max: number;
-  /** A képernyőolvasónak szánt érték, ha eltér a számtól (pl. a páncél százaléka). */
-  text?: string;
 }
 
-/** Vékony, jelölt csík; a szám a címkében és a tooltipben van, nem a rajzolt sávban. */
-function Stripe({ kind, label, value, max, text }: StripeProps) {
+/** Vékony, jelölt csík; a pontos érték a tooltipben és a képernyőolvasónak szóló attribútumokban van. */
+function Stripe({ kind, label, value, max }: StripeProps) {
   const percent = max > 0 ? Math.min(100, Math.max(0, (value / max) * 100)) : 0;
-  const shown = text ?? `${value}/${max}`;
+  const shown = `${value}/${max}`;
   return (
     <div
       className={`stripe stripe-${kind}`}
@@ -124,15 +121,7 @@ export function Hud() {
             {unit.maxShield > 0 && (
               <Stripe kind="shield" label={t("hud.shield")} value={unit.shield} max={unit.maxShield} />
             )}
-            {unit.armor > 0 && (
-              <Stripe
-                kind="armor"
-                label={t("hud.armor")}
-                value={Math.round(armorFraction(unit.armor) * 100)}
-                max={100}
-                text={`${Math.round(unit.armor * 100)}%`}
-              />
-            )}
+            {unit.maxArmor > 0 && <Stripe kind="armor" label={t("hud.armor")} value={unit.armor} max={unit.maxArmor} />}
           </div>
         ))}
       </div>
