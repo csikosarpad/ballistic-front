@@ -161,10 +161,12 @@ komponensekbe.
 2. Távoli hegyek
 3. Közeli hegyek
 4. Harctér
-5. Terep
-6. Egységek és lövedékek
-7. Előtér effektek
-8. HUD és interakciós réteg
+5. Távoli tereptárgyak
+6. Közeli tereptárgyak
+7. Terep
+8. Egységek és lövedékek
+9. Előtér effektek
+10. HUD és interakciós réteg
 ```
 
 ### 2.1 Csillagos ég
@@ -242,6 +244,23 @@ Ez marad a játékmenet elsődleges geometriai rétege.
 - robbanási nyomok és sérülések külön effekt-rétegen jelenjenek meg;
 - ne kerüljön a terrain assetbe statikus tank vagy szöveg.
 
+### 2.7 Tereptárgyak
+
+A `BattlefieldProps` első változata collision nélküli, seed alapján elhelyezett dekorációkat
+rajzol a terrain mögé:
+
+- távoli és közeli fa-sziluettek;
+- sziklák és földközeli kövek;
+- katonai antennák;
+- kis narancs jelzőfények.
+
+Az első iterációban ezek nem módosítják a mozgást vagy a ballisztikát. A tereptárgyak
+vizuális prioritása a tank, lövedék és terrain kontúrja alatt marad. Később egyenként
+bekapcsolható sérülési, remegési vagy collision viselkedésük.
+
+**Aktuális döntés:** a tereptárgyak dekoratívak maradnak; nem kapnak collisiont, nem
+rombolhatók, és nem módosítják a lövedékek vagy a tankok mozgását.
+
 ## 3. Renderelési és teljesítményelvek
 
 - A statikus háttérrétegek lehetőleg cache-elhetők legyenek.
@@ -250,13 +269,14 @@ Ez marad a játékmenet elsődleges geometriai rétege.
 - A játéktér Pixi rendererje maradjon egyetlen tulajdonosi lifecycle alatt.
 - A ResultScreen dekorációs rendererje nem pusztíthatja a játék rendererét vagy textúráit.
 - A rétegek z-indexe legyen explicit és dokumentált.
+- A dekoratív tereptárgyak ne keltsenek collision-érzetet, amíg nincs hozzájuk fizikai modell.
 
 ## 4. Megvalósítási fázisok
 
 - [x] ResultScreen HUD és egységfüggetlen presentation rendszer.
 - [x] Pixi UI primitive-ok és háttéreffektek.
 - [x] Tank/space presentation contract tesztek.
-- [ ] Referenciahű, kontúros combat-dossier tank SVG újratervezése.
+- [x] Referenciahű, kontúros combat-dossier tank SVG újratervezése.
 - [x] `UnitIllustration` több rétegű asset-renderelésének kialakítása.
 - [x] A tank rétegek neutral/accent színezésének szétválasztása.
 - [x] Optika, antenna és technikai toronyrészletek hozzáadása.
@@ -268,11 +288,22 @@ Ez marad a játékmenet elsődleges geometriai rétege.
 - [x] HUD-os `WindIndicator` hozzáadása.
 - [x] Pixi-alapú, visszafogott `WindDustClouds` réteg hozzáadása.
 - [x] Terep vizuális rétegének finomítása a fizikai heightmap megtartásával.
-- [ ] Több viewporton történő vizuális ellenőrzés.
-- [ ] Háttérrétegek teljesítmény- és reduced-motion tesztje.
+- [x] Sci-fi katonai HUD keret, kontrollpanel és action bar hozzáadása.
+- [x] Dekoratív `BattlefieldProps` réteg hozzáadása fákkal, sziklákkal, antennákkal és jelzőfényekkel.
+- [x] Terrain mögötti atmoszferikus és por-rétegek összehangolása.
+- [x] Tereptárgyak lövésre adott vizuális reakciói.
+- [x] Részletesebb SVG tereptárgy assetek bevezetése.
+- [x] Tereptárgyak mélységi sávjainak és terrainhez kötött alapvonalának korrekciója.
+- [x] Fák és antennatornyok ideiglenes eltávolítása az egységesebb harctéri sziluett érdekében.
+- [ ] Opcionális collision- és rombolhatósági modell tereptárgyanként (későbbi, külön döntési fázis).
+- [x] Több viewporton történő vizuális ellenőrzés.
+- [x] Háttérrétegek teljesítmény- és reduced-motion tesztje.
 
 ## 5. Következő javasolt lépés
 
-Elsőként a tank SVG újratervezése és a `UnitIllustration` rétegezett renderelése készüljön
-el. Ezután a csillagos ég és a távoli hegyek adhatók hozzá, mert ezek nem módosítják a
-terrain fizikáját, mégis azonnal javítják a játéktér mélységérzetét.
+A következő nagyobb vizuális lépés a referenciahű combat-dossier tank SVG és a részletesebb
+tereptárgy assetek elkészítése lehet. Ezek előtt érdemes több desktop és mobil viewporton
+ellenőrizni a HUD, a tereptárgyak, a porfelhők és a lövés utáni reakciók összhangját.
+
+A collision- és rombolhatósági modell külön döntési fázis marad, mert az már a pálya
+stratégiáját és a ballisztikai szabályokat is megváltoztatná.

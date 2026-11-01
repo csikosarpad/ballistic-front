@@ -105,6 +105,7 @@ export class Game {
       Assets.load<Texture>({ src: tankBodyUrl, data: { resolution: 3 } }),
       Assets.load<Texture>({ src: tankBarrelUrl, data: { resolution: 3 } }),
       loadFxTextures(),
+      this.battlefieldLayers.loadAssets(),
     ]);
     // Az asset-betöltés alatt is megszúnhetett a komponens (StrictMode).
     if (this.destroyed) return;
@@ -130,6 +131,9 @@ export class Game {
       this.shellGfx,
       this.shellGlow,
       this.fx.layer,
+    );
+    this.battlefieldLayers.setMotionEnabled(
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     );
     this.layout();
     const pendingStart = this.pendingMultiplayerStart;
@@ -174,7 +178,7 @@ export class Game {
     );
     this.nextStarter = (starterIndex + 1) % this.tanks.length;
     this.matchStats = newMatchStats(this.tanks.map((t) => t.id));
-    this.previewAllowance.reset();
+    this.previewAllowance.reset(Object.fromEntries(this.tanks.map((tank) => [tank.id, tank.stats.previewCharges])));
     this.shell = null;
     this.beginTurn();
   }
@@ -311,6 +315,7 @@ export class Game {
       profiles: { ...this.profiles },
       matchStats: this.matchStats,
       previewAvailable: this.turns.phase === "aiming" && this.previewAllowance.canUse(this.turns.current),
+      previewRemaining: this.previewAllowance.remainingFor(this.turns.current),
       previewActive: this.previewActive,
     });
   }
@@ -463,6 +468,7 @@ export class Game {
   private explode(x: number, y: number): void {
     const shooter = this.current;
     const radius = shooter.stats.blastRadius;
+    this.battlefieldLayers.reactToImpact(Math.min(1, radius / 80));
     this.terrain?.carve(x, y, radius);
     this.particles.spawnExplosion(x, y, radius);
     this.audio?.play("explosion", { rate: 0.9 + Math.random() * 0.2 });

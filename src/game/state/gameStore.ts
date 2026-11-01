@@ -46,6 +46,7 @@ export interface GameState {
   matchStats: MatchStats;
   /** A soron lévő játékos még kérhet röppálya-előnézetet. */
   previewAvailable: boolean;
+  previewRemaining: number;
   previewActive: boolean;
   screen: Screen;
   muted: boolean;
@@ -76,6 +77,7 @@ export const useGameStore = create<GameState>((set) => ({
   profiles: {},
   matchStats: {},
   previewAvailable: false,
+  previewRemaining: 0,
   previewActive: false,
   screen: "menu",
   muted: readMuted(),

@@ -8,6 +8,7 @@ export class WindDustClouds extends Container {
   private worldWidth = 1280;
   private worldHeight = 720;
   private wind = 0;
+  private motionEnabled = true;
 
   public constructor() {
     super();
@@ -48,13 +49,20 @@ export class WindDustClouds extends Container {
   }
 
   public update(dt: number): void {
-    if (!this.visible) return;
+    if (!this.motionEnabled || !this.visible) return;
     const direction = Math.sign(this.wind);
     const speed = direction * (8 + Math.abs(this.wind) * 1.1);
     for (const cloud of this.clouds) {
       cloud.x += speed * dt;
       if (direction > 0 && cloud.x > this.worldWidth + 70) cloud.x = -70;
       if (direction < 0 && cloud.x < -70) cloud.x = this.worldWidth + 70;
+    }
+  }
+
+  public setMotionEnabled(enabled: boolean): void {
+    this.motionEnabled = enabled;
+    if (!enabled) {
+      this.visible = false;
     }
   }
 }

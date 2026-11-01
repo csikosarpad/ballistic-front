@@ -4,6 +4,7 @@ import { awardXp, buyUpgrade, computeStats, newProfile, upgradeCost } from "./up
 
 const armor = UPGRADES.find((u) => u.id === "armor")!;
 const shield = UPGRADES.find((u) => u.id === "shield")!;
+const smartAim = UPGRADES.find((u) => u.id === "smartAim")!;
 
 describe("upgrades", () => {
   it("fejlesztés nélkül az alapértékek érvényesek", () => {
@@ -13,6 +14,7 @@ describe("upgrades", () => {
   it("a szintek hozzáadódnak az alapértékhez", () => {
     expect(computeStats({ armor: 2 }).maxArmor).toBe(BASE_STATS.maxArmor + 2 * armor.perLevel);
     expect(computeStats({ shield: 2 }).maxEnergyShield).toBe(BASE_STATS.maxEnergyShield + 2 * shield.perLevel);
+    expect(computeStats({ smartAim: 2 }).previewCharges).toBe(BASE_STATS.previewCharges + 2 * smartAim.perLevel);
   });
 
   it("a régi mentés páncélszintje már nem ad max HP-t", () => {

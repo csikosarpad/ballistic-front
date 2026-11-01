@@ -76,7 +76,7 @@ describe("UnitPanel and Shop presentation contract", () => {
 
     expect(screen.getByText("Space fighter")).toBeInTheDocument();
     expect(screen.getByText("P1")).toBeInTheDocument();
-    expect(screen.getAllByRole("button")).toHaveLength(6);
+    expect(screen.getAllByRole("button")).toHaveLength(7);
     expect(screen.getByText("1/5")).toBeInTheDocument();
   });
 

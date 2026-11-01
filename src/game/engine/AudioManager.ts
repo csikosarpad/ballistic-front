@@ -1,6 +1,6 @@
-import shotUrl from "@game/assets/audio/shot.wav?url";
-import explosionUrl from "@game/assets/audio/explosion.flac?url";
-import moveUrl from "@game/assets/audio/tank-move.wav?url";
+import shotUrl from "@game/assets/audio/shot.ogg?url";
+import explosionUrl from "@game/assets/audio/explosion.ogg?url";
+import moveUrl from "@game/assets/audio/tank-move.ogg?url";
 import { useGameStore } from "@game/state/gameStore";
 import { HoldGate } from "@game/systems/holdGate";
 

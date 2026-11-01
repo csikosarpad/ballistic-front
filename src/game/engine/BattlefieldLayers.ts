@@ -1,5 +1,6 @@
 import { Container, Graphics } from "pixi.js";
 import { WindDustClouds } from "./WindDustClouds";
+import { BattlefieldProps } from "./BattlefieldProps";
 
 const STAR_COUNT = 72;
 
@@ -31,16 +32,18 @@ export class BattlefieldLayers extends Container {
   private readonly distantMountains = new Graphics();
   private readonly nearMountains = new Graphics();
   private readonly atmosphere = new Graphics();
+  private readonly props = new BattlefieldProps();
   private readonly windDustClouds = new WindDustClouds();
 
   public constructor() {
     super();
-    this.addChild(this.stars, this.distantMountains, this.nearMountains, this.atmosphere, this.windDustClouds);
+    this.addChild(this.stars, this.distantMountains, this.nearMountains, this.atmosphere, this.props, this.windDustClouds);
   }
 
   public draw(width: number, height: number, seed: number): void {
     const random = seededRandom(seed);
     this.windDustClouds.setBounds(width, height);
+    this.props.draw(width, height, seed);
     this.stars.clear();
     this.distantMountains.clear();
     this.nearMountains.clear();
@@ -77,7 +80,21 @@ export class BattlefieldLayers extends Container {
     this.windDustClouds.setWind(wind);
   }
 
+  public loadAssets(): Promise<void> {
+    return this.props.loadAssets();
+  }
+
+  public setMotionEnabled(enabled: boolean): void {
+    this.props.setMotionEnabled(enabled);
+    this.windDustClouds.setMotionEnabled(enabled);
+  }
+
   public update(dt: number): void {
+    this.props.update(dt);
     this.windDustClouds.update(dt);
+  }
+
+  public reactToImpact(intensity: number): void {
+    this.props.reactToImpact(intensity);
   }
 }
