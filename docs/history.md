@@ -27,3 +27,4 @@
 - A terrain vizuális rétege finomodott: felszíni highlight, heightmap-követő talajstratifikációs vonalak és sötétebb mélységi tónusok kerültek a RenderTexture-be, a fizikai heightmap és collision mask változatlanul megmaradt.
 - A szél most HUD-os `WindIndicator` komponensként és visszafogott Pixi `WindDustClouds` háttérrétegként is látható; az irány az előjelet, a sebesség és kiemelés az abszolút erősséget követi.
 - A korábbi szélvonalakat talajközeli, lapos porfelhők váltották fel, hogy a szél vizuális visszajelzése jobban illeszkedjen a katonai sivatagi harctér hangulatához.
+- A PixiJS bundling külön vendor chunkot kapott: a fő alkalmazási chunk mérete kb. 1,1 MB-ról 211 kB-ra csökkent, a 908 kB-os Pixi renderer pedig dokumentált, célzott chunklimittel marad külön.

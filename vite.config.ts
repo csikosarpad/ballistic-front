@@ -27,6 +27,17 @@ export default defineConfig({
       "@ui": `${srcPath}/ui`,
     },
   },
+  build: {
+    // PixiJS szándékosan külön vendor chunk; a motor teljes renderer-készlete miatt nagy.
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          pixi: ["pixi.js"],
+        },
+      },
+    },
+  },
   test: {
     globals: true,
     environment: "jsdom",
