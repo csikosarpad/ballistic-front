@@ -15,12 +15,13 @@ export function Shop({ editablePlayerId, disabled = false }: ShopProps) {
   const t = useT();
 
   return (
-    <div style={{ display: "flex", gap: 24, marginTop: 8 }}>
+      <tr>
       {Object.entries(profiles).map(([id, profile]) => (
-        <div key={id}>
+        <td key={id} colSpan={2} align="left">
           <strong>
             {id} – {profile.xp} XP
           </strong>
+          <table className="player-upgrades">
           {UPGRADES.map((def) => {
             const level = profile.levels[def.id] ?? 0;
             const maxed = level >= def.maxLevel;
@@ -28,25 +29,28 @@ export function Shop({ editablePlayerId, disabled = false }: ShopProps) {
             const name = t(`upgrade.${def.id}.name` as MessageKey);
             const value = def.stat === "damage" ? Math.round(def.perLevel * 100) : def.perLevel;
             return (
-              <div key={def.id}>
-                <button
-                  aria-label={`${id}: ${name}`}
-                  disabled={
-                    disabled ||
-                    (editablePlayerId !== undefined && editablePlayerId !== id) ||
-                    maxed ||
-                    profile.xp < cost
-                  }
-                  onClick={() => gameRef.current?.buy(id, def.id)}
-                >
-                  {name} {level}/{def.maxLevel} {maxed ? t("shop.max") : t("shop.cost", { cost })}
-                </button>{" "}
-                <small>{t(`upgrade.${def.id}.desc` as MessageKey, { value })}</small>
-              </div>
+              <tr key={def.id}>
+                <td>{name}</td>
+                <td className="upgrade-cell">
+                  <button
+                    aria-label={`${id}: ${name}`}
+                    disabled={
+                      disabled ||
+                      (editablePlayerId !== undefined && editablePlayerId !== id) ||
+                      maxed ||
+                      profile.xp < cost
+                    }
+                    onClick={() => gameRef.current?.buy(id, def.id)}
+                  >
+                     <span className="level">{level}</span>/{def.maxLevel} {maxed ? t("shop.max") : t("shop.cost", { cost })}
+                  </button> <small>{t(`upgrade.${def.id}.desc` as MessageKey, { value })}</small>
+              </td>
+              </tr>
             );
           })}
-        </div>
+          </table>
+        </td>
       ))}
-    </div>
+      </tr>
   );
 }

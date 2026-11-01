@@ -1,8 +1,8 @@
-import shotUrl from "../assets/audio/shot.wav?url";
-import explosionUrl from "../assets/audio/explosion.flac?url";
-import moveUrl from "../assets/audio/tank-move.wav?url";
-import { useGameStore } from "../state/gameStore";
-import { HoldGate } from "../systems/holdGate";
+import shotUrl from "@game/assets/audio/shot.wav?url";
+import explosionUrl from "@game/assets/audio/explosion.flac?url";
+import moveUrl from "@game/assets/audio/tank-move.wav?url";
+import { useGameStore } from "@game/state/gameStore";
+import { HoldGate } from "@game/systems/holdGate";
 
 export type SoundName = "shot" | "explosion" | "move";
 

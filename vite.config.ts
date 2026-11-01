@@ -1,5 +1,8 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
+import { fileURLToPath } from "node:url";
+
+const srcPath = fileURLToPath(new URL("./src", import.meta.url));
 
 export default defineConfig({
   // Relatív útvonalak: a dist mappa bármilyen alútvonalról kiszolgálható (pl. Live Server).
@@ -18,7 +21,11 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: { "@": new URL("./src", import.meta.url).pathname.replace(/^\/(\w:)/, "$1") },
+    alias: {
+      "@": srcPath,
+      "@game": `${srcPath}/game`,
+      "@ui": `${srcPath}/ui`,
+    },
   },
   test: {
     globals: true,
