@@ -18,27 +18,50 @@ export function ResultScreen() {
     <div className="overlay">
       <div className="panel">
         <h2 className="winner">{winner ? t("result.wins", { name: winner }) : t("result.draw")}</h2>
-        <table className="stats">
+        <table className="stats" cellPadding={0} cellSpacing={0} border={0}>
+            {/* <colgroup>
+              <col width="25%" />
+              <col width="15%" />
+              <col width="15%" />
+              <col width="15%" />
+            </colgroup> */}
           <thead>
             <tr>
-              <th>{t("result.player")}</th>
-              <th>{t("result.shots")}</th>
+              <th colSpan={4}>
+                <div className="grid grid-flow-col gap-2">                  
+                  <span className="col-wide">{t("result.player")}</span>
+                  <span className="col-narrow">{t("result.shots")}</span>
+                  <span className="col-narrow">{t("result.damage")}</span>
+                  <span className="col-narrow">{t("result.xp")}</span>
+                </div>
+              </th>
+              {/* <th align="left">{t("result.shots")}</th>
               <th>{t("result.damage")}</th>
-              <th>{t("result.xp")}</th>
+              <th align="left">{t("result.xp")}</th> */}
             </tr>
           </thead>
           <tbody>
             {Object.entries(matchStats).map(([id, s]) => (
               <tr key={id}>
-                <td>{id}</td>
-                <td>{s.shots}</td>
+                <td colSpan={4} align="left">
+                  <div className="grid grid-flow-col gap-2">
+                    <span><u>{id}</u>:</span>
+                    <span>{s.shots}</span>
+                    <span>{s.damage}</span>
+                    <span>+{s.xp}</span>
+                  </div>
+                </td>
+                {/* <td>{s.shots}</td>
                 <td>{s.damage}</td>
-                <td>+{s.xp}</td>
+                <td align="left">+{s.xp}</td> */}
               </tr>
             ))}
           </tbody>
+        
+          <tbody className="shop">
+            {onlineMatch ? <Shop editablePlayerId={credentials.playerId} disabled={!matchFinished} /> : <Shop />}
+          </tbody>
         </table>
-        {onlineMatch ? <Shop editablePlayerId={credentials.playerId} disabled={!matchFinished} /> : <Shop />}
         {onlineMatch && !matchFinished && <p role="status">{t("result.syncing")}</p>}
         {multiplayerError && onlineMatch && (
           <p className="lobby-error" role="alert">

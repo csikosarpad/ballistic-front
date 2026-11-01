@@ -13,7 +13,11 @@
     "isolatedModules": true,
     "noEmit": true,
     "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
-    "paths": { "@/*": ["./src/*"] }
+    "paths": {
+      "@/*": ["./src/*"],
+      "@ui/*": ["./src/ui/*"],
+      "@game/*": ["./src/game/*"]
+    }
   },
   "include": ["src", "vite.config.ts"]
 }

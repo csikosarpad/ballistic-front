@@ -1,3 +1,4 @@
+/* @import "./tailwind-like.css"; */
 /* Skin: a színeket CSS változók adják; másik kinézethez elég a :root[data-skin="…"] felülírása. */
 :root {
   --bf-text: #fff;
@@ -138,17 +139,17 @@
   min-width: 320px;
   max-height: 90%;
   overflow: auto;
-  padding: 24px 32px;
+  padding: 24px 16px;
   border-radius: 12px;
   background: var(--bf-panel);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   text-align: center;
   animation: pop-in 0.35s cubic-bezier(0.2, 1.3, 0.4, 1);
-}
 
-.panel h1,
-.panel h2 {
-  margin: 0 0 12px;
+  h1,
+  h2 {
+    margin: 0 0 12px;
+  }
 }
 
 .multiplayer-panel {
@@ -238,11 +239,38 @@
   width: 100%;
   margin: 12px 0;
   border-collapse: collapse;
-}
 
-.stats th,
-.stats td {
-  padding: 4px 10px;
+  th,
+  td {
+    padding: 4px 10px;
+  }
+
+  .shop td {
+    padding: 4px;
+
+    .player-upgrades {
+      /* border: 1px solid var(--bf-border); */
+      td {
+        padding: 4px;
+        border: 1px solid var(--bf-border);
+      }
+      td.upgrade-cell {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 4px;
+
+        button {
+          width: 100px;
+          box-sizing: border-box;
+          &:not(:disabled):hover {
+            filter: brightness(1.15);            
+          }
+        }
+      }
+    }
+
+  }
 }
 
 .stats td:first-child,
@@ -268,8 +296,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .overlay,
   .panel {
     animation: none;
   }
 }
+
