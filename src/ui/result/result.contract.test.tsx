@@ -18,6 +18,9 @@ describe("result presentation contract", () => {
       accent: "cyan",
     });
     expect(p1.silhouetteAsset).toBeTruthy();
+    expect(p1.secondaryAsset).toBeTruthy();
+    expect(p1.detailAsset).toBeTruthy();
+    expect(p1.accentAsset).toBeTruthy();
     expect(p2).toMatchObject({
       domain: "ground",
       primaryColor: 0xffc52e,
@@ -90,5 +93,7 @@ describe("UnitPanel and Shop presentation contract", () => {
     expect(screen.getAllByText("Tank")).toHaveLength(2);
     expect(screen.getByRole("button", { name: "P1: Páncél" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "P2: Páncél" })).toBeDisabled();
+    expect(document.querySelector(".unit-illustration.facing-right")).toBeInTheDocument();
+    expect(document.querySelector(".unit-illustration.facing-left")).toBeInTheDocument();
   });
 });

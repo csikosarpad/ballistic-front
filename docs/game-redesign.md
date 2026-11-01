@@ -69,6 +69,54 @@ High contrast.
 Suitable for strategy game interface.
 ```
 
+### Referencia szerinti végső vizuális irány
+
+A csatolt referencia alapján a tank végső megjelenése az egyszerű katonai illusztrációnál
+karakteresebb, technikai blueprint/combat dossier hangulatú legyen:
+
+- oldalnézeti, jól olvasható modern harckocsi;
+- sötét, majdnem fekete-kék háttér;
+- vékony arany/narancs főkontúr;
+- világosabb belső technikai vonalak és panelrészletek;
+- jól elkülönülő lánctalp, road wheel-ek, páncéltest és torony;
+- hosszú, hangsúlyos lövegcső;
+- antenna, optikai egység és toronyfelső részletek;
+- enyhén szabálytalan, kézzel rajzolt/katonai concept-art jellegű kontúr;
+- minimális, de erős cyan vagy arany emissive kiemelés a játékos accentje alapján;
+- átlátszó háttér az egység assetben, a környezeti blueprint/HUD-réteget a játék rajzolja.
+
+Az új irányban nem cél a teljes fotórealizmus. A prioritás:
+
+1. távolról is felismerhető tank-sziluett;
+2. erős kontúr és olvasható komponensek;
+3. ResultScreen méretben is részletgazdag megjelenés;
+4. P1/P2 színezhetőség;
+5. későbbi sérülés-, kijelölés- és upgrade-állapotok támogatása.
+
+### Ajánlott végső asset-rétegek
+
+```text
+tank-base-dark
+tank-track-outline
+tank-road-wheels
+tank-hull-outline
+tank-turret-outline
+tank-barrel-outline
+tank-technical-details
+tank-optics-and-antenna
+tank-accent-glow
+tank-damage-overlay
+```
+
+Az arany/narancs referencia-kontúr ne legyen beleégetve minden assetbe. A semleges
+technikai rétegek maradjanak újraszínezhetők, hogy ugyanaz a tank használható legyen:
+
+- P1 cyan;
+- P2 gold/orange;
+- sérült állapot;
+- kijelölt állapot;
+- későbbi space vagy mech presentation.
+
 ### Javasolt SVG rétegek
 
 - `tank-shadow`
@@ -158,7 +206,33 @@ Ez a vizuális átmeneti sáv a háttér és a tényleges terep között.
 - nagyon visszafogott animáció;
 - lövedékek és robbanások mögött jelenjen meg.
 
-### 2.5 Terep
+### 2.5 Szél megjelenítése
+
+A szél egyszerre játékmeneti adat és atmoszferikus környezeti jelzés. A két információs
+szint külön marad:
+
+- a pontos érték és irány a React HUD `WindIndicator` komponensében jelenik meg;
+- a játéktérben a Pixi `WindDustClouds` réteg csak visszafogott vizuális megerősítést ad.
+
+HUD-szabályok:
+
+- pozitív érték: jobbra mutató nyíl;
+- negatív érték: balra mutató nyíl;
+- nulla: szélcsend jelzés;
+- az erősség a numerikus abszolút értékben marad pontos;
+- erős szél esetén az indikátor kiemelése növekedhet, de nem villoghat zavaróan.
+
+Játéktér-szabályok:
+
+- a porfelhők laposak, ritkák és talajközeliek;
+- a porfelhők mozgási iránya a fizikai szél előjelét követi;
+- a sebesség, méret és alpha az abszolút szélértékből származik;
+- a porfelhők a terrain mögött, az atmoszferikus rétegben maradnak;
+- a porfelhők ne hasonlítsanak robbanási füstre: ne emelkedjenek függőlegesen és ne legyen lokális keletkezési pontjuk;
+- reduced-motion módban a réteg statikus vagy rejtett;
+- a trajectory preview továbbra is a tényleges ballisztikai wind értéket használja.
+
+### 2.6 Terep
 
 Ez marad a játékmenet elsődleges geometriai rétege.
 
@@ -182,13 +256,18 @@ Ez marad a játékmenet elsődleges geometriai rétege.
 - [x] ResultScreen HUD és egységfüggetlen presentation rendszer.
 - [x] Pixi UI primitive-ok és háttéreffektek.
 - [x] Tank/space presentation contract tesztek.
-- [ ] Részletesebb tank SVG újratervezése.
-- [ ] `UnitIllustration` több rétegű asset-renderelésének kialakítása.
-- [ ] Csillagos ég réteg hozzáadása.
-- [ ] Távoli hegyek réteg hozzáadása.
-- [ ] Közeli hegyek réteg hozzáadása.
-- [ ] Harctér atmoszferikus réteg hozzáadása.
-- [ ] Terep vizuális rétegének finomítása a fizikai heightmap megtartásával.
+- [ ] Referenciahű, kontúros combat-dossier tank SVG újratervezése.
+- [x] `UnitIllustration` több rétegű asset-renderelésének kialakítása.
+- [x] A tank rétegek neutral/accent színezésének szétválasztása.
+- [x] Optika, antenna és technikai toronyrészletek hozzáadása.
+- [x] A ResultScreen játékosonkénti tankjainak egymás felé fordítása.
+- [x] Csillagos ég réteg hozzáadása.
+- [x] Távoli hegyek réteg hozzáadása.
+- [x] Közeli hegyek réteg hozzáadása.
+- [x] Harctér atmoszferikus réteg hozzáadása.
+- [x] HUD-os `WindIndicator` hozzáadása.
+- [x] Pixi-alapú, visszafogott `WindDustClouds` réteg hozzáadása.
+- [x] Terep vizuális rétegének finomítása a fizikai heightmap megtartásával.
 - [ ] Több viewporton történő vizuális ellenőrzés.
 - [ ] Háttérrétegek teljesítmény- és reduced-motion tesztje.
 

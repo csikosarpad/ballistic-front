@@ -8,6 +8,8 @@ export interface UnitPresentation {
   displayName: string;
   silhouetteAsset?: string;
   secondaryAsset?: string;
+  detailAsset?: string;
+  accentAsset?: string;
   primaryColor: number;
   secondaryColor: number;
   iconSet: string;

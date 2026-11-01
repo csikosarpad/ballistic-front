@@ -19,7 +19,7 @@ export function UnitPanel({ id, profile, presentation, editable, disabled }: Uni
           <strong>{profile.xp} XP</strong>
         </div>
       </div>
-      <UnitIllustration presentation={presentation} />
+      <UnitIllustration presentation={presentation} facing={id === "P2" ? "left" : "right"} />
       <div className="upgrade-list">
         {UPGRADES.map((definition) => (
           <UpgradeRow

@@ -19,3 +19,11 @@
 - A Pixi UI primitive-ok méret- és resize-contract tesztekkel bővültek.
 - A presentation rétegben elkészült a space theme contract: a jövőbeli űrharcos egység tank-specifikus asset nélkül, saját `space-combat` icon settel és státuszpalettával használható.
 - Elkészült a teljes játék vizuális redesign tervének első változata: a ResultScreen dokumentációja mellett külön terv készült a rétegezett játéktérhez és a részletesebb, rétegezett tank SVG-hez.
+- A ResultScreen tank illusztrációja három rétegre bővült: részletes test és lánctalp, külön löveg, valamint kiemelő részletek. A `UnitIllustration` ezeket presentation assetként, egymásra rétegezve rendereli.
+- A felhasználói referencia pontosította a tank art directiont: a következő iteráció célja egy oldalnézeti, arany/narancs kontúros, sötét blueprint/combat dossier jellegű tank, külön optika-, antenna-, technikai részlet- és accent rétegekkel.
+- A tank illusztráció neutral/accent színezése szétvált: a sötét acél testrétegek semlegesek maradnak, a játékos-specifikus cyan/gold/orange színezést külön `tank-accent.svg` réteg kapja.
+- A tank technikai részletei optikával, antennával és toronyfelső elemekkel bővültek. A ResultScreenen P1 jobbra, P2 balra néz, így a két tank vizuálisan egymással szemben áll.
+- A játéktér terrainje mögé bekerült a determinisztikus, meccs-seedből újrarajzolt `BattlefieldLayers`: csillagos ég, távoli és közeli hegyek, valamint visszafogott atmoszferikus harctér-réteg.
+- A terrain vizuális rétege finomodott: felszíni highlight, heightmap-követő talajstratifikációs vonalak és sötétebb mélységi tónusok kerültek a RenderTexture-be, a fizikai heightmap és collision mask változatlanul megmaradt.
+- A szél most HUD-os `WindIndicator` komponensként és visszafogott Pixi `WindDustClouds` háttérrétegként is látható; az irány az előjelet, a sebesség és kiemelés az abszolút erősséget követi.
+- A korábbi szélvonalakat talajközeli, lapos porfelhők váltották fel, hogy a szél vizuális visszajelzése jobban illeszkedjen a katonai sivatagi harctér hangulatához.

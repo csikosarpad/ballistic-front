@@ -33,11 +33,28 @@ export class Terrain {
     shape.moveTo(0, heightmap[0]!);
     heightmap.forEach((y, x) => shape.lineTo(x, y));
     shape.stroke({ width: 4, color: this.colors.grass });
+    shape.moveTo(0, heightmap[0]! - 1);
+    heightmap.forEach((y, x) => shape.lineTo(x, y - 1));
+    shape.stroke({ width: 1, color: this.colors.surfaceHighlight, alpha: 0.7 });
+
+    const strata = new Graphics();
+    for (const offset of [18, 38, 62]) {
+      strata.moveTo(0, Math.min(height - 1, heightmap[0]! + offset));
+      heightmap.forEach((surfaceY, x) => strata.lineTo(x, Math.min(height - 1, surfaceY + offset)));
+      strata.stroke({
+        width: offset === 18 ? 2 : 1,
+        color: offset === 38 ? this.colors.soilLight : this.colors.soilDeep,
+        alpha: offset === 18 ? 0.24 : 0.34,
+      });
+    }
+
+    const terrainVisuals = new Container();
+    terrainVisuals.addChild(shape, strata);
 
     this.texture?.destroy(true);
     this.texture = RenderTexture.create({ width, height });
-    this.renderer.render({ container: shape, target: this.texture });
-    shape.destroy();
+    this.renderer.render({ container: terrainVisuals, target: this.texture });
+    terrainVisuals.destroy({ children: true });
     this.sprite.texture = this.texture;
   }
 

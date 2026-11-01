@@ -75,6 +75,43 @@
   border-radius: 2px;
 }
 
+.wind-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 76px;
+  color: #bdefff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-shadow: 0 0 7px rgba(67, 218, 255, 0.55);
+}
+
+.wind-indicator-label {
+  color: #7eabc6;
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.wind-indicator-arrow {
+  display: inline-block;
+  min-width: 16px;
+  color: #8beeff;
+  font-size: 18px;
+  line-height: 0.8;
+}
+
+.wind-left .wind-indicator-arrow,
+.wind-right .wind-indicator-arrow {
+  color: #ffd34d;
+}
+
+.wind-calm {
+  color: #9eb4c2;
+  text-shadow: none;
+}
+
 .legend-hp::before {
   background: var(--bf-hp);
 }
@@ -351,36 +388,71 @@
   position: relative;
   display: flex;
   justify-content: center;
-  height: 54px;
-  margin: -2px 0 4px;
+  height: 82px;
+  margin: -4px 0 6px;
   opacity: 0.9;
 }
 
+.unit-illustration.facing-left {
+  transform: scaleX(-1);
+}
+
 .unit-illustration-body {
-  width: 140px;
-  height: 70px;
+  width: 224px;
+  height: 98px;
   object-fit: contain;
-  filter: grayscale(1) brightness(1.7) sepia(1) hue-rotate(155deg) saturate(4);
+  filter: brightness(1.08) contrast(1.08);
 }
 
 .unit-illustration-secondary {
   position: absolute;
-  top: 20px;
-  left: calc(50% + 24px);
-  width: 94px;
-  height: 24px;
-  transform: rotate(-4deg);
-  transform-origin: left center;
+  top: 0;
+  left: calc(50% - 112px);
+  width: 224px;
+  height: 98px;
+  object-fit: contain;
+  filter: brightness(1.12) contrast(1.1);
+}
+
+.unit-illustration-details {
+  position: absolute;
+  top: 0;
+  left: calc(50% - 112px);
+  width: 224px;
+  height: 98px;
+  object-fit: contain;
+  filter: brightness(1.08) contrast(1.08);
+  pointer-events: none;
+}
+
+.unit-illustration-accent {
+  position: absolute;
+  top: 0;
+  left: calc(50% - 112px);
+  width: 224px;
+  height: 98px;
+  object-fit: contain;
   filter: grayscale(1) brightness(1.8) sepia(1) hue-rotate(155deg) saturate(4);
+  pointer-events: none;
 }
 
 .unit-illustration.accent-gold .unit-illustration-body,
-.unit-illustration.accent-gold .unit-illustration-secondary {
+.unit-illustration.accent-gold .unit-illustration-secondary,
+.unit-illustration.accent-gold .unit-illustration-details {
+  filter: brightness(1.08) contrast(1.08);
+}
+
+.unit-illustration.accent-gold .unit-illustration-accent {
   filter: grayscale(1) brightness(1.6) sepia(1) hue-rotate(355deg) saturate(4);
 }
 
 .unit-illustration.accent-orange .unit-illustration-body,
-.unit-illustration.accent-orange .unit-illustration-secondary {
+.unit-illustration.accent-orange .unit-illustration-secondary,
+.unit-illustration.accent-orange .unit-illustration-details {
+  filter: brightness(1.08) contrast(1.08);
+}
+
+.unit-illustration.accent-orange .unit-illustration-accent {
   filter: grayscale(1) brightness(1.5) sepia(1) hue-rotate(325deg) saturate(5);
 }
 

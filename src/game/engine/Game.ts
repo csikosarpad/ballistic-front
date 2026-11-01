@@ -18,6 +18,7 @@ import { DEFAULT_THEME, type Theme } from "../theme";
 import { FxRenderer } from "./FxRenderer";
 import { loadFxTextures } from "./fxTextures";
 import { AudioManager } from "./AudioManager";
+import { BattlefieldLayers } from "./BattlefieldLayers";
 import { TurnManager } from "../systems/turnManager";
 import {
   applyDamage,
@@ -63,6 +64,7 @@ export class Game {
   private terrain: Terrain | null = null;
   private tanksGfx = new Graphics();
   private tankLayer = new Container();
+  private battlefieldLayers = new BattlefieldLayers();
   private tankViews = new Map<string, TankView>();
   private tankTextures: { body: Texture; barrel: Texture } | null = null;
   private shellGfx = new Graphics();
@@ -120,6 +122,7 @@ export class Game {
     const backdrop = new Graphics().rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT).fill(this.theme.sky);
     this.app.stage.addChild(
       backdrop,
+      this.battlefieldLayers,
       this.terrain.sprite,
       this.previewGfx,
       this.tankLayer,
@@ -155,6 +158,7 @@ export class Game {
     const width = WORLD_WIDTH;
     const matchSetup = setup ?? { seed: Math.floor(Math.random() * 1_000_000), starterIndex: this.nextStarter };
     this.matchRandom = createSeededRandom(matchSetup.seed);
+    this.battlefieldLayers.draw(WORLD_WIDTH, WORLD_HEIGHT, matchSetup.seed);
     this.terrain.build(WORLD_WIDTH, WORLD_HEIGHT, matchSetup.seed);
     this.tanks = [
       createTank("P1", width * 0.12, this.playerColor(0), 45, this.statsFor("P1")),
@@ -280,6 +284,7 @@ export class Game {
     this.previewActive = false;
     // Új szél minden körben.
     const wind = Math.round((this.matchRandom() - 0.5) * 120);
+    this.battlefieldLayers.setWind(wind);
     useGameStore.getState().sync({ angle: tank.angle, power: tank.power, maxPower: tank.stats.maxPower, wind });
     this.syncStore();
   }
@@ -510,6 +515,7 @@ export class Game {
       this.stepShell();
     }
     this.processPendingMultiplayerEvents();
+    this.battlefieldLayers.update(frameDt);
     this.particles.update(frameDt);
     this.audio?.update();
     this.draw(frameDt);
