@@ -3,6 +3,8 @@ import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
 import { Shop } from "./Shop";
+import { ResultDecorCanvas } from "./result/ResultDecorCanvas";
+import { getUnitPresentation } from "./result/unitPresentation";
 
 /** Meccs végén: győztes, statisztika, bolt és továbblépés. */
 export function ResultScreen() {
@@ -17,6 +19,7 @@ export function ResultScreen() {
   return (
     <div className="overlay">
       <div className="panel result-panel">
+        <ResultDecorCanvas accent={getUnitPresentation(winner ?? "P1").accent} />
         <div className="winner-banner">
           <span className="winner-trophy" aria-hidden="true">
             ★
@@ -55,14 +58,14 @@ export function ResultScreen() {
             {multiplayerError}
           </p>
         )}
-        <div style={{ marginTop: 12 }}>
+        <div className="result-actions">
           {!onlineMatch ? (
-            <button className="btn" onClick={() => gameRef.current?.restart()}>
+            <button className="btn hud-button hud-button-primary" onClick={() => gameRef.current?.restart()}>
               {t("result.rematch")}
             </button>
           ) : credentials.playerId === "P1" ? (
             <button
-              className="btn"
+              className="btn hud-button hud-button-primary"
               disabled={!matchFinished}
               onClick={() => gameRef.current?.requestMultiplayerRematch()}
             >
@@ -72,7 +75,7 @@ export function ResultScreen() {
             <p role="status">{t("result.waitingRematch")}</p>
           )}
           <button
-            className="btn secondary"
+            className="btn secondary hud-button hud-button-secondary"
             onClick={() => {
               if (onlineMatch) useMultiplayerStore.getState().leave();
               setScreen("menu");

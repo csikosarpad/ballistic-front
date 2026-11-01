@@ -8,3 +8,11 @@
 - [x] A referencia szerinti neon sci-fi vizuális stílus és fejlesztési sávok kialakítása.
 - [x] A meglévő offline/online vásárlási és visszavágó-viselkedés megőrzése.
 - [x] Tesztek és production build futtatása.
+
+## Hosszú távú, egységfüggetlen irány
+
+- [ ] A player panel ne tank-specifikus, hanem általános `UnitPanel` komponens legyen.
+- [ ] Az egységkép, az ikonok, a statnevek és az accent színek theme-adatból érkezzenek.
+- [ ] A tank és az űrharcos külön `UnitPresentation` konfigurációt használjon azonos UI-hierarchiával.
+- [ ] Az upgrade-ek üzleti azonosítói váljanak külön a megjelenített nevektől és ikonoktól.
+- [ ] A result képernyő layoutja maradjon platform- és egységfüggetlen, csak a presentation theme változzon.
