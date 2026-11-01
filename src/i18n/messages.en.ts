@@ -49,6 +49,7 @@ export const en: Record<MessageKey, string> = {
 
   "result.wins": "{name} wins!",
   "result.draw": "Draw",
+  "result.goodGame": "GOOD FIGHT!",
   "result.player": "Player",
   "result.shots": "Shots",
   "result.damage": "Damage",
@@ -60,6 +61,8 @@ export const en: Record<MessageKey, string> = {
 
   "shop.max": "(max)",
   "shop.cost": "– {cost} XP",
+  "shop.costShort": "{cost} XP",
+  "shop.totalXp": "TOTAL XP EARNED",
 
   "upgrade.armor.name": "Armor",
   "upgrade.armor.desc": "+{value} armor points; wears down after the shield and does not recharge",
