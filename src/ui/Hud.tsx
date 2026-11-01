@@ -3,6 +3,7 @@ import { MAX_ANGLE, MIN_ANGLE, MIN_POWER, useGameStore } from "@/game/state/game
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
+import { WindIndicator } from "./WindIndicator";
 
 const toCss = (color?: number) => (color === undefined ? "#ffffff" : `#${color.toString(16).padStart(6, "0")}`);
 
@@ -132,7 +133,7 @@ export function Hud() {
       </ul>
       <div>
         {t("hud.turn")} <strong style={{ color: toCss(me?.color) }}>{currentId}</strong> |{" "}
-        {t("hud.move", { value: me?.moveLeft ?? 0 })} | {t("hud.wind")} {wind}
+        {t("hud.move", { value: me?.moveLeft ?? 0 })} | <WindIndicator wind={wind} />
       </div>
       {online && (
         <div role={multiplayerError ? "alert" : "status"}>

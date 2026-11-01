@@ -48,6 +48,7 @@ export const hu = {
 
   "result.wins": "{name} nyert!",
   "result.draw": "Döntetlen",
+  "result.goodGame": "JÓ CSATA VOLT!",
   "result.player": "Játékos",
   "result.shots": "Lövés",
   "result.damage": "Sebzés",
@@ -59,6 +60,8 @@ export const hu = {
 
   "shop.max": "(max)",
   "shop.cost": "– {cost} XP",
+  "shop.costShort": "{cost} XP",
+  "shop.totalXp": "ÖSSZESEN SZERZETT XP",
 
   "upgrade.armor.name": "Páncél",
   "upgrade.armor.desc": "+{value} páncélpont; a pajzs után kopik, nem töltődik vissza",

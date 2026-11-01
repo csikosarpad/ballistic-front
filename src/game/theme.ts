@@ -3,7 +3,14 @@ export interface Theme {
   /** CSS szín, a Pixi háttérnek. */
   background: string;
   sky: number;
-  terrain: { fill: number; grass: number; scorch: number };
+  terrain: {
+    fill: number;
+    grass: number;
+    surfaceHighlight: number;
+    soilDeep: number;
+    soilLight: number;
+    scorch: number;
+  };
   /** Játékosonkénti színek, a csapatindex szerint. */
   players: readonly number[];
   hud: {
@@ -28,7 +35,14 @@ export interface Theme {
 export const DEFAULT_THEME: Theme = {
   background: "#0b1020",
   sky: 0x16224a,
-  terrain: { fill: 0x6b4a2b, grass: 0x3d7a3a, scorch: 0x14100a },
+  terrain: {
+    fill: 0x6b4a2b,
+    grass: 0x3d7a3a,
+    surfaceHighlight: 0x6da64b,
+    soilDeep: 0x3d2a20,
+    soilLight: 0x93643a,
+    scorch: 0x14100a,
+  },
   players: [0x4da3ff, 0xff6b5a],
   hud: {
     hpBack: 0x222222,

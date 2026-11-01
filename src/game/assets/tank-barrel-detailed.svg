@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="140" viewBox="0 0 320 140">
+  <defs>
+    <linearGradient id="barrel" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#6c8998"/>
+      <stop offset=".5" stop-color="#263d4d"/>
+      <stop offset="1" stop-color="#0b1722"/>
+    </linearGradient>
+  </defs>
+  <path d="M146 39 278 20l5 13-130 26z" fill="#050c13" opacity=".85"/>
+  <path d="M145 34 278 15l4 12-132 25z" fill="url(#barrel)" stroke="#93adba" stroke-width="2"/>
+  <path d="m271 16 15-2 5 15-14 3z" fill="#142735" stroke="#9ed3dd" stroke-width="2"/>
+  <path d="m190 28 4 17M211 25l4 16" stroke="#8beeff" stroke-width="2" opacity=".7"/>
+  <path d="m138 40 14-6 10 17-15 5z" fill="#3f5b6d" stroke="#9ab7c4" stroke-width="2"/>
+</svg>

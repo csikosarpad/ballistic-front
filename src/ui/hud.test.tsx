@@ -117,4 +117,13 @@ describe("Hud billentyűk", () => {
     fireEvent.keyDown(window, { key: "ArrowLeft", ctrlKey: true, shiftKey: true });
     expect(angle()).toBe(180);
   });
+
+  it("a szélindikátor az előjelet iránnyal, az erősséget abszolút értékkel mutatja", () => {
+    act(() => useGameStore.setState({ wind: -42 }));
+    expect(screen.getByRole("status", { name: "Szél: -42" })).toHaveTextContent("←");
+    expect(screen.getByRole("status", { name: "Szél: -42" })).toHaveTextContent("42");
+
+    act(() => useGameStore.setState({ wind: 0 }));
+    expect(screen.getByRole("status", { name: "Szél: 0" })).toHaveTextContent("—");
+  });
 });
