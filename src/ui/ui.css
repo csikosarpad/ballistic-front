@@ -874,47 +874,158 @@
 }
 
 .multiplayer-panel {
-  width: min(420px, calc(100vw - 32px));
+  width: min(440px, calc(100vw - 32px));
   min-width: 0;
+}
+
+.lobby-header h2 {
+  margin: 0;
+  color: #e4f7ff;
+  font-size: clamp(20px, 5vw, 28px);
+  font-style: italic;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 0 16px rgba(67, 218, 255, 0.45);
+}
+
+.lobby-body {
+  display: grid;
+  gap: 4px;
+  margin-top: 18px;
+}
+
+.multiplayer-panel .lobby-body .btn {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 42px;
+  margin: 0;
+  border: 1px solid rgba(67, 218, 255, 0.9);
+  border-radius: 2px 8px;
+  background: linear-gradient(180deg, rgba(27, 119, 153, 0.9), rgba(8, 51, 79, 0.96));
+  color: #e4f9ff;
+  text-align: left;
+  letter-spacing: 0.5px;
+  box-shadow: inset 0 0 16px rgba(36, 216, 255, 0.12);
+}
+
+.multiplayer-panel .lobby-body .btn.secondary {
+  border-color: rgba(69, 190, 231, 0.58);
+  background: linear-gradient(180deg, rgba(20, 74, 103, 0.86), rgba(6, 32, 54, 0.94));
+  color: #c9f3ff;
+  box-shadow: none;
+}
+
+.multiplayer-panel .lobby-body .btn:hover:not(:disabled) {
+  border-color: #9ceeff;
+  box-shadow: 0 0 12px rgba(36, 216, 255, 0.2);
+}
+
+.multiplayer-panel .lobby-body .btn:disabled {
+  border-color: rgba(91, 177, 210, 0.22);
+  background: rgba(14, 30, 46, 0.7);
+  color: #6f8797;
+  box-shadow: none;
+  cursor: default;
+}
+
+.main-menu-panel .btn.main-menu-back {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 42px;
+  margin: 20px 0 0;
+  border: 1px solid rgba(91, 177, 210, 0.32);
+  border-radius: 2px 8px;
+  background: linear-gradient(180deg, rgba(20, 74, 103, 0.6), rgba(6, 32, 54, 0.8));
+  color: #a9c8d6;
+  text-align: left;
+  letter-spacing: 0.5px;
+}
+
+.main-menu-panel .btn.main-menu-back:hover {
+  border-color: #9ceeff;
+  color: #c9f3ff;
+}
+
+.multiplayer-panel .btn:focus-visible,
+.lobby-field input:focus-visible {
+  outline: 2px solid #ffe27a;
+  outline-offset: 3px;
 }
 
 .lobby-field {
   display: grid;
   gap: 6px;
-  margin: 12px auto;
+  margin: 8px 0;
+  color: #9ac8dc;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
   text-align: left;
+  text-transform: uppercase;
 }
 
 .lobby-field input {
   box-sizing: border-box;
   width: 100%;
-  padding: 9px 10px;
-  border: 1px solid var(--bf-border);
-  border-radius: 4px;
-  background: var(--bf-input-bg);
-  color: var(--bf-text);
+  padding: 10px 12px;
+  border: 1px solid rgba(69, 190, 231, 0.5);
+  border-radius: 2px 6px;
+  background: rgba(3, 14, 28, 0.9);
+  color: #e4f7ff;
   font: inherit;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  text-transform: none;
+}
+
+.lobby-field input:focus {
+  border-color: #9ceeff;
+  box-shadow: 0 0 10px rgba(36, 216, 255, 0.25);
 }
 
 .lobby-divider {
   height: 1px;
-  margin: 16px 0;
-  background: var(--bf-divider);
+  margin: 14px 0 10px;
+  background: rgba(91, 177, 210, 0.3);
 }
 
 .lobby-room {
-  margin: 20px 0;
+  display: grid;
+  gap: 8px;
+  margin: 4px 0;
+  color: #b8d7e5;
+  text-align: center;
+}
+
+.lobby-room p {
+  margin: 0;
 }
 
 .lobby-code-label {
-  margin-bottom: 4px;
+  color: #83b9d1;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .lobby-code {
   display: block;
-  font-size: 32px;
-  letter-spacing: 4px;
+  padding: 10px 8px;
+  border: 1px solid rgba(255, 211, 77, 0.5);
+  border-radius: 2px 8px;
+  background: rgba(3, 14, 28, 0.9);
+  box-shadow: inset 0 0 14px rgba(255, 211, 77, 0.08);
   color: var(--bf-highlight);
+  font-size: 34px;
+  letter-spacing: 8px;
+  text-indent: 8px;
+  text-shadow: 0 0 12px rgba(255, 211, 77, 0.4);
+}
+
+.lobby-players {
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .lobby-players span {
@@ -922,8 +1033,18 @@
   color: var(--bf-muted);
 }
 
+.lobby-room small {
+  color: #77a9c2;
+}
+
 .lobby-error {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 139, 130, 0.5);
+  border-radius: 2px 6px;
+  background: rgba(60, 14, 18, 0.5);
   color: var(--bf-error);
+  text-align: left;
 }
 
 .btn {

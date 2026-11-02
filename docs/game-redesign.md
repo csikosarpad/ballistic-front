@@ -366,6 +366,7 @@ termékdöntés, adatmodell/protokoll-elemzés és saját TODO után kerülhet b
 - [x] Paletta átvezetése a `theme.ts`-be: sötét bazalt-kék terep ciánkék felszíni éllel, hűvösebb ég, ciános lövedék/robbanás/por, a játékosszínek változatlanok.
 - [x] Tank átszínezése: új, szögletes `tank-body.svg` / `tank-barrel.svg` (ugyanaz a méret és kötés, a játékosszín-tint megmarad), hűvös fémtónus és ciános fényelem; fizika és hitbox változatlan.
 - [x] Háttérrétegek (`BattlefieldLayers.ts`) kontrasztjának finomítása: a távoli hegyek világosabb kékes sziluettek, a közeliek sötétebbek (mélységhatás), a légköri téglalap éles széle megszűnt. A `BattlefieldProps.ts` nem változott.
+- [x] Online játék (lobby) képernyő átállítva a Siege Protocol panelstílusra: címfejléc, beviteli mezők, szobakód-kijelző, hibaüzenet, egységes gombok; a lobby-logika változatlan.
 - [ ] Új sziluett/részletes tank csak jóváhagyott vizuális irány után.
 
 ### Tipográfia / fontkészlet TODO

@@ -54,60 +54,68 @@ export function MultiplayerLobby({ onBack, onStartMatch }: MultiplayerLobbyProps
   };
 
   return (
-    <div className="panel multiplayer-panel">
-      <h2>{t("lobby.title")}</h2>
-      {!credentials || !session ? (
-        <>
-          <label className="lobby-field">
-            {t("lobby.playerName")}
-            <input maxLength={24} value={playerName} onChange={(event) => setPlayerName(event.target.value)} />
-          </label>
-          <button className="btn" disabled={busy || !playerName.trim()} onClick={() => void create(playerName.trim())}>
-            {t("lobby.create")}
-          </button>
-          <div className="lobby-divider" />
-          <label className="lobby-field">
-            {t("lobby.roomCode")}
-            <input
-              autoCapitalize="characters"
-              maxLength={6}
-              value={roomCode}
-              onChange={(event) => setRoomCode(event.target.value.toUpperCase())}
-            />
-          </label>
-          <button
-            className="btn secondary"
-            disabled={busy || !playerName.trim() || roomCode.trim().length !== 6}
-            onClick={() => void join(roomCode, playerName.trim())}
-          >
-            {t("lobby.join")}
-          </button>
-        </>
-      ) : (
-        <div className="lobby-room" aria-live="polite">
-          <p className="lobby-code-label">{t("lobby.roomCode")}</p>
-          <strong className="lobby-code">{session.code}</strong>
-          <p>{session.status === "waiting" ? t("lobby.waitingForGuest") : t("lobby.bothJoined")}</p>
-          <p className="lobby-players">
-            {session.players.P1 ?? t("lobby.slotWaiting", { id: "P1" })} <span>{t("lobby.versus")}</span>{" "}
-            {session.players.P2 ?? t("lobby.slotWaiting", { id: "P2" })}
-          </p>
-          {session.status === "ready" && credentials.playerId === "P1" && (
-            <button className="btn" disabled={busy} onClick={startMatch}>
-              {t("lobby.startMatch")}
+    <div className="panel main-menu-panel multiplayer-panel">
+      <header className="main-menu-header lobby-header">
+        <h2>{t("lobby.title")}</h2>
+      </header>
+      <div className="lobby-body">
+        {!credentials || !session ? (
+          <>
+            <label className="lobby-field">
+              {t("lobby.playerName")}
+              <input maxLength={24} value={playerName} onChange={(event) => setPlayerName(event.target.value)} />
+            </label>
+            <button
+              className="btn"
+              disabled={busy || !playerName.trim()}
+              onClick={() => void create(playerName.trim())}
+            >
+              {t("lobby.create")}
             </button>
-          )}
-          {session.status === "ready" && credentials.playerId === "P2" && <small>{t("lobby.waitingForHost")}</small>}
-          {session.status === "playing" && <small>{t("lobby.matchStarting")}</small>}
-          {session.status === "finished" && <small>{t("lobby.restoring")}</small>}
-        </div>
-      )}
-      {error && (
-        <p className="lobby-error" role="alert">
-          {error}
-        </p>
-      )}
-      <button className="btn secondary" onClick={back}>
+            <div className="lobby-divider" />
+            <label className="lobby-field">
+              {t("lobby.roomCode")}
+              <input
+                autoCapitalize="characters"
+                maxLength={6}
+                value={roomCode}
+                onChange={(event) => setRoomCode(event.target.value.toUpperCase())}
+              />
+            </label>
+            <button
+              className="btn secondary"
+              disabled={busy || !playerName.trim() || roomCode.trim().length !== 6}
+              onClick={() => void join(roomCode, playerName.trim())}
+            >
+              {t("lobby.join")}
+            </button>
+          </>
+        ) : (
+          <div className="lobby-room" aria-live="polite">
+            <p className="lobby-code-label">{t("lobby.roomCode")}</p>
+            <strong className="lobby-code">{session.code}</strong>
+            <p>{session.status === "waiting" ? t("lobby.waitingForGuest") : t("lobby.bothJoined")}</p>
+            <p className="lobby-players">
+              {session.players.P1 ?? t("lobby.slotWaiting", { id: "P1" })} <span>{t("lobby.versus")}</span>{" "}
+              {session.players.P2 ?? t("lobby.slotWaiting", { id: "P2" })}
+            </p>
+            {session.status === "ready" && credentials.playerId === "P1" && (
+              <button className="btn" disabled={busy} onClick={startMatch}>
+                {t("lobby.startMatch")}
+              </button>
+            )}
+            {session.status === "ready" && credentials.playerId === "P2" && <small>{t("lobby.waitingForHost")}</small>}
+            {session.status === "playing" && <small>{t("lobby.matchStarting")}</small>}
+            {session.status === "finished" && <small>{t("lobby.restoring")}</small>}
+          </div>
+        )}
+        {error && (
+          <p className="lobby-error" role="alert">
+            {error}
+          </p>
+        )}
+      </div>
+      <button className="btn secondary main-menu-back" onClick={back}>
         {t("lobby.back")}
       </button>
     </div>
