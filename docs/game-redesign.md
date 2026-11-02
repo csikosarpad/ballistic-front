@@ -348,6 +348,31 @@ Az első implementációs kör célja a meglévő állapotok új, egységes megj
 játékmeneti funkciók vagy profil-/progressziórendszer bevezetése. Új funkció csak külön
 termékdöntés, adatmodell/protokoll-elemzés és saját TODO után kerülhet be.
 
+### Siege Platform átalakíthatósági vizsgálat
+
+- [ ] Felmérni, hogy a jelenlegi gameplay-képernyő mely UI-elemei nevezhetők és rendezhetők át
+      közvetlenül a Siege Protocol világába, és melyek igényelnek új vizuális koncepciót.
+- [ ] Megvizsgálni a tank body/barrel SVG-rétegeket, sziluettet, játékosaccenteket és
+      csőanimációt: elegendők-e célzott grafikai módosítások, vagy új Siege Platform asset/API kell.
+- [ ] Rögzíteni, hogy az első Siege Platform-változat a jelenlegi tank fizikáját és
+      viselkedését használja; külön választani a későbbi, mechanikus `Tank` → új egységmodell
+      átnevezéstől és a többféle platform támogatásától.
+- [ ] A vizsgálat eredményeként javasolt, kis kockázatú implementációs lépéseket és becsült
+      ráfordítást felvenni a Roadmapbe; új assetkészítés előtt megállni a vizuális irány
+      jóváhagyásáig.
+
+### Tipográfia / fontkészlet TODO
+
+Javaslat: **Oxanium** (UI és címek), **Orbitron** (logó), **Rajdhani** (HUD adatok). Mind
+SIL OFL 1.1 licencű. Ellenőrzött tény: az Orbitron csak `latin` subsetet tartalmaz, ezért az
+ő/ű karaktereket nem tudja megjeleníteni; csak ékezetmentes logófeliratra használható.
+
+- [x] Döntés: Oxanium + Rajdhani; az Orbitron egyelőre nem kerül be (logó később, ha kell).
+- [x] Önálló hosztolás `@fontsource` csomagokkal (`latin` + `latin-ext`, csak a használt súlyok).
+- [x] CSS változók (`--bf-font-ui`, `--bf-font-data`) és fallback stack; `ui.css` és `Hud.tsx` cserélve.
+- [x] Ellenőrzés: magyar ékezetek (latin-ext betöltve), menü és HUD böngészőben; a HUD apró feliratai Rajdhanival kisebbnek hatnak, finomhangolásra érdemesek.
+- [x] Licenc és forrás rögzítése a README-ben.
+
 ### Meglévő technikai alap
 
 - A játékteret a Pixi engine rajzolja, a HUD-ot és a képernyőket React kezeli; a renderernek

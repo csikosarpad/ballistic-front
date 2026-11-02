@@ -87,6 +87,8 @@ A robbanás- és füstsprite-ok a [Kenney Particle Pack](https://kenney.nl/asset
 
 A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalról származó, Creative Commons 0 (CC0) licenc szerinti forrásokból készültek. A WAV/FLAC fájlok OGG formátumba konvertálásához a [FreeConvert OGG Converter](https://www.freeconvert.com/ogg-converter/) eszközt használtam. A konvertálás a fájlméret és a webes betöltés optimalizálását szolgálja; a játék futásidejű hangbetöltése az OGG fájlokra hivatkozik. Az egyes eredeti Freesound-oldalak és szerzők még nincsenek fájlonként rögzítve, ezért publikálás előtt ezeket külön ellenőrizni kell.
 
+A betűtípusok az **Oxanium** (UI) és a **Rajdhani** (HUD adatok), SIL Open Font License 1.1 alatt, a [Fontsource](https://fontsource.org) csomagokból önállóan hosztolva (`@fontsource/oxanium`, `@fontsource/rajdhani`).
+
 ## Nyelvek
 
 A felület magyarul és angolul érhető el. Az első indításkor a böngésző nyelve dönt (magyar böngészőnél magyar, egyébként angol), a választás a főmenüben módosítható, és `localStorage`-ban (`ballistic-front:locale`) marad meg.

@@ -16,6 +16,8 @@
   --bf-shield: #4dd0ff;
   --bf-armor: #ffb347;
   --bf-stripe-back: #222;
+  --bf-font-ui: "Oxanium", "Segoe UI", system-ui, sans-serif;
+  --bf-font-data: "Rajdhani", "Oxanium", "Segoe UI", system-ui, sans-serif;
 }
 
 .hud-unit {
@@ -38,7 +40,7 @@
 }
 
 .hud-unit-heading {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.5px;
 }
@@ -79,7 +81,7 @@
   min-width: 100px;
   justify-content: center;
   color: #e2f8ff;
-  font-size: 15px;
+  font-size: 19px;
   font-weight: 700;
   letter-spacing: 0.6px;
   text-shadow: 0 0 8px rgba(67, 218, 255, 0.55);
@@ -87,7 +89,7 @@
 
 .wind-indicator-label {
   color: #83b9d1;
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
@@ -167,7 +169,7 @@
   flex-wrap: wrap;
   gap: 6px;
   color: #b8d7e5;
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 0.45px;
   text-transform: uppercase;
 }
@@ -179,7 +181,7 @@
 .hud-status-message {
   max-width: 100%;
   color: #9ed5e8;
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
@@ -217,7 +219,7 @@
   align-items: center;
   gap: 10px;
   color: #c8e8f4;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -252,7 +254,7 @@
   border-radius: 3px 8px;
   background: linear-gradient(180deg, rgba(24, 87, 119, 0.82), rgba(8, 35, 61, 0.9));
   color: #c9f3ff;
-  font-size: 10px;
+  font-size: 13px;
   line-height: 1.15;
   text-align: center;
   text-shadow: 0 0 7px rgba(65, 214, 255, 0.45);
@@ -306,8 +308,15 @@
   place-items: center;
   background: var(--bf-overlay);
   color: var(--bf-text);
-  font: 15px sans-serif;
+  font: 15px var(--bf-font-ui);
   animation: fade-in 0.3s ease-out;
+}
+
+.overlay button,
+.overlay input,
+.overlay select,
+.battle-hud button {
+  font-family: inherit;
 }
 
 .panel {
@@ -1052,7 +1061,7 @@
   }
 
   .hud-unit-heading {
-    font-size: 11px;
+    font-size: 13px;
   }
 
   .hud-top-center {
@@ -1075,7 +1084,7 @@
   .hud-control {
     grid-template-columns: 1fr;
     gap: 3px;
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .hud-control input[type="range"] {
@@ -1090,7 +1099,7 @@
   .hud-actions button {
     min-height: 48px;
     padding: 4px 3px;
-    font-size: 9px;
+    font-size: 11px;
     overflow-wrap: anywhere;
   }
 

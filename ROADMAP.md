@@ -19,6 +19,37 @@ Hosszú távú cél: sci-fi, Galaxy Tactics-hoz hasonló látvány (több karakt
 - Az átnevezések külön, tisztán mechanikus commitban készülnek.
 - A hot-seat mód megmarad.
 
+## Designirány – Siege Platform
+
+A jelenlegi tankok fokozatosan a Solvyr Prime világába illő **Siege Platform** egységidentitást
+kapjanak. Ez elsősorban vizuális és terminológiai átpozicionálás: a mostani szárazföldi,
+ágyús platform maradjon felismerhető, de ne egy valós tank közvetlen megfelelőjeként jelenjen
+meg. A „Siege Platform” legyen később bővíthető egységcsalád, amelyhez eltérő fegyverzetű,
+páncélzatú vagy akár más működési tartományú platformok is tartozhatnak.
+
+- A játékos felé használt elnevezések és illusztrációk különüljenek el a jelenlegi belső
+  `Tank` entitás- és fájlnevektől; a mechanikus átnevezés külön, későbbi feladat.
+- Az első vizuális változat ne módosítsa a ballisztikát, a terepütközést, a mozgást, a
+  mentéseket vagy a multiplayer protokollt.
+- A gameplay-képernyő és a jelenlegi tankassetek Siege Protocol-világba illeszthetőségét
+  külön vizsgálat rögzítse, mielőtt új egységasset vagy animáció készül.
+- A csatolt terveken szereplő **Siege Platform A-1 / B-2** koncepció vizuális referencia,
+  nem végleges modell- vagy osztálynév-döntés.
+
+## Designirány – Tipográfia
+
+Javasolt, ingyenes (SIL OFL 1.1) fontkészlet a modern military sci-fi hangulathoz:
+
+| Szerep                   | Font         | Használat                        | Megjegyzés                                                     |
+| ------------------------ | ------------ | -------------------------------- | -------------------------------------------------------------- |
+| Elsődleges UI / címek    | **Oxanium**  | menü, panelcímek, gombok, shop   | `latin-ext` van: ő/ű támogatott                                |
+| Logó / nagy cím akcentus | **Orbitron** | „SOLVYR PRIME”, „SIEGE PROTOCOL” | csak `latin`: **nincs ő/ű**, ezért csak ékezetmentes feliratra |
+| HUD adatok / kis méret   | **Rajdhani** | HP, pajzs, páncél, XP, szél      | `latin-ext` van; kis méretben jól olvasható                    |
+
+- Önálló hosztolás (pl. `@fontsource`) a Google Fonts CDN helyett: nincs külső kérés/GDPR-kockázat, offline is működik.
+- Csak a használt betűsúlyok és subsetek (`latin`, `latin-ext`) kerüljenek be; `font-display: swap`, rendszerfont fallback.
+- Fontbevezetés nem módosíthat játékmenetet; a HUD-méretek és a mobil elrendezés a betűméret-különbségek miatt újraellenőrzendők.
+
 ## Döntések
 
 - **Védelmi modell**: három réteg kopik sorban: erőtér pajzs → fizikai páncélpontok → HP, 1:1 arányban. A pajzs körönként visszatöltődik, a páncél nem. A sorrendet egyetlen tiszta függvény rögzíti, tesztekkel.
@@ -54,7 +85,7 @@ Hosszú távú cél: sci-fi, Galaxy Tactics-hoz hasonló látvány (több karakt
 
 ### M2 – Egységmodell
 
-- [ ] `Tank` → `Soldier` mechanikus átnevezés (külön commit)
+- [ ] A belső `Tank` entitásnév egységmodellhez igazítása; a végleges fogalmi célnevet a Siege Platform modellel összehangolni (külön, mechanikus commit)
 - [ ] Több egység csapatonként, csapatkezelés a turn managerben
 - [ ] Protokoll és snapshot bővítése (csapat, egység azonosító)
 - [ ] Célzó kar/fegyver animáció a csőanimáció helyett, placeholder sprite-ok
@@ -94,6 +125,7 @@ Hosszú távú cél: sci-fi, Galaxy Tactics-hoz hasonló látvány (több karakt
 - [x] Neon, sci-fi katonai HUD és additív vizuális effektek első rétege
 - [x] Rétegezett csillagos ég-, hegy-, atmoszféra- és terrain-megjelenítés
 - [x] OGG hangassetek bevezetése és webes betöltésre optimalizálása
+- [ ] Siege Platform vizuális megvalósíthatósági vizsgálata: gameplay-képernyő, egységsziluett, SVG-rétegek és animációk; játékmeneti és multiplayer-viselkedés változatlanul hagyásával
 - [ ] Neon, additív blend (erőtér-villanás, pajzsbuborék)
 - [ ] Parallax világűr-háttér
 - [ ] Sötét cyberpunk UI továbbfejlesztése

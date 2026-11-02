@@ -107,7 +107,7 @@ export function Hud() {
       style={{
         ...({ "--accent": toCss(me?.color) } as CSSProperties),
         color: "#fff",
-        font: "14px sans-serif",
+        font: "600 15px var(--bf-font-data)",
       }}
     >
       <div className="hud-top">
