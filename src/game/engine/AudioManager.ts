@@ -11,6 +11,7 @@ const MASTER_VOLUME = 0.6;
 const MOVE_VOLUME = 0.5;
 /** A mozgáshang ennyi ideig marad meg az utolsó lépés után (a billentyű-ismétlés késése miatt). */
 const MOVE_HOLD_MS = 250;
+const GESTURES = ["pointerup", "touchend", "click", "keydown"] as const;
 
 /** Web Audio alapú hangkezelő; a böngésző szabálya miatt az első kattintásra/billentyűre éled fel. */
 export class AudioManager {
@@ -21,10 +22,14 @@ export class AudioManager {
   private moveGate = new HoldGate(MOVE_HOLD_MS);
   private unsubscribe: () => void;
   private onGesture = () => void this.unlock();
+  private onVisible = () => {
+    if (!document.hidden && this.ctx && this.ctx.state !== "running") void this.ctx.resume().catch(() => {});
+  };
 
   constructor() {
-    window.addEventListener("pointerdown", this.onGesture);
-    window.addEventListener("keydown", this.onGesture);
+    // Mobilon a pointerdown/touchstart nem számít felhasználói aktivációnak; a felengedés/koppintás igen.
+    for (const type of GESTURES) window.addEventListener(type, this.onGesture);
+    document.addEventListener("visibilitychange", this.onVisible);
     this.unsubscribe = useGameStore.subscribe((s) => this.applyMute(s.muted));
   }
 
@@ -32,16 +37,24 @@ export class AudioManager {
     if (this.master) this.master.gain.value = muted ? 0 : MASTER_VOLUME;
   }
 
+  private removeGestureListeners(): void {
+    for (const type of GESTURES) window.removeEventListener(type, this.onGesture);
+  }
+
   private async unlock(): Promise<void> {
-    if (this.ctx) return;
-    window.removeEventListener("pointerdown", this.onGesture);
-    window.removeEventListener("keydown", this.onGesture);
+    if (this.ctx) {
+      // Felfüggesztett (pl. háttérbe került vagy tájolásváltáson átesett) kontextus újraélesztése.
+      if (this.ctx.state !== "running") await this.ctx.resume().catch(() => {});
+      if (this.ctx.state === "running") this.removeGestureListeners();
+      return;
+    }
     const ctx = new AudioContext();
     this.ctx = ctx;
     this.master = ctx.createGain();
     this.master.connect(ctx.destination);
     this.applyMute(useGameStore.getState().muted);
-    await ctx.resume();
+    await ctx.resume().catch(() => {});
+    if (ctx.state === "running") this.removeGestureListeners();
 
     await Promise.all(
       (Object.keys(URLS) as SoundName[]).map(async (name) => {
@@ -102,8 +115,8 @@ export class AudioManager {
   }
 
   destroy(): void {
-    window.removeEventListener("pointerdown", this.onGesture);
-    window.removeEventListener("keydown", this.onGesture);
+    this.removeGestureListeners();
+    document.removeEventListener("visibilitychange", this.onVisible);
     this.unsubscribe();
     this.stopMove();
     void this.ctx?.close();
