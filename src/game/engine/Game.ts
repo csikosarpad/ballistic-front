@@ -11,6 +11,7 @@ import {
   type BallisticBody,
 } from "../physics/ballistics";
 import { PreviewAllowance } from "../systems/previewAllowance";
+import { dragToAim, DRAG_POWER_PER_PX } from "../systems/dragAim";
 import { createSeededRandom, type MatchSetup } from "../systems/seededRandom";
 import { Terrain } from "../terrain/Terrain";
 import { ParticleSystem } from "../systems/particles";
@@ -51,6 +52,8 @@ const PREVIEW_GAP = 4;
 const SELF_HIT_GRACE = 30;
 /** A cső forgáspontja a tank talajszintje fölött (px); egyezik a tank.ts-ben lévővel. */
 const BARREL_PIVOT_HEIGHT = 10;
+/** Ekkora (képernyő-px) sugarú körben a tank körül indított húzás célzást jelent. */
+const DRAG_GRAB_RADIUS = 64;
 
 interface TankView {
   root: Container;
@@ -74,6 +77,7 @@ export class Game {
   private previewGfx = new Graphics();
   private previewAllowance = new PreviewAllowance();
   private previewActive = false;
+  private dragPointerId: number | null = null;
   private theme: Theme = DEFAULT_THEME;
   private particles = new ParticleSystem(Math.random, this.theme.fx);
   private tanks: Tank[] = [];
@@ -100,11 +104,13 @@ export class Game {
     // Ha az init közben unmountoltak (StrictMode), azonnal takarítunk.
     if (this.destroyed) return this.app.destroy(true);
     host.appendChild(this.app.canvas);
+    this.setupDragAim(this.app.canvas);
 
     const [body, barrel, fxTextures] = await Promise.all([
       Assets.load<Texture>({ src: tankBodyUrl, data: { resolution: 3 } }),
       Assets.load<Texture>({ src: tankBarrelUrl, data: { resolution: 3 } }),
       loadFxTextures(),
+      this.battlefieldLayers.loadAssets(),
     ]);
     // Az asset-betöltés alatt is megszúnhetett a komponens (StrictMode).
     if (this.destroyed) return;
@@ -131,6 +137,7 @@ export class Game {
       this.shellGlow,
       this.fx.layer,
     );
+    this.battlefieldLayers.setMotionEnabled(!window.matchMedia("(prefers-reduced-motion: reduce)").matches);
     this.layout();
     const pendingStart = this.pendingMultiplayerStart;
     if (pendingStart) this.startMultiplayer(pendingStart.setup, pendingStart.profiles, pendingStart.revision);
@@ -150,6 +157,42 @@ export class Game {
     const scale = Math.min(width / WORLD_WIDTH, height / WORLD_HEIGHT);
     this.app.stage.scale.set(scale);
     this.app.stage.position.set((width - WORLD_WIDTH * scale) / 2, (height - WORLD_HEIGHT * scale) / 2);
+  }
+
+  /** Húzásos célzás: a soron lévő tank közeléből indított húzás iránya a szög, hossza az erő. */
+  private setupDragAim(canvas: HTMLCanvasElement): void {
+    canvas.style.touchAction = "none";
+    const toWorld = (e: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const { scale, position } = this.app.stage;
+      return { x: (e.clientX - rect.left - position.x) / scale.x, y: (e.clientY - rect.top - position.y) / scale.y };
+    };
+    const pivot = () => ({ x: this.current.x, y: this.current.y - BARREL_PIVOT_HEIGHT });
+    const aimTo = (e: PointerEvent) => {
+      const { angle, power } = dragToAim(pivot(), toWorld(e), useGameStore.getState().maxPower);
+      useGameStore.getState().setAim(angle, power);
+    };
+    const end = (e: PointerEvent) => {
+      if (e.pointerId !== this.dragPointerId) return;
+      this.dragPointerId = null;
+      canvas.releasePointerCapture?.(e.pointerId);
+    };
+
+    canvas.addEventListener("pointerdown", (e) => {
+      if (this.dragPointerId !== null || this.turns.phase !== "aiming" || !this.canControlCurrentTurn()) return;
+      const p = pivot();
+      const w = toWorld(e);
+      const grab = DRAG_GRAB_RADIUS / this.app.stage.scale.x;
+      if (Math.hypot(w.x - p.x, w.y - p.y) > grab) return;
+      this.dragPointerId = e.pointerId;
+      canvas.setPointerCapture?.(e.pointerId);
+      aimTo(e);
+    });
+    canvas.addEventListener("pointermove", (e) => {
+      if (e.pointerId === this.dragPointerId && this.turns.phase === "aiming") aimTo(e);
+    });
+    canvas.addEventListener("pointerup", end);
+    canvas.addEventListener("pointercancel", end);
   }
 
   /** Új meccs: terep újragenerálása, tankok újraszórása. */
@@ -174,7 +217,7 @@ export class Game {
     );
     this.nextStarter = (starterIndex + 1) % this.tanks.length;
     this.matchStats = newMatchStats(this.tanks.map((t) => t.id));
-    this.previewAllowance.reset();
+    this.previewAllowance.reset(Object.fromEntries(this.tanks.map((tank) => [tank.id, tank.stats.previewCharges])));
     this.shell = null;
     this.beginTurn();
   }
@@ -311,6 +354,7 @@ export class Game {
       profiles: { ...this.profiles },
       matchStats: this.matchStats,
       previewAvailable: this.turns.phase === "aiming" && this.previewAllowance.canUse(this.turns.current),
+      previewRemaining: this.previewAllowance.remainingFor(this.turns.current),
       previewActive: this.previewActive,
     });
   }
@@ -463,6 +507,7 @@ export class Game {
   private explode(x: number, y: number): void {
     const shooter = this.current;
     const radius = shooter.stats.blastRadius;
+    this.battlefieldLayers.reactToImpact(Math.min(1, radius / 80));
     this.terrain?.carve(x, y, radius);
     this.particles.spawnExplosion(x, y, radius);
     this.audio?.play("explosion", { rate: 0.9 + Math.random() * 0.2 });
@@ -552,6 +597,20 @@ export class Game {
     if (filled > 0) this.tanksGfx.rect(x - 14, y, filled, 3).fill(color);
   }
 
+  /** Húzás közben vonal a cső forgásponttól a célzott erőnek megfelelő pontig. */
+  private drawDragGuide(tank: Tank): void {
+    const { angle, power } = useGameStore.getState();
+    const rad = (angle * Math.PI) / 180;
+    const length = power / DRAG_POWER_PER_PX;
+    const px = tank.x;
+    const py = tank.y - BARREL_PIVOT_HEIGHT;
+    const ex = px + Math.cos(rad) * length;
+    const ey = py - Math.sin(rad) * length;
+    const color = this.theme.hud.previewLine;
+    this.tanksGfx.moveTo(px, py).lineTo(ex, ey).stroke({ width: 2, color, alpha: 0.85 });
+    this.tanksGfx.circle(ex, ey, 7).fill({ color, alpha: 0.9 });
+  }
+
   private draw(dt: number): void {
     const aiming = this.turns.phase === "aiming";
     const aimAngle = useGameStore.getState().angle;
@@ -589,6 +648,7 @@ export class Game {
       if (t.id === this.turns.current && this.turns.phase === "aiming") {
         const my = top - 8;
         this.tanksGfx.poly([t.x - 4, my, t.x + 4, my, t.x, my + 6]).fill(this.theme.hud.turnMarker);
+        if (this.dragPointerId !== null) this.drawDragGuide(t);
       }
     }
 

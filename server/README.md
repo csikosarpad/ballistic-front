@@ -1,4 +1,4 @@
-# Ballistic Front multiplayer backend
+# Solvyr Prime: Siege Protocol – multiplayer backend
 
 Ez a mappa a körökre osztott multiplayer első verziójának PHP/MySQL backendjét tartalmazza. A backend szobákat hoz létre, kezeli a két játékos csatlakozását, és verziózott eseménynaplót tárol. A játék fizikáját továbbra is a kliensek futtatják.
 

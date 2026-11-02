@@ -21,12 +21,14 @@ export function UpgradeRow({ playerId, profile, definition, editable, disabled, 
   const level = profile.levels[definition.id] ?? 0;
   const maxed = level >= definition.maxLevel;
   const cost = upgradeCost(definition, level);
+  const unaffordable = !maxed && profile.xp < cost;
+  const purchasable = !disabled && editable && !maxed && !unaffordable;
   const name = t(`upgrade.${definition.id}.name` as MessageKey);
   const value = definition.stat === "damage" ? Math.round(definition.perLevel * 100) : definition.perLevel;
   const presentation = getUpgradePresentation(definition.id, iconSet);
 
   return (
-    <div className="upgrade-row">
+    <div className={`upgrade-row${unaffordable ? " is-unaffordable" : ""}`}>
       <UpgradeIcon upgradeId={definition.id} iconSet={iconSet} />
       <div className="upgrade-label">
         <strong>{name}</strong>
@@ -39,8 +41,8 @@ export function UpgradeRow({ playerId, profile, definition, editable, disabled, 
         </span>
         <button
           aria-label={`${playerId}: ${name}`}
-          className={maxed ? "upgrade-buy maxed" : "upgrade-buy"}
-          disabled={disabled || !editable || maxed || profile.xp < cost}
+          className={`upgrade-buy${maxed ? " maxed" : ""}${purchasable ? " is-purchasable" : ""}`}
+          disabled={disabled || !editable || maxed || unaffordable}
           onClick={() => gameRef.current?.buy(playerId, definition.id)}
         >
           {maxed ? t("shop.max") : t("shop.costShort", { cost })}

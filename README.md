@@ -1,6 +1,6 @@
-# Ballistic Front
+# Solvyr Prime: Siege Protocol
 
-Böngészős 2D ágyús/tankos játék (Scorched Earth / Worms / Gunbound stílus).
+A Solvyr Prime univerzumban játszódó böngészős, körökre osztott taktikai tüzérségi játék.
 
 - két (vagy több) tank egymást lövi
 - ballisztikus fizika (szög, erő, szél)
@@ -9,6 +9,7 @@ Böngészős 2D ágyús/tankos játék (Scorched Earth / Worms / Gunbound stílu
 - fejleszthető ágyú, lövedék, páncél
 - XP, bolt, meta-progresszió
 - szép grafika (particle effektek, animációk, shaderek)
+- Web Audio hangrendszer OGG assetekkel (lövés, robbanás, tankmozgás)
 
 ## Tech stack
 
@@ -22,7 +23,7 @@ Online mód (v1): szobakódos lobby, két kliens közös seed alapján futtatott
 
 ## Irányítás
 
-- Főmenü: Játék indítása, Online játék, Haladás törlése (megerősítéssel), nyelvválasztó (Magyar / English)
+- Főmenü: Játék indítása, Online játék, Mentés törlése (megerősítéssel), nyelvválasztó (Magyar / English)
 - ◀ / ▶ nyilak: mozgás (körönként korlátozott távolság)
 - ▲ / ▼ nyilak: lövés ereje (±10, Shift: ±50)
 - Ctrl + ◀ / ▶: cső szöge (±1°, Shift: ±5°; ◀ a bal oldali irány felé forgat)
@@ -64,7 +65,7 @@ src/
 ├── test/               # Vitest setup
 └── game/               # Reacttől független játékmag
     ├── engine/         # Game (Pixi app, fix időlépéses loop, skálázás), AudioManager, FxRenderer
-    ├── assets/         # SVG tank sprite-ok, fx/ (Kenney Particle Pack PNG-k), audio/ (lövés, robbanás, tankmozgás)
+    ├── assets/         # SVG tank/terep assetek, fx/ (Kenney Particle Pack PNG-k), audio/ (OGG hangok)
     ├── entities/       # tank
     ├── multiplayer/    # API kliens és protokoll (HTTP polling)
     ├── systems/        # turnManager, upgrades, matchStats, barrelAnimation, particles, profileStorage, seededRandom
@@ -78,11 +79,15 @@ A frontend (`src/`) és a backend (`server/`) szétválasztott: a Vite és a `ts
 
 Elv: a nagy gyakoriságú adat (pozíciók) az engine-ben él, a Zustand store csak a HUD-hoz szükséges állapotot tartja.
 
+A hangrendszer fejlesztési tervei és a következő eseményhangok (angle/power, target hit, terrain impact, missed) a [sound-redesign.md](docs/sound-redesign.md) dokumentumban vannak.
+
 ## Köszönet
 
 A robbanás- és füstsprite-ok a [Kenney Particle Pack](https://kenney.nl/assets/particle-pack) csomagból valók (CC0), a licenc a `src/game/assets/fx/License.txt` fájlban van.
 
-A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalról valók, Creative Commons 0 (CC0) licenc szerinti szűréssel letöltve, így attribúció nem kötelező. Az egyes fájlok eredeti oldalát és szerzőjét nem rögzítettem; ha később publikálod a játékot, érdemes a forrásoldalakat egyenként is megerősíteni.
+A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalról származó, Creative Commons 0 (CC0) licenc szerinti forrásokból készültek. A WAV/FLAC fájlok OGG formátumba konvertálásához a [FreeConvert OGG Converter](https://www.freeconvert.com/ogg-converter/) eszközt használtam. A konvertálás a fájlméret és a webes betöltés optimalizálását szolgálja; a játék futásidejű hangbetöltése az OGG fájlokra hivatkozik. Az egyes eredeti Freesound-oldalak és szerzők még nincsenek fájlonként rögzítve, ezért publikálás előtt ezeket külön ellenőrizni kell.
+
+A betűtípusok az **Oxanium** (UI) és a **Rajdhani** (HUD adatok), SIL Open Font License 1.1 alatt, a [Fontsource](https://fontsource.org) csomagokból önállóan hosztolva (`@fontsource/oxanium`, `@fontsource/rajdhani`).
 
 ## Nyelvek
 

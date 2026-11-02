@@ -1,4 +1,4 @@
-# Eredményképernyő újratervezése
+# Solvyr Prime: Siege Protocol – eredményképernyő újratervezése
 
 - [x] A referencia szerinti eredménykártya és győztes fejléc kialakítása.
 - [x] A meccsstatisztika külön, négyoszlopos táblázatba rendezése.

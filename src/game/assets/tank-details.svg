@@ -7,6 +7,11 @@
   <circle cx="109" cy="48" r="5" fill="#122636" stroke="#bceff5" stroke-width="2"/>
   <circle cx="109" cy="48" r="2" fill="#8beeff"/>
   <path d="M144 39h18M144 44h24" stroke="#bceff5" stroke-width="1.5"/>
+  <path d="M106 52h18l6 5h24l7-5h15" fill="none" stroke="#d3f6fa" stroke-width="1.2" opacity=".8"/>
+  <path d="M96 60h18M165 60h22M82 72h15M180 72h20" stroke="#8beeff" stroke-width="1.4" opacity=".8"/>
+  <path d="M152 19v-8M152 11l-4-4M152 11l5-4" fill="none" stroke="#bceff5" stroke-width="1.5"/>
+  <circle cx="152" cy="18" r="2" fill="#ffb52e" stroke="#bceff5" stroke-width="1"/>
+  <path d="M117 28h7M164 29h8M113 32h12M166 34h12" stroke="#d3f6fa" stroke-width="1"/>
   <g fill="#bceff5">
     <circle cx="71" cy="69" r="2"/><circle cx="188" cy="69" r="2"/>
     <circle cx="86" cy="80" r="2"/><circle cx="202" cy="81" r="2"/>

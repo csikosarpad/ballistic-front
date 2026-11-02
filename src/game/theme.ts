@@ -33,15 +33,15 @@ export interface Theme {
 }
 
 export const DEFAULT_THEME: Theme = {
-  background: "#0b1020",
-  sky: 0x16224a,
+  background: "#060b1a",
+  sky: 0x0c1633,
   terrain: {
-    fill: 0x6b4a2b,
-    grass: 0x3d7a3a,
-    surfaceHighlight: 0x6da64b,
-    soilDeep: 0x3d2a20,
-    soilLight: 0x93643a,
-    scorch: 0x14100a,
+    fill: 0x2a3a4f,
+    grass: 0x2399ad,
+    surfaceHighlight: 0x8beeff,
+    soilDeep: 0x121b2a,
+    soilLight: 0x4f6c88,
+    scorch: 0x04070d,
   },
   players: [0x4da3ff, 0xff6b5a],
   hud: {
@@ -52,13 +52,13 @@ export const DEFAULT_THEME: Theme = {
     turnMarker: 0xffffff,
     previewLine: 0xffffff,
   },
-  shell: { core: 0xfff2c0, glow: 0xffd070 },
+  shell: { core: 0xeafcff, glow: 0x5fe0ff },
   fx: {
-    shockwave: 0xffb870,
-    fire: [0xff7a20, 0xffa030],
-    debris: 0x7a5530,
-    smoke: 0x777777,
-    muzzle: 0xffe0a0,
-    trail: 0xcccccc,
+    shockwave: 0x7fe9ff,
+    fire: [0xff8a3c, 0x7fe9ff],
+    debris: 0x5b7189,
+    smoke: 0x6b7b8f,
+    muzzle: 0xbff6ff,
+    trail: 0x9fdcff,
   },
 };

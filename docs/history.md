@@ -28,3 +28,15 @@
 - A szél most HUD-os `WindIndicator` komponensként és visszafogott Pixi `WindDustClouds` háttérrétegként is látható; az irány az előjelet, a sebesség és kiemelés az abszolút erősséget követi.
 - A korábbi szélvonalakat talajközeli, lapos porfelhők váltották fel, hogy a szél vizuális visszajelzése jobban illeszkedjen a katonai sivatagi harctér hangulatához.
 - A PixiJS bundling külön vendor chunkot kapott: a fő alkalmazási chunk mérete kb. 1,1 MB-ról 211 kB-ra csökkent, a 908 kB-os Pixi renderer pedig dokumentált, célzott chunklimittel marad külön.
+- A sci-fi ResultScreen stílusa átkerült a játéktér HUD-jába: keretezett command panel, szegmentált kontrollok, neon action bar és kiemelt FIRE gomb készült.
+- A játéktér hatodik vizuális rétegeként bekerült a collision nélküli `BattlefieldProps`, amely seed alapján fákat, sziklákat, antennákat és jelzőfényeket helyez el.
+- Döntés született arról, hogy a tereptárgyak egyelőre dekoratívak maradnak; nem módosítják a collisiont, a ballisztikát vagy a tankmozgást.
+- A dekoratív tereptárgyak robbanáskor enyhe, rövid idejű remegést és jelzőfény-erősítést kapnak, fizikai collision nélkül.
+- A viewport-ellenőrzés során javítva lett a mobil HUD 2 px-es kilógása, és a Pixi háttérmozgások most valóban kikapcsolnak `prefers-reduced-motion` esetén.
+- A tank semleges test- és technikai részlet rétegei további páncélpanel-, varrat-, rögzítési pont- és optikai részleteket kaptak; a játékosszínű accent réteg változatlanul külön maradt.
+- Elkészültek a részletes SVG tereptárgy assetek: fa, szikla és katonai antenna. A Pixi réteg ezeket tölti be, hiba esetén pedig naplózott vektoros fallback rajzolást használ.
+- A tereptárgyak mélységi elhelyezése finomodott: kisebb, terrainhez kötött előtéri skálát és alacsonyabb alpha-t kaptak, így nem keverednek a távoli hegy- és atmoszférarétegekkel.
+- A szétszórt fák és antennatornyok kikerültek az aktív pályaképből; egyelőre csak a terrainhez jobban illeszkedő sziklaelemek maradtak. A fa- és antenna-SVG-k későbbi, sűrűbb környezeti rendszerhez megmaradtak.
+- A hangassetek OGG formátumra váltottak; az `AudioManager` már a `shot.ogg`, `explosion.ogg` és `tank-move.ogg` fájlokat tölti be. A konvertálás forrása a FreeConvert OGG Converter, a további hangterv külön `docs/sound-redesign.md` dokumentumba került.
+- A röppálya-előnézet jövőbeli fejleszthető erőforrásának neve rögzítve lett: magyarul „Célzástámogatás”, angolul „Smart Aim”. Az alap 1 meccsenkénti használat megmarad, később töltetekkel bővíthető.
+- A Célzástámogatás / Smart Aim tényleges upgrade-ként bekerült: alapból 1, szintenként +1 meccsenkénti töltetet ad, a HUD és a multiplayer profiladatok játékosonként kezelik a megmaradt tölteteket.

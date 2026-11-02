@@ -8,17 +8,18 @@ export class WindDustClouds extends Container {
   private worldWidth = 1280;
   private worldHeight = 720;
   private wind = 0;
+  private motionEnabled = true;
 
   public constructor() {
     super();
     for (let index = 0; index < CLOUD_COUNT; index += 1) {
       const cloud = new Graphics()
         .ellipse(0, 0, 24 + (index % 3) * 8, 4 + (index % 2) * 2)
-        .fill({ color: 0xb18a5a, alpha: 0.16 })
+        .fill({ color: 0x7fa8c0, alpha: 0.14 })
         .ellipse(22, -2, 16, 3)
-        .fill({ color: 0xc3a16f, alpha: 0.12 })
+        .fill({ color: 0x9cc4d8, alpha: 0.1 })
         .ellipse(-20, 2, 14, 3)
-        .fill({ color: 0x8f704d, alpha: 0.1 });
+        .fill({ color: 0x5f87a0, alpha: 0.1 });
       this.clouds.push(cloud);
       this.addChild(cloud);
     }
@@ -48,13 +49,20 @@ export class WindDustClouds extends Container {
   }
 
   public update(dt: number): void {
-    if (!this.visible) return;
+    if (!this.motionEnabled || !this.visible) return;
     const direction = Math.sign(this.wind);
     const speed = direction * (8 + Math.abs(this.wind) * 1.1);
     for (const cloud of this.clouds) {
       cloud.x += speed * dt;
       if (direction > 0 && cloud.x > this.worldWidth + 70) cloud.x = -70;
       if (direction < 0 && cloud.x < -70) cloud.x = this.worldWidth + 70;
+    }
+  }
+
+  public setMotionEnabled(enabled: boolean): void {
+    this.motionEnabled = enabled;
+    if (!enabled) {
+      this.visible = false;
     }
   }
 }

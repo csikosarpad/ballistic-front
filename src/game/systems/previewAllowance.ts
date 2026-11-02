@@ -1,19 +1,25 @@
-/** Játékosonként meccsenként egyszer kérhető röppálya-előnézet. */
+/** Játékosonként meccsenként korlátozott számú röppálya-előnézet. */
 export class PreviewAllowance {
-  private used = new Set<string>();
+  private remaining = new Map<string, number>();
 
   canUse(id: string): boolean {
-    return !this.used.has(id);
+    return this.remainingFor(id) > 0;
   }
 
-  /** Igaz, ha most használta fel az egyetlen lehetőségét. */
+  remainingFor(id: string): number {
+    return this.remaining.get(id) ?? 0;
+  }
+
   use(id: string): boolean {
-    if (this.used.has(id)) return false;
-    this.used.add(id);
+    const remaining = this.remainingFor(id);
+    if (remaining <= 0) return false;
+    this.remaining.set(id, remaining - 1);
     return true;
   }
 
-  reset(): void {
-    this.used.clear();
+  reset(allowances: Record<string, number> = {}): void {
+    this.remaining = new Map(
+      Object.entries(allowances).map(([id, amount]) => [id, Math.max(0, Math.floor(amount))]),
+    );
   }
 }

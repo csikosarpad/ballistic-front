@@ -19,6 +19,7 @@ export const UPGRADE_PRESENTATIONS: Record<string, UpgradePresentation> = {
   blast: { glyph: "✹", accent: "gold", iconSet: "ground-combat" },
   barrel: { glyph: "◎", accent: "gold", iconSet: "ground-combat" },
   engine: { glyph: "▣", accent: "cyan", iconSet: "ground-combat" },
+  smartAim: { glyph: "⌖", accent: "gold", iconSet: "ground-combat" },
 };
 
 export function getUpgradePresentation(id: string, iconSet = "ground-combat"): UpgradePresentation {

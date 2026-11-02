@@ -28,4 +28,17 @@
   <path d="M108 29h42" stroke="#92e7f2" stroke-width="3" opacity=".8"/>
   <path d="M65 72h126M57 82h147" stroke="#7898a8" stroke-width="2" opacity=".7"/>
   <path d="M31 91h19M229 91h22" stroke="#8beeff" stroke-width="3" opacity=".8"/>
+  <g fill="none" stroke="#9bb9c4" stroke-linecap="round" stroke-linejoin="round" opacity=".72">
+    <path d="m60 79 16-17h39l-11 17z" stroke-width="1.5"/>
+    <path d="m117 62 12-18h40l21 18" stroke-width="1.5"/>
+    <path d="m198 79 15 6-7 11h-19" stroke-width="1.5"/>
+    <path d="M73 87h30M151 87h38M48 96h16M207 96h17" stroke-width="1.2"/>
+    <path d="M67 98v16M101 98v16M170 98v16M204 98v16" stroke="#547687" stroke-width="1"/>
+  </g>
+  <g fill="#b9d1d8" opacity=".75">
+    <circle cx="82" cy="68" r="1.5"/><circle cx="115" cy="68" r="1.5"/>
+    <circle cx="145" cy="51" r="1.5"/><circle cx="178" cy="62" r="1.5"/>
+    <circle cx="201" cy="84" r="1.5"/>
+  </g>
+  <path d="M88 35h8l5-6h10M158 35h8l5 6" fill="none" stroke="#6f919e" stroke-width="1.5"/>
 </svg>

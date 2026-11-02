@@ -14,6 +14,8 @@ export interface TankStats {
   maxPower: number;
   /** Körönként megtehető távolság (px). */
   moveBudget: number;
+  /** Meccsenként felhasználható röppálya-előnézetek száma. */
+  previewCharges: number;
 }
 
 export const BASE_STATS: TankStats = {
@@ -25,6 +27,7 @@ export const BASE_STATS: TankStats = {
   blastRadius: 30,
   maxPower: 600,
   moveBudget: 60,
+  previewCharges: 1,
 };
 
 export interface UpgradeDef {
@@ -90,5 +93,13 @@ export const UPGRADES: readonly UpgradeDef[] = [
     maxLevel: 5,
     baseCost: 30,
     costGrowth: 1.4,
+  },
+  {
+    id: "smartAim",
+    stat: "previewCharges",
+    perLevel: 1,
+    maxLevel: 3,
+    baseCost: 45,
+    costGrowth: 1.7,
   },
 ];

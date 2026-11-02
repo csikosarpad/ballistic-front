@@ -1,5 +1,6 @@
 import { Container, Graphics } from "pixi.js";
 import { WindDustClouds } from "./WindDustClouds";
+import { BattlefieldProps } from "./BattlefieldProps";
 
 const STAR_COUNT = 72;
 
@@ -31,16 +32,18 @@ export class BattlefieldLayers extends Container {
   private readonly distantMountains = new Graphics();
   private readonly nearMountains = new Graphics();
   private readonly atmosphere = new Graphics();
+  private readonly props = new BattlefieldProps();
   private readonly windDustClouds = new WindDustClouds();
 
   public constructor() {
     super();
-    this.addChild(this.stars, this.distantMountains, this.nearMountains, this.atmosphere, this.windDustClouds);
+    this.addChild(this.stars, this.distantMountains, this.nearMountains, this.atmosphere, this.props, this.windDustClouds);
   }
 
   public draw(width: number, height: number, seed: number): void {
     const random = seededRandom(seed);
     this.windDustClouds.setBounds(width, height);
+    this.props.draw(width, height, seed);
     this.stars.clear();
     this.distantMountains.clear();
     this.nearMountains.clear();
@@ -55,17 +58,15 @@ export class BattlefieldLayers extends Container {
 
     this.distantMountains
       .poly(mountainPoints(width, height * 0.64, height * 0.16, random))
-      .fill({ color: 0x101d3c, alpha: 0.92 })
-      .stroke({ color: 0x29466d, alpha: 0.48, width: 2 });
+      .fill({ color: 0x132a4e, alpha: 0.92 })
+      .stroke({ color: 0x4488a8, alpha: 0.45, width: 2 });
 
     this.nearMountains
       .poly(mountainPoints(width, height * 0.72, height * 0.13, random))
-      .fill({ color: 0x132746, alpha: 0.98 })
-      .stroke({ color: 0x39708a, alpha: 0.55, width: 2 });
+      .fill({ color: 0x0c1c36, alpha: 0.98 })
+      .stroke({ color: 0x2f8fb0, alpha: 0.6, width: 2 });
 
     this.atmosphere
-      .rect(0, height * 0.47, width, height * 0.2)
-      .fill({ color: 0x1b5b78, alpha: 0.08 })
       .moveTo(0, height * 0.58)
       .lineTo(width, height * 0.54)
       .moveTo(0, height * 0.62)
@@ -77,7 +78,21 @@ export class BattlefieldLayers extends Container {
     this.windDustClouds.setWind(wind);
   }
 
+  public loadAssets(): Promise<void> {
+    return this.props.loadAssets();
+  }
+
+  public setMotionEnabled(enabled: boolean): void {
+    this.props.setMotionEnabled(enabled);
+    this.windDustClouds.setMotionEnabled(enabled);
+  }
+
   public update(dt: number): void {
+    this.props.update(dt);
     this.windDustClouds.update(dt);
+  }
+
+  public reactToImpact(intensity: number): void {
+    this.props.reactToImpact(intensity);
   }
 }
