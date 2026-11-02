@@ -15,11 +15,11 @@ export class WindDustClouds extends Container {
     for (let index = 0; index < CLOUD_COUNT; index += 1) {
       const cloud = new Graphics()
         .ellipse(0, 0, 24 + (index % 3) * 8, 4 + (index % 2) * 2)
-        .fill({ color: 0xb18a5a, alpha: 0.16 })
+        .fill({ color: 0x7fa8c0, alpha: 0.14 })
         .ellipse(22, -2, 16, 3)
-        .fill({ color: 0xc3a16f, alpha: 0.12 })
+        .fill({ color: 0x9cc4d8, alpha: 0.1 })
         .ellipse(-20, 2, 14, 3)
-        .fill({ color: 0x8f704d, alpha: 0.1 });
+        .fill({ color: 0x5f87a0, alpha: 0.1 });
       this.clouds.push(cloud);
       this.addChild(cloud);
     }

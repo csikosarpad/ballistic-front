@@ -361,6 +361,13 @@ termékdöntés, adatmodell/protokoll-elemzés és saját TODO után kerülhet b
       ráfordítást felvenni a Roadmapbe; új assetkészítés előtt megállni a vizuális irány
       jóváhagyásáig.
 
+### Játéktér színvilág TODO
+
+- [x] Paletta átvezetése a `theme.ts`-be: sötét bazalt-kék terep ciánkék felszíni éllel, hűvösebb ég, ciános lövedék/robbanás/por, a játékosszínek változatlanok.
+- [x] Tank átszínezése: új, szögletes `tank-body.svg` / `tank-barrel.svg` (ugyanaz a méret és kötés, a játékosszín-tint megmarad), hűvös fémtónus és ciános fényelem; fizika és hitbox változatlan.
+- [ ] Háttérrétegek (`BattlefieldLayers.ts`, `BattlefieldProps.ts`) és terep/hegyek kontrasztjának finomhangolása.
+- [ ] Új sziluett/részletes tank csak jóváhagyott vizuális irány után.
+
 ### Tipográfia / fontkészlet TODO
 
 Javaslat: **Oxanium** (UI és címek), **Orbitron** (logó), **Rajdhani** (HUD adatok). Mind

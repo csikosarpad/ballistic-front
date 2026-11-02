@@ -99,11 +99,11 @@ describe("MainMenu", () => {
     render(<MainMenu />);
 
     confirm.mockReturnValueOnce(false);
-    fireEvent.click(screen.getByRole("button", { name: /haladás/i }));
+    fireEvent.click(screen.getByRole("button", { name: /mentés törlése/i }));
     expect(resetProgress).not.toHaveBeenCalled();
 
     confirm.mockReturnValueOnce(true);
-    fireEvent.click(screen.getByRole("button", { name: /haladás/i }));
+    fireEvent.click(screen.getByRole("button", { name: /mentés törlése/i }));
     expect(resetProgress).toHaveBeenCalledOnce();
   });
 });

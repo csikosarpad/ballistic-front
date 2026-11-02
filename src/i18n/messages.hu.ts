@@ -7,7 +7,7 @@ export const hu = {
   "menu.online": "Online játék",
   "menu.settings": "Beállítások",
   "menu.sound": "Hang",
-  "menu.reset": "Haladás törlése",
+  "menu.reset": "Mentés törlése",
   "menu.resetConfirm": "Biztosan törlöd az összes XP-t és fejlesztést?",
   "menu.language": "Nyelv",
 

@@ -23,7 +23,7 @@ Online mód (v1): szobakódos lobby, két kliens közös seed alapján futtatott
 
 ## Irányítás
 
-- Főmenü: Játék indítása, Online játék, Haladás törlése (megerősítéssel), nyelvválasztó (Magyar / English)
+- Főmenü: Játék indítása, Online játék, Mentés törlése (megerősítéssel), nyelvválasztó (Magyar / English)
 - ◀ / ▶ nyilak: mozgás (körönként korlátozott távolság)
 - ▲ / ▼ nyilak: lövés ereje (±10, Shift: ±50)
 - Ctrl + ◀ / ▶: cső szöge (±1°, Shift: ±5°; ◀ a bal oldali irány felé forgat)
