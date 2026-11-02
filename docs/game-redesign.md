@@ -303,6 +303,10 @@ rombolhatók, és nem módosítják a lövedékek vagy a tankok mozgását.
 
 ### Referenciák
 
+- [Solvyr Prime: Siege Protocol – Steam Capsule / Store Header koncepció](../plans/solvyr-prime_siege_protocol_game.png)
+- [Solvyr Prime: Siege Protocol – nyitóképernyő](../plans/solvyr-prime_siege_protocol_open.png)
+- [Solvyr Prime: Siege Protocol – játékképernyő](../plans/solvyr-prime_siege_protocol_game_screen.png)
+- [Solvyr Prime: Siege Protocol – eredményképernyő](../plans/solvyr-prime_siege_protocol_result.png)
 - [Játékmenet és főmenü vizuális terve](../plans/visual_plan_game.png)
 - [Meccs utáni fejlesztőbolt terve](../plans/ballistic-front_shop.png)
 
@@ -311,6 +315,38 @@ a feliratokat, vezérlőket és állapotokat a meglévő React/Pixi felülettel 
 A képek teljes képernyős háttérként való használata nem javasolt, mert a beégetett szöveg nem
 lokalizálható, nem hozzáférhető, és kis nézetben nem rendezhető át. A forgalomba kerülő
 háttér- és egységassetek forrását/felhasználási jogát külön ellenőrizni kell.
+
+A Steam Capsule / Store Header kép külön marketinggrafikai koncepció, nem játékon belüli
+képernyő vagy háttérasset. A beégetett logót és címet tartalmazó kompozíciót a Steam
+áruházhoz a szükséges képarányokra és méretekre külön kell exportálni; a játék UI-jában a
+cím továbbra is szöveges, lokalizálható elem marad.
+
+### Az új Solvyr Prime-tervek értelmezése
+
+Az új nyitóképernyő, játékképernyő és eredményképernyő koherens sci-fi katonai art directiont
+ad: sötét űrbéli háttér, cyan HUD-panelek, arany elsődleges műveletek és egyértelmű
+képernyőhierarchia. A nyitóképernyő vizuális háttere új, feliratmentes assetként hasznos
+lehet, de a korábbi döntés változatlan: egyelőre nem vezetünk be plusz háttérképet; a
+meglévő játéktér marad a menü háttere.
+
+A megjelenített vezérlők és értékek nem mind egyeznek a mostani játékkal:
+
+- **Nyitóképernyő:** a Deploy az offline indítás vizuális megfelelője lehet, a Multiplayer a
+  meglévő online lobbyé. A Command Profile és Exit funkció nincs a jelenlegi hatókörben; az
+  Armory a meccs utáni fejlesztőbolt elé kerülő új képernyőt és új folyamatot jelentene.
+- **Játékképernyő:** a játékosállapotok, szél, szög, erő, mozgás és tüzelés meglévő adatokhoz
+  köthetők. A képen szereplő taktikai AI töltetek a jelenlegi röppálya-előnézet vizuális
+  megfelelőjeként értelmezhetők, de csak a meglévő elérhetőségi szabályok és töltetszám
+  jeleníthető meg. Az új akciópontok, orbitális támogatás, többféle terepbonusz és egyéb
+  képességek nem részei ennek a UI-implementációnak.
+- **Eredményképernyő:** a győztes, játékosonkénti fejlesztések, meccsstatisztikák, XP és
+  meccs utáni műveletek már léteznek. A képen látható tartós összesített XP, szint/rang,
+  XP-küszöb, eliminációs és pontszámstatisztika viszont nem mind része a jelenlegi adatmodellnek;
+  ezeket nem szabad statikus képszövegből vagy ideiglenes UI-értékből megjeleníteni.
+
+Az első implementációs kör célja a meglévő állapotok új, egységes megjelenítése, nem új
+játékmeneti funkciók vagy profil-/progressziórendszer bevezetése. Új funkció csak külön
+termékdöntés, adatmodell/protokoll-elemzés és saját TODO után kerülhet be.
 
 ### Meglévő technikai alap
 
