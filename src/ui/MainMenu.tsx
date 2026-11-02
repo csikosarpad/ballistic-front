@@ -11,7 +11,10 @@ import { MultiplayerLobby } from "./MultiplayerLobby";
 export function MainMenu() {
   const t = useT();
   const setScreen = useGameStore((s) => s.setScreen);
+  const muted = useGameStore((s) => s.muted);
+  const toggleMuted = useGameStore((s) => s.toggleMuted);
   const [showLobby, setShowLobby] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const start = () => {
     useMultiplayerStore.getState().leave();
@@ -29,28 +32,51 @@ export function MainMenu() {
   };
 
   return (
-    <div className="overlay">
+    <div className="overlay main-menu-overlay">
       {showLobby ? (
         <MultiplayerLobby onBack={() => setShowLobby(false)} onStartMatch={startMultiplayer} />
+      ) : showSettings ? (
+        <div className="panel main-menu-panel">
+          <header className="main-menu-header">
+            <h1>{t("menu.settings")}</h1>
+          </header>
+          <section className="main-menu-settings" aria-label={t("menu.settings")}>
+            <div className="main-menu-setting">
+              <span>{t("menu.language")}</span>
+              <LanguageSwitch />
+            </div>
+            <div className="main-menu-setting">
+              <span>{t("menu.sound")}</span>
+              <button className="btn secondary" aria-pressed={!muted} onClick={toggleMuted}>
+                {t("hud.sound", { state: muted ? t("hud.soundOff") : t("hud.soundOn") })}
+              </button>
+            </div>
+          </section>
+          <button className="btn secondary main-menu-back" onClick={() => setShowSettings(false)}>
+            {t("lobby.back")}
+          </button>
+        </div>
       ) : (
-        <div className="panel">
-          <h1>{t("menu.title")}</h1>
-          <p>{t("menu.tagline")}</p>
-          <p>
+        <div className="panel main-menu-panel">
+          <header className="main-menu-header">
+            <h1>{t("menu.title")}</h1>
+            <p>{t("menu.tagline")}</p>
             <small>{t("menu.controls")}</small>
-          </p>
-          <button className="btn" onClick={start}>
-            {t("menu.start")}
-          </button>
-          <br />
-          <button className="btn secondary" onClick={() => setShowLobby(true)}>
-            {t("menu.online")}
-          </button>
-          <br />
-          <button className="btn secondary" onClick={reset}>
-            {t("menu.reset")}
-          </button>
-          <LanguageSwitch />
+          </header>
+          <nav className="main-menu-actions" aria-label={t("menu.title")}>
+            <button className="btn main-menu-start" onClick={start}>
+              {t("menu.start")}
+            </button>
+            <button className="btn secondary" onClick={() => setShowLobby(true)}>
+              {t("menu.online")}
+            </button>
+            <button className="btn secondary" onClick={() => setShowSettings(true)}>
+              {t("menu.settings")}
+            </button>
+            <button className="btn secondary" onClick={reset}>
+              {t("menu.reset")}
+            </button>
+          </nav>
         </div>
       )}
     </div>

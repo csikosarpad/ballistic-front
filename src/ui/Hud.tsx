@@ -106,22 +106,24 @@ export function Hud() {
       className="hud battle-hud"
       style={{
         ...({ "--accent": toCss(me?.color) } as CSSProperties),
-        position: "absolute",
-        top: 12,
-        left: 12,
         color: "#fff",
         font: "14px sans-serif",
       }}
     >
-      <div className="hud-frame">
-        <div className="hud-frame-corner hud-frame-corner-left" />
-        <div className="hud-frame-corner hud-frame-corner-right" />
-        <div className="hud-units">
-          {tanks.map((unit) => (
-            <div key={unit.id} className="hud-unit" style={{ color: toCss(unit.color) }}>
+      <div className="hud-top">
+        {tanks.map((unit) => (
+          <section
+            key={unit.id}
+            className={`hud-unit hud-unit-${unit.id.toLowerCase()}${unit.id === currentId ? " is-active" : ""}`}
+            style={{ "--unit-accent": toCss(unit.color) } as CSSProperties}
+            aria-label={unit.id}
+          >
+            <div className="hud-unit-heading">
               <span style={{ fontWeight: unit.id === currentId ? "bold" : "normal" }}>
                 {unit.id}: {unit.hp}/{unit.maxHp} HP
               </span>
+            </div>
+            <div className="hud-unit-meters">
               <Stripe kind="hp" label="HP" value={unit.hp} max={unit.maxHp} />
               {unit.maxShield > 0 && (
                 <Stripe kind="shield" label={t("hud.shield")} value={unit.shield} max={unit.maxShield} />
@@ -130,70 +132,108 @@ export function Hud() {
                 <Stripe kind="armor" label={t("hud.armor")} value={unit.armor} max={unit.maxArmor} />
               )}
             </div>
-          ))}
+          </section>
+        ))}
+        <div className="hud-top-center">
+          <WindIndicator wind={wind} />
+          <div className="hud-readout">
+            {t("hud.turn")} <strong style={{ color: toCss(me?.color) }}>{currentId}</strong>
+            <span aria-hidden="true">·</span>
+            {t("hud.move", { value: me?.moveLeft ?? 0 })}
+          </div>
+          {online && (
+            <div className="hud-status-message" role={multiplayerError ? "alert" : "status"}>
+              {multiplayerError ??
+                (phase === "flying"
+                  ? t("hud.shotInFlight")
+                  : canControl
+                    ? t("hud.yourTurn")
+                    : t("hud.opponentTurn", { id: currentId }))}
+            </div>
+          )}
         </div>
-        <ul className="hud-legend" aria-label={t("hud.legend")}>
-          <li className="legend-hp">{t("hud.legend.hp")}</li>
-          {tanks.some((u) => u.maxShield > 0) && <li className="legend-shield">{t("hud.legend.shield")}</li>}
-          {tanks.some((u) => u.maxArmor > 0) && <li className="legend-armor">{t("hud.legend.armor")}</li>}
-        </ul>
       </div>
-      <div className="hud-readout">
-        {t("hud.turn")} <strong style={{ color: toCss(me?.color) }}>{currentId}</strong> |{" "}
-        {t("hud.move", { value: me?.moveLeft ?? 0 })} | <WindIndicator wind={wind} />
-      </div>
-      {online && (
-        <div className="hud-status-message" role={multiplayerError ? "alert" : "status"}>
-          {multiplayerError ??
-            (phase === "flying"
-              ? t("hud.shotInFlight")
-              : canControl
-                ? t("hud.yourTurn")
-                : t("hud.opponentTurn", { id: currentId }))}
+      <div className="hud-command-dock">
+        <div className="hud-controls">
+          <label className="hud-control">
+            <span>{t("hud.angle", { value: angle })}</span>
+            <input
+              type="range"
+              min={MIN_ANGLE}
+              max={MAX_ANGLE}
+              value={angle}
+              disabled={locked}
+              onChange={(e) => setAim(+e.target.value, power)}
+            />
+          </label>
+          <label className="hud-control">
+            <span>{t("hud.power", { value: power })}</span>
+            <input
+              type="range"
+              min={MIN_POWER}
+              max={maxPower}
+              value={power}
+              disabled={locked}
+              onChange={(e) => setAim(angle, +e.target.value)}
+            />
+          </label>
         </div>
-      )}
-      <div className="hud-controls">
-        <label className="hud-control">
-          <span>{t("hud.angle", { value: angle })}</span>
-          <input
-            type="range"
-            min={MIN_ANGLE}
-            max={MAX_ANGLE}
-            value={angle}
+        <div className="hud-actions">
+          <button
+            aria-label={t("hud.moveLeft")}
+            title={t("hud.moveLeft")}
             disabled={locked}
-            onChange={(e) => setAim(+e.target.value, power)}
-          />
-        </label>
-        <label className="hud-control">
-          <span>{t("hud.power", { value: power })}</span>
-          <input
-            type="range"
-            min={MIN_POWER}
-            max={maxPower}
-            value={power}
+            onClick={() => gameRef.current?.move(-1)}
+          >
+            <span className="hud-action-icon" aria-hidden="true">
+              ◀
+            </span>
+            <span>{t("hud.moveLeft")}</span>
+          </button>
+          <button
+            aria-label={t("hud.moveRight")}
+            title={t("hud.moveRight")}
             disabled={locked}
-            onChange={(e) => setAim(angle, +e.target.value)}
-          />
-        </label>
-      </div>
-      <div className="hud-actions">
-        <button disabled={locked} onClick={() => gameRef.current?.move(-1)}>
-          ◀
-        </button>
-        <button disabled={locked} onClick={() => gameRef.current?.move(1)}>
-          ▶
-        </button>
-        <button className="hud-fire-button" disabled={locked} onClick={() => gameRef.current?.fire()}>
-          {t("hud.fire")}
-        </button>
-        <button disabled={locked || !previewAvailable} onClick={() => gameRef.current?.requestPreview()}>
-          {previewActive
-            ? t("hud.previewActive")
-            : previewAvailable
-              ? t("hud.previewAvailable", { value: previewRemaining })
-              : t("hud.previewUsed")}
-        </button>
-        <button onClick={toggleMuted}>{t("hud.sound", { state: muted ? t("hud.soundOff") : t("hud.soundOn") })}</button>
+            onClick={() => gameRef.current?.move(1)}
+          >
+            <span className="hud-action-icon" aria-hidden="true">
+              ▶
+            </span>
+            <span>{t("hud.moveRight")}</span>
+          </button>
+          <button
+            aria-pressed={previewActive}
+            disabled={locked || !previewAvailable}
+            onClick={() => gameRef.current?.requestPreview()}
+          >
+            <span className="hud-action-icon" aria-hidden="true">
+              ⌖
+            </span>
+            <span>
+              {previewActive
+                ? t("hud.previewActive")
+                : previewAvailable
+                  ? t("hud.previewAvailable", { value: previewRemaining })
+                  : t("hud.previewUsed")}
+            </span>
+          </button>
+          <button className="hud-fire-button" disabled={locked} onClick={() => gameRef.current?.fire()}>
+            <span className="hud-action-icon" aria-hidden="true">
+              ➤
+            </span>
+            <span>{t("hud.fire")}</span>
+          </button>
+          <button
+            aria-pressed={!muted}
+            onClick={toggleMuted}
+            title={t("hud.sound", { state: muted ? t("hud.soundOff") : t("hud.soundOn") })}
+          >
+            <span className="hud-action-icon" aria-hidden="true">
+              ♫
+            </span>
+            <span>{t("hud.sound", { state: muted ? t("hud.soundOff") : t("hud.soundOn") })}</span>
+          </button>
+        </div>
       </div>
     </div>
   );

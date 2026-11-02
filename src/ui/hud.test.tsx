@@ -62,6 +62,25 @@ describe("Hud billentyűk", () => {
     expect(screen.getByRole("button", { name: /elhasználva/i })).toBeDisabled();
   });
 
+  it("az átrendezett action bar minden meglévő műveletet elérhetővé tesz", () => {
+    const move = vi.fn();
+    const fire = vi.fn();
+    const requestPreview = vi.fn();
+    gameRef.current = { move, fire, requestPreview } as unknown as Game;
+    act(() => useGameStore.setState({ previewAvailable: true, previewRemaining: 1, muted: false }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Mozgás balra" }));
+    fireEvent.click(screen.getByRole("button", { name: "Mozgás jobbra" }));
+    fireEvent.click(screen.getByRole("button", { name: /Célzástámogatás/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Tűz!" }));
+    fireEvent.click(screen.getByRole("button", { name: "Hang: be (M)" }));
+
+    expect(move.mock.calls).toEqual([[-1], [1]]);
+    expect(requestPreview).toHaveBeenCalledOnce();
+    expect(fire).toHaveBeenCalledOnce();
+    expect(useGameStore.getState().muted).toBe(true);
+  });
+
   it("a HUD külön csíkot mutat a HP-nak, a pajzsnak és a páncélnak, ha vannak", () => {
     act(() =>
       useGameStore.setState({

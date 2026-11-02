@@ -299,11 +299,143 @@ rombolhatók, és nem módosítják a lövedékek vagy a tankok mozgását.
 - [x] Több viewporton történő vizuális ellenőrzés.
 - [x] Háttérrétegek teljesítmény- és reduced-motion tesztje.
 
-## 5. Következő javasolt lépés
+## 5. Új UI-referenciák és megvalósíthatósági elemzés
 
-A következő nagyobb vizuális lépés a referenciahű combat-dossier tank SVG és a részletesebb
-tereptárgy assetek elkészítése lehet. Ezek előtt érdemes több desktop és mobil viewporton
-ellenőrizni a HUD, a tereptárgyak, a porfelhők és a lövés utáni reakciók összhangját.
+### Referenciák
+
+- [Játékmenet és főmenü vizuális terve](../plans/visual_plan_game.png)
+- [Meccs utáni fejlesztőbolt terve](../plans/ballistic-front_shop.png)
+
+A képek vizuális irányt és elrendezési ötletet adnak, nem kész, közvetlenül beépíthető UI-k:
+a feliratokat, vezérlőket és állapotokat a meglévő React/Pixi felülettel kell újrarajzolni.
+A képek teljes képernyős háttérként való használata nem javasolt, mert a beégetett szöveg nem
+lokalizálható, nem hozzáférhető, és kis nézetben nem rendezhető át. A forgalomba kerülő
+háttér- és egységassetek forrását/felhasználási jogát külön ellenőrizni kell.
+
+### Meglévő technikai alap
+
+- A játékteret a Pixi engine rajzolja, a HUD-ot és a képernyőket React kezeli; a renderernek
+  már egyetlen, központi lifecycle-ja van.
+- A játéktér 1280×720 logikai méretben fut, és az ablakhoz aránytartóan skálázódik.
+- A környezet rétegzett, a mozgás reduced-motion módban kikapcsolható, a HUD és az eredmény
+  képernyő mobil elrendezése is létezik.
+- Az eredményképernyőn már van győztes, statisztika, két játékos fejlesztési panelje,
+  fejlesztésvásárlás, visszavágó és főmenü művelet. A fejlesztések adatvezéreltek, a profilok
+  offline mentése és az online vásárlások szinkronizálása is megvan.
+
+Ezért a terv megvalósítása **közepes ráfordítással, motor- és játékszabály-átalakítás nélkül
+megvalósítható**. A shop esetében főként vizuális illesztés és egy tartalmi pontosítás
+szükséges; a főmenü és az aktív játékképernyő komolyabb React/CSS elrendezési munkát igényel.
+
+### A játékmenet és főmenü terve
+
+**Megvalósíthatóság: közepes.**
+
+- A terv alsó része jól illeszkedik a meglévő Pixi csatatérhez és React HUD-hoz. A szél,
+  játékosállapot, lövési előnézet, mozgás, célzás és tüzelés már rendelkezésre áll.
+- A billentyűzetes vezérlés egy része eltér a képen jelzett kiosztástól (például a mozgás
+  jelenleg nyílbillentyűkkel történik, a célzási szög Ctrl+nyíllal állítható). Az új gombok és
+  feliratok nem változtathatják meg észrevétlenül a meglévő vezérlést; a kiosztásról és az
+  esetleges újrakötésről külön döntés és célzott teszt kell.
+- A főmenü most egyszerű overlay, benne offline/online indítással, nyelvváltással és
+  haladástörléssel. A redesign első implementációja ezeket sci-fi katonai panelbe rendezi;
+  a Beállítások nézet a meglévő nyelvváltót és hangkapcsolót tartalmazza. Új profilfunkció
+  nem készül.
+- A böngészős „Kilépés” nem zárható megbízhatóan programból; a menüpont jelenleg nincs
+  implementálva, és egyelőre nem része a fejlesztési hatókörnek.
+- A kép a menüt és a játékmenetet egy kompozícióban mutatja. Megvalósítási alapfeltevésként
+  ezek külön képernyőállapotok, nem egyszerre megjelenő panelek. Eltérő szándék esetén az
+  elrendezést előbb pontosítani kell.
+- A részletes, atmoszferikus háttérhez jogtiszta assetek kellenek; a csatatér alaprétegei már
+  Pixiben vannak, így az új grafika oda illeszthető anélkül, hogy az assetbe égetett szöveg
+  vagy vezérlő kerülne.
+
+### Javasolt ütemterv
+
+Az alábbi becslések egy fejlesztővel, a meglévő komponensek és játékmenet megtartásával
+számolnak. Fejlesztői munkanapok, nem naptári idő; képi asset készítése és a döntési
+visszajelzések ideje nincs bennük. A megvalósítási feladatok az egyszerűbb, kisebb kockázatú
+lépésektől haladnak a nagyobb és bizonytalanabb feladatok felé; a végső ellenőrzés a
+függőségei miatt zárólépés. A megállási kapuknál a munka nem folytatódik a szükséges döntés
+vagy asset tisztázásáig.
+
+| Sorrend | Feladat                                                                                                                               |                         Becsült ráfordítás | Megvalósíthatóság / megállási pont                                                                                                                                                                                                                        |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------- | -----------------------------------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.      | Meglévő menü és HUD vizuális alapjainak egységesítése: színek, panelek, gombok, fókusz- és letiltott állapotok.                       |                                  0,5–1 nap | Egyszerű, a meglévő CSS-re és komponensekre épít; új funkciót és képet nem igényel.                                                                                                                                                                       |
+| 2.      | Főmenü elrendezésének és képernyőváltásainak megtervezése a már létező offline/online indítással, nyelvváltással és haladástörléssel. |                                  0,5–1 nap | A jelenlegi funkciók megtarthatók; a menü és a játék külön képernyő marad.                                                                                                                                                                                |
+| 3.      | A menüfunkciók hatókörének rögzítése.                                                                                                 |                          Döntés megtörtént | A „Profil” és „Kilépés” menüpont egyelőre nem része a fejlesztésnek; a Beállítások csak a már létező nyelv- és hangkapcsolót tartalmazza.                                                                                                                 |
+| 4.      | Beállítások almenü kialakítása a nyelvváltóval és a meglévő hangkapcsolóval.                                                          |                                    0,5 nap | Kis kockázatú UI-munka; új beállítási modellt vagy mentési formátumot nem igényel.                                                                                                                                                                        |
+| 5.      | Aktív HUD és vezérlők újraelrendezése a meglévő adatokkal és műveletekkel.                                                            |                                    1–2 nap | Közepes ráfordítású React/CSS munka. A Pixi játéktér, a fizika és a játékmeneti állapot nem változik.                                                                                                                                                     |
+| 6.      | A referencia szerinti billentyűzetes vezérlés véglegesítése és bekötése.                                                              |                                0,5–1,5 nap | **MEGÁLLÁS:** előbb dönteni kell, hogy a jelenlegi kiosztás maradjon, vagy az ábrán jelzettől eltérő új kiosztást szeretnénk. A módosítás csak jóváhagyás után készülhet el.                                                                              |
+| 7.      | Egyedi főmenü-háttér vagy további illusztráció előkészítése és beillesztése.                                                          | 1–3 nap integráció; az assetkészítés külön | **MEGÁLLÁS:** csak akkor induljon, ha rendelkezésre áll a kívánt, felhasználható kép, vagy megszületett a döntés az elkészítés módjáról. A tervkép önmagában vizuális referencia; szöveget tartalmazó teljes képernyős háttérként nem javasolt beépíteni. |
+| 8.      | Desktop, keskeny mobil és nagyított nézet ellenőrzése; fókusz, görgetés, lokalizáció és reduced-motion viselkedés javítása.           |                                  0,5–1 nap | Az elkészült UI és assetek után végzendő záróellenőrzés.                                                                                                                                                                                                  |
+
+Az első négy lépés a meglévő funkcionalitásra támaszkodva, új menüpont-funkció kitalálása
+nélkül megvalósítható. A vezérlésváltás és az egyedi háttér külön jóváhagyási kapu. A becslés
+a 7. pont képi anyagának elkészítését nem tartalmazza, ezért a teljes naptári ütemezés csak az
+asset-döntés után adható meg.
+
+### Megvalósítási TODO
+
+Az ellenőrzőlista az ütemterv sorrendjét követi. A `[!]` jelölés döntésre vagy külső assetre
+váró megállási pontot jelent; az ilyen feladatot jóváhagyás előtt nem implementáljuk.
+
+- [x] Vizuális alapok: a sci-fi katonai panel, gomb, hover, fókusz és mobilméretű keret bevezetése.
+- [x] Főmenü: a meglévő offline/online indítás, haladástörlés és nyelvváltás átrendezése külön menüképernyőbe.
+- [x] Hatókör: „Profil” és „Kilépés” menüpont most nem készül; a Beállítások meglévő funkciókra korlátozódik.
+- [x] Beállítások nézet a nyelvváltóval és a már létező hangkapcsolóval, magyar és angol feliratokkal.
+- [x] Aktív HUD és vezérlők újraelrendezése a meglévő műveletekkel, fizika és vezérlési kiosztás módosítása nélkül.
+- [!] Döntés: maradjon a jelenlegi billentyűzet-kiosztás, vagy változzon a referencia alapján?
+- [!] Képi megállási pont: egyedi főmenü-háttér vagy illusztráció csak jóváhagyott, felhasználható assettel készüljön.
+- [ ] Záróellenőrzés desktopon, mobilon és nagyított nézetben; lokalizáció, fókusz, görgetés és reduced-motion.
+
+### A meccs utáni bolt terve
+
+**Megvalósíthatóság: alacsony-közepes; a működő alap már rendelkezésre áll.**
+
+- A jelenlegi `ResultScreen` és `Shop` már ugyanazt a kétoszlopos, játékosonkénti
+  fejlesztési modellt használja; a szintcsíkok, árak, maximumszint, játékosaccentek és a
+  meccs utáni műveletek léteznek.
+- Online meccsen a játékos csak a saját profilját módosíthatja, a vásárlás pedig a meccs
+  szinkronizálásáig le van tiltva. Ezt a szabályt a vizuális átrendezés során is meg kell
+  tartani.
+- Van egy tartalmi eltérés, amit a képernyő finomításakor rendezni kell: a bolt
+  „ÖSSZESEN SZERZETT XP” felirata mellett jelenleg a `Profile.xp` jelenik meg, ami az
+  elkölthető egyenleg, és vásárláskor csökken. A meccsben szerzett XP külön statisztika.
+  Vagy az egyenleget kell „Elérhető XP”-ként feliratozni, vagy külön, tartós összesített
+  XP-adatot kell bevezetni; az utóbbi már mentésverzió-váltást és online profilprotokoll-
+  egyeztetést is igényelne. Egyszerű vizuális egyezéshez az első megoldás a kisebb kockázat.
+- A terv képernyőjén a fejlesztéssorok sűrűbbek, ezért a meglévő mobil töréspont és a
+  kis kijelzőn történő görgethetőség ellenőrzése szükséges.
+
+### Javasolt megvalósítási sorrend és elfogadási feltételek
+
+1. **Vizuális alapok és képernyőfolyam:** közös színek, tipográfia, panelek és gombállapotok;
+   a főmenü külön menü-, beállítás- és profilnézeteinek, valamint a menüpontok pontos
+   funkcióinak rögzítése. A meglévő offline/online indítás maradjon elérhető.
+2. **Aktív játékképernyő:** a HUD és vezérlők újraelrendezése Reactben, a Pixi játéktér és
+   fizikai koordináták módosítása nélkül. A jelenlegi műveletek, billentyűzetes vezérlés,
+   lokalizáció és reduced-motion viselkedés maradjon működőképes.
+3. **Eredmény és bolt:** a meglévő komponensek referencia szerinti vizuális finomítása,
+   az XP-felirat/jelentés tisztázása, az online jogosultság és szinkron megtartásával.
+4. **Ellenőrzés:** desktop, keskeny mobil és nagyított nézet; magyar és angol szöveg;
+   offline és online meccs; egérrel és billentyűzettel végrehajtott vásárlás/vezérlés;
+   eredményképernyőn hosszú lista és túlfutó tartalom.
+
+Új backend, külső UI-keretrendszer vagy játékszabály-módosítás a képek megvalósításához nem
+szükséges. A legfontosabb nyitott termékdöntés a menüben ígért profil/beállítás funkciók
+pontos tartalma; az XP-felirat eltérése pedig a shop fejlesztésének megkezdése előtt
+eldöntendő.
+
+## 6. Következő javasolt lépés
+
+A főmenü alapvető sci-fi megjelenése, a meglévő nyelv-/hangbeállítások külön nézete és az
+aktív HUD újraelrendezése elkészült. A fizika és a billentyűzet-kiosztás változatlan maradt.
+Következőként a referencia szerinti egyedi főmenü-háttér készülhet el, de csak jóváhagyott,
+felhasználható assettel; a záró viewport-ellenőrzés ezután következik.
+
+A shop vizuális finomítása külön lépésként végezhető el, miután eldőlt, hogy az XP-felirat
+elkölthető egyenleget vagy életút alatt szerzett összes XP-t mutasson.
 
 A collision- és rombolhatósági modell külön döntési fázis marad, mert az már a pálya
 stratégiáját és a ballisztikai szabályokat is megváltoztatná.

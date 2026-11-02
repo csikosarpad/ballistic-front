@@ -13,17 +13,33 @@ const mockGame = (overrides: Partial<Record<keyof Game, unknown>>) => {
 
 describe("MainMenu", () => {
   beforeEach(() => {
-    useGameStore.setState({ screen: "menu" });
+    useGameStore.setState({ screen: "menu", muted: false });
     useMultiplayerStore.getState().leave();
   });
 
   it("a nyelvváltó angolra állítja a menüt, majd vissza magyarra", () => {
     render(<MainMenu />);
+    fireEvent.click(screen.getByRole("button", { name: "Beállítások" }));
     fireEvent.click(screen.getByRole("button", { name: "English" }));
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByRole("button", { name: "Start game" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Play online" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Settings" }));
     fireEvent.click(screen.getByRole("button", { name: "Magyar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Vissza" }));
     expect(screen.getByRole("button", { name: "Játék indítása" })).toBeInTheDocument();
+  });
+
+  it("a beállításokból módosítható és visszajelzett a hang állapota", () => {
+    render(<MainMenu />);
+    fireEvent.click(screen.getByRole("button", { name: "Beállítások" }));
+
+    const soundButton = screen.getByRole("button", { name: "Hang: be (M)" });
+    expect(soundButton).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(soundButton);
+
+    expect(useGameStore.getState().muted).toBe(true);
+    expect(screen.getByRole("button", { name: "Hang: ki (M)" })).toHaveAttribute("aria-pressed", "false");
   });
 
   it("az online játék gomb megnyitja a szobalobbyt", () => {
