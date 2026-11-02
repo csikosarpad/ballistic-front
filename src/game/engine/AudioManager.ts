@@ -21,7 +21,7 @@ export class AudioManager {
   private move: { source: AudioBufferSourceNode; gain: GainNode } | null = null;
   private moveGate = new HoldGate(MOVE_HOLD_MS);
   private unsubscribe: () => void;
-  private onGesture = () => void this.unlock();
+  private onGesture = () => this.unlock();
   private onVisible = () => {
     if (!document.hidden && this.ctx && this.ctx.state !== "running") void this.ctx.resume().catch(() => {});
   };
@@ -41,11 +41,10 @@ export class AudioManager {
     for (const type of GESTURES) window.removeEventListener(type, this.onGesture);
   }
 
-  private async unlock(): Promise<void> {
+  private unlock(): void {
     if (this.ctx) {
-      // Felfüggesztett (pl. háttérbe került vagy tájolásváltáson átesett) kontextus újraélesztése.
-      if (this.ctx.state !== "running") await this.ctx.resume().catch(() => {});
-      if (this.ctx.state === "running") this.removeGestureListeners();
+      // Felfüggesztett (pl. háttérbe került) kontextus újraélesztése; a resume() függőben maradhat, ezért nem várjuk meg.
+      if (this.ctx.state !== "running") void this.ctx.resume().catch(() => {});
       return;
     }
     const ctx = new AudioContext();
@@ -53,10 +52,14 @@ export class AudioManager {
     this.master = ctx.createGain();
     this.master.connect(ctx.destination);
     this.applyMute(useGameStore.getState().muted);
-    await ctx.resume().catch(() => {});
+    ctx.onstatechange = () => {
+      if (ctx.state === "running") this.removeGestureListeners();
+    };
+    void ctx.resume().catch(() => {});
     if (ctx.state === "running") this.removeGestureListeners();
 
-    await Promise.all(
+    // A betöltés nem várhat a resume()-ra: mobilon az függőben maradhat, és a hangok sosem töltődnének be.
+    void Promise.all(
       (Object.keys(URLS) as SoundName[]).map(async (name) => {
         try {
           const data = await (await fetch(URLS[name])).arrayBuffer();
@@ -72,6 +75,7 @@ export class AudioManager {
   play(name: SoundName, { rate = 1, volume = 1 }: { rate?: number; volume?: number } = {}): void {
     const buffer = this.buffers[name];
     if (!this.ctx || !this.master || !buffer) return;
+    if (this.ctx.state !== "running") void this.ctx.resume().catch(() => {});
     const source = this.ctx.createBufferSource();
     source.buffer = buffer;
     source.playbackRate.value = rate;
