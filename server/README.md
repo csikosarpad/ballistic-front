@@ -22,7 +22,7 @@ A lobbyból a host elindíthatja a meccset; a kliensek a közös seed és upgrad
 - `config.example.php` – konfigurációs minta; a saját `config.php` nincs verziókezelve.
 - `schema.sql` – MySQL/MariaDB táblák.
 
-Elnevezés: az `api/` az egyetlen HTTP-n elérhető belépési pont, és telepítéskor közvetlenül az `…/ballistic-front/api/` URL-nek felel meg. A `lib/` kizárólag szerveroldali kód, soha nem végpont. (Korábban `public/` és `src/` volt a nevük; a frontend `src/` mappájával összekeveredtek, a `public/` pedig félrevezető volt.) A két mappa egymáshoz viszonyított helye telepítéskor maradjon meg, mert az `api/index.php` a `../lib/bootstrap.php` fájlt tölti be, a `lib/bootstrap.php` pedig alapértelmezetten a `lib/` melletti `config.php` fájlt keresi.
+Elnevezés: az `api/` az egyetlen HTTP-n elérhető belépési pont, és telepítéskor közvetlenül az `…/solvyr-prime/api/` URL-nek felel meg. A `lib/` kizárólag szerveroldali kód, soha nem végpont. (Korábban `public/` és `src/` volt a nevük; a frontend `src/` mappájával összekeveredtek, a `public/` pedig félrevezető volt.) A két mappa egymáshoz viszonyított helye telepítéskor maradjon meg, mert az `api/index.php` a `../lib/bootstrap.php` fájlt tölti be, a `lib/bootstrap.php` pedig alapértelmezetten a `lib/` melletti `config.php` fájlt keresi.
 
 ## Követelmények Windows alatt
 
@@ -65,7 +65,7 @@ A projekt tartalmaz egy helyi `server/config.php` fájlt, amelyet a Git figyelme
 if (-not (Test-Path server/config.php)) { Copy-Item server/config.example.php server/config.php }
 ```
 
-Nyisd meg a `server/config.php` fájlt, majd állítsd be a saját MySQL host, adatbázisnév, felhasználónév és jelszó értékeit. A `api.base_path` éles értéke `/ballistic-front/api`; a `route_aliases` tartalmazza a helyi Vite proxy által használt `/api` útvonalat.
+Nyisd meg a `server/config.php` fájlt, majd állítsd be a saját MySQL host, adatbázisnév, felhasználónév és jelszó értékeit. A `api.base_path` éles értéke `/solvyr-prime/api`; a `route_aliases` tartalmazza a helyi Vite proxy által használt `/api` útvonalat.
 
 Ezután a projekt gyökérmappájából indítsd el a beépített PHP fejlesztői szervert:
 
@@ -109,13 +109,13 @@ Ez a próba a lobbyt és a backend szinkronját ellenőrzi. A meccs indítása u
 | `db.host`, `db.port` | `server/config.php` | MySQL/MariaDB szerver címe és portja. |
 | `db.name` | `server/config.php` | A létrehozott adatbázis neve. |
 | `db.user`, `db.pass` | `server/config.php` | Adatbázis-felhasználó és jelszó. |
-| `api.base_path` | `server/config.php` | Éles API prefix; ehhez a projekthez `/ballistic-front/api`. |
+| `api.base_path` | `server/config.php` | Éles API prefix; ehhez a projekthez `/solvyr-prime/api`. |
 | `api.route_aliases` | `server/config.php` | Helyi API prefixek; alapértelmezetten `/api`. |
 | `api.allowed_origins` | `server/config.php` | Pontos böngésző-origin allowlist, például `https://delawer.hu`. |
 | `api.max_payload_bytes` | `server/config.php` | Esemény payload felső méretkorlátja byte-ban. |
 | `BALLISTIC_CONFIG_PATH` | PHP folyamat környezete | Opcionális, a config teljes fájlútvonala, ha nem a `server/config.php` helyen van. |
 | `MULTIPLAYER_API_TARGET` | Vite környezete | Fejlesztői proxy célcíme; alapértelmezése `http://127.0.0.1:8000`. |
-| `VITE_MULTIPLAYER_API_URL` | Frontend build | Böngésző API-alap URL; lokálisan `/api`, élesben `https://delawer.hu/ballistic-front/api`. |
+| `VITE_MULTIPLAYER_API_URL` | Frontend build | Böngésző API-alap URL; lokálisan `/api`, élesben `https://delawer.hu/solvyr-prime/api`. |
 
 Éles adatbázis-jelszót ne írj a `config.example.php` fájlba, és a saját `config.php` fájlt ne commitold. Ha lehet, a szerveren tartsd a configot a webrooton kívül, és a `BALLISTIC_CONFIG_PATH` változóval mutass rá.
 
@@ -209,14 +209,14 @@ Hozz létre külön MySQL/MariaDB adatbázist és korlátozott jogosultságú fe
 
 ### 2. PHP API
 
-Az API-t a kívánt `https://delawer.hu/ballistic-front/api` címre telepítsd:
+Az API-t a kívánt `https://delawer.hu/solvyr-prime/api` címre telepítsd:
 
-- A `server/api/` tartalma kerüljön a `public_html/ballistic-front/api/` mappába.
-- A `server/lib/` tartalma kerüljön a `public_html/ballistic-front/lib/` mappába; a benne lévő `.htaccess` tiltja a PHP forrás HTTP-letöltését.
-- A `server/config.php` kerüljön a `public_html/ballistic-front/config.php` helyre, vagy még jobb, a webrooton kívülre, `BALLISTIC_CONFIG_PATH` beállítással.
+- A `server/api/` tartalma kerüljön a `public_html/solvyr-prime/api/` mappába.
+- A `server/lib/` tartalma kerüljön a `public_html/solvyr-prime/lib/` mappába; a benne lévő `.htaccess` tiltja a PHP forrás HTTP-letöltését.
+- A `server/config.php` kerüljön a `public_html/solvyr-prime/config.php` helyre, vagy még jobb, a webrooton kívülre, `BALLISTIC_CONFIG_PATH` beállítással.
 - Importáld a `server/schema.sql` fájlt a produkciós adatbázisba.
 
-Ha a `config.php` a frontend könyvtárába kerül, a `public_html/ballistic-front/.htaccess` fájlban tiltsd le a közvetlen elérését:
+Ha a `config.php` a frontend könyvtárába kerül, a `public_html/solvyr-prime/.htaccess` fájlban tiltsd le a közvetlen elérését:
 
 ```apache
 <Files "config.php">
@@ -224,26 +224,26 @@ Ha a `config.php` a frontend könyvtárába kerül, a `public_html/ballistic-fro
 </Files>
 ```
 
-Az Apache API könyvtárban legyen engedélyezve a `mod_rewrite` és `mod_setenvif`; töltsd fel a `server/api/.htaccess` fájlt is. A `server/config.php` `api.base_path` értéke legyen `/ballistic-front/api`, az engedélyezett origin tartalmazza a `https://delawer.hu` értéket. Éles API-t kizárólag HTTPS-en szolgálj ki.
+Az Apache API könyvtárban legyen engedélyezve a `mod_rewrite` és `mod_setenvif`; töltsd fel a `server/api/.htaccess` fájlt is. A `server/config.php` `api.base_path` értéke legyen `/solvyr-prime/api`, az engedélyezett origin tartalmazza a `https://delawer.hu` értéket. Éles API-t kizárólag HTTPS-en szolgálj ki.
 
 ### 3. Frontend build
 
-A frontend API URL-je buildidőben kerül a JS bundle-be. Az éles API-alap URL a `.env.production` fájlban `/ballistic-front/api` értékre van állítva, így az alap build parancs megfelelő:
+A frontend API URL-je buildidőben kerül a JS bundle-be. Az éles API-alap URL a `.env.production` fájlban `/solvyr-prime/api` értékre van állítva, így az alap build parancs megfelelő:
 
 ```powershell
 pnpm.cmd build
 ```
 
-Ezzel a böngésző a `https://delawer.hu/ballistic-front/api` címet éri el. Eltérő API-domain esetén build előtt felülírhatod a `VITE_MULTIPLAYER_API_URL` változót.
+Ezzel a böngésző a `https://delawer.hu/solvyr-prime/api` címet éri el. Eltérő API-domain esetén build előtt felülírhatod a `VITE_MULTIPLAYER_API_URL` változót.
 
-Töltsd fel a `dist/` teljes tartalmát a `public_html/ballistic-front/` könyvtárba. Az API ugyanazon az originen van, ezért a CORS allowlistben a `https://delawer.hu` origin szerepeljen (útvonal nélkül).
+Töltsd fel a `dist/` teljes tartalmát a `public_html/solvyr-prime/` könyvtárba. Az API ugyanazon az originen van, ezért a CORS allowlistben a `https://delawer.hu` origin szerepeljen (útvonal nélkül).
 
 ### 4. Feltöltési lista
 
 Az API szerverre a következők kerüljenek:
 
-- a `server/api/` tartalma az API publikus útvonalára (`ballistic-front/api/`);
-- a `server/lib/` tartalma a `ballistic-front/lib/` alá, a tiltó `.htaccess` fájllal együtt;
+- a `server/api/` tartalma az API publikus útvonalára (`solvyr-prime/api/`);
+- a `server/lib/` tartalma a `solvyr-prime/lib/` alá, a tiltó `.htaccess` fájllal együtt;
 - a saját `server/config.php` a frontend webroot védett gyökerébe vagy azon kívülre;
 - az adatbázisba importált séma.
 

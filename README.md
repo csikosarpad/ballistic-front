@@ -54,8 +54,8 @@ Online módhoz a PHP API is kell (`php -S 127.0.0.1:8000 -t server/api server/ap
 
 ```
 server/                 # PHP/MySQL multiplayer backend (nem része a Vite buildnek)
-├── api/                # HTTP belépési pont (index.php, .htaccess) → deploy: public_html/ballistic-front/api/
-├── lib/                # szerveroldali PHP kód, HTTP-ről tiltva → deploy: public_html/ballistic-front/lib/
+├── api/                # HTTP belépési pont (index.php, .htaccess) → deploy: public_html/solvyr-prime/api/
+├── lib/                # szerveroldali PHP kód, HTTP-ről tiltva → deploy: public_html/solvyr-prime/lib/
 ├── config.example.php  # konfigurációs minta (a config.php nincs verziókezelve)
 └── schema.sql
 src/
@@ -75,7 +75,7 @@ src/
     └── data/           # adatvezérelt definíciók (upgrade-ek)
 ```
 
-A frontend (`src/`) és a backend (`server/`) szétválasztott: a Vite és a `tsc` csak a `src/` mappát látja, a szerver mappák átnevezése nem érinti a buildet. A frontend az API-t kizárólag a `VITE_MULTIPLAYER_API_URL` URL-en éri el (éles: `/ballistic-front/api`, lásd `.env.production`), ami az `server/api/` telepítési helyének felel meg.
+A frontend (`src/`) és a backend (`server/`) szétválasztott: a Vite és a `tsc` csak a `src/` mappát látja, a szerver mappák átnevezése nem érinti a buildet. A frontend az API-t kizárólag a `VITE_MULTIPLAYER_API_URL` URL-en éri el (éles: `/solvyr-prime/api`, lásd `.env.production`), ami az `server/api/` telepítési helyének felel meg.
 
 Elv: a nagy gyakoriságú adat (pozíciók) az engine-ben él, a Zustand store csak a HUD-hoz szükséges állapotot tartja.
 
