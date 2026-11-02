@@ -50,6 +50,35 @@ describe("Hud billentyűk", () => {
     expect(angle()).toBe(41);
   });
 
+  it("a ± gombok 1° / 10 erő lépést adnak, zárolva tiltottak", () => {
+    fireEvent.click(screen.getByRole("button", { name: "Szög növelése" }));
+    fireEvent.click(screen.getByRole("button", { name: "Erő csökkentése" }));
+    expect(angle()).toBe(46);
+    expect(power()).toBe(390);
+    act(() => useGameStore.setState({ phase: "flying" }));
+    expect(screen.getByRole("button", { name: "Szög csökkentése" })).toBeDisabled();
+  });
+
+  it("a nyomva tartott gomb ismétel", () => {
+    vi.useFakeTimers();
+    try {
+      const button = screen.getByRole("button", { name: "Erő növelése" });
+      fireEvent.pointerDown(button, { button: 0 });
+      expect(power()).toBe(410);
+      act(() => {
+        vi.advanceTimersByTime(350 + 90 * 2);
+      });
+      expect(power()).toBe(440);
+      fireEvent.pointerUp(button);
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+      expect(power()).toBe(440);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("a T billentyű röppálya-előnézetet kér, ha még elérhető", () => {
     const requestPreview = vi.fn();
     gameRef.current = { requestPreview } as unknown as Game;

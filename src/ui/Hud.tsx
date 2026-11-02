@@ -1,8 +1,9 @@
-import { useEffect, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { MAX_ANGLE, MIN_ANGLE, MIN_POWER, useGameStore } from "@/game/state/gameStore";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
+import { RepeatButton } from "./RepeatButton";
 import { WindIndicator } from "./WindIndicator";
 
 const toCss = (color?: number) => (color === undefined ? "#ffffff" : `#${color.toString(16).padStart(6, "0")}`);
@@ -56,6 +57,11 @@ export function Hud() {
   const multiplayerError = useMultiplayerStore((state) => state.error);
   const locked = phase !== "aiming" || !canControl;
   const me = tanks.find((t) => t.id === currentId);
+  // Érintőeszközön a billentyűkre utaló jelzések fölöslegesek.
+  const touch = typeof window.matchMedia === "function" && window.matchMedia("(pointer: coarse)").matches;
+  const soundState = muted ? t("hud.soundOff") : t("hud.soundOn");
+  const soundLabel = t(touch ? "hud.soundTouch" : "hud.sound", { state: soundState });
+  const [hintDismissed, setHintDismissed] = useState(false);
 
   // Bal/jobb: mozgás, Ctrl+bal/jobb: szög (Shift: x5), fel/le: erő (Shift: x5), szóköz: tűz.
   useEffect(() => {
@@ -155,52 +161,92 @@ export function Hud() {
       </div>
       <div className="hud-command-dock">
         <div className="hud-controls">
-          <label className="hud-control">
-            <span>{t("hud.angle", { value: angle })}</span>
-            <input
-              type="range"
-              min={MIN_ANGLE}
-              max={MAX_ANGLE}
-              value={angle}
-              disabled={locked}
-              onChange={(e) => setAim(+e.target.value, power)}
-            />
-          </label>
-          <label className="hud-control">
-            <span>{t("hud.power", { value: power })}</span>
-            <input
-              type="range"
-              min={MIN_POWER}
-              max={maxPower}
-              value={power}
-              disabled={locked}
-              onChange={(e) => setAim(angle, +e.target.value)}
-            />
-          </label>
+          <div className="hud-control">
+            <span id="hud-angle-label">{t("hud.angle", { value: angle })}</span>
+            <div className="hud-stepper">
+              <RepeatButton
+                className="hud-step"
+                aria-label={t("hud.angleDown")}
+                disabled={locked}
+                onPress={() => useGameStore.getState().nudgeAngle(-1)}
+              >
+                −
+              </RepeatButton>
+              <input
+                type="range"
+                aria-labelledby="hud-angle-label"
+                min={MIN_ANGLE}
+                max={MAX_ANGLE}
+                value={angle}
+                disabled={locked}
+                onChange={(e) => setAim(+e.target.value, power)}
+              />
+              <RepeatButton
+                className="hud-step"
+                aria-label={t("hud.angleUp")}
+                disabled={locked}
+                onPress={() => useGameStore.getState().nudgeAngle(1)}
+              >
+                +
+              </RepeatButton>
+            </div>
+          </div>
+          <div className="hud-control">
+            <span id="hud-power-label">{t("hud.power", { value: power })}</span>
+            <div className="hud-stepper">
+              <RepeatButton
+                className="hud-step"
+                aria-label={t("hud.powerDown")}
+                disabled={locked}
+                onPress={() => useGameStore.getState().nudgePower(-10)}
+              >
+                −
+              </RepeatButton>
+              <input
+                type="range"
+                aria-labelledby="hud-power-label"
+                min={MIN_POWER}
+                max={maxPower}
+                value={power}
+                disabled={locked}
+                onChange={(e) => setAim(angle, +e.target.value)}
+              />
+              <RepeatButton
+                className="hud-step"
+                aria-label={t("hud.powerUp")}
+                disabled={locked}
+                onPress={() => useGameStore.getState().nudgePower(10)}
+              >
+                +
+              </RepeatButton>
+            </div>
+          </div>
         </div>
         <div className="hud-actions">
-          <button
+          <RepeatButton
             aria-label={t("hud.moveLeft")}
             title={t("hud.moveLeft")}
             disabled={locked}
-            onClick={() => gameRef.current?.move(-1)}
+            intervalMs={140}
+            onPress={() => gameRef.current?.move(-1)}
           >
             <span className="hud-action-icon" aria-hidden="true">
               ◀
             </span>
             <span>{t("hud.moveLeft")}</span>
-          </button>
-          <button
+          </RepeatButton>
+          <RepeatButton
             aria-label={t("hud.moveRight")}
             title={t("hud.moveRight")}
             disabled={locked}
-            onClick={() => gameRef.current?.move(1)}
+            intervalMs={140}
+            onPress={() => gameRef.current?.move(1)}
           >
             <span className="hud-action-icon" aria-hidden="true">
               ▶
             </span>
             <span>{t("hud.moveRight")}</span>
-          </button>
+          </RepeatButton>
           <button
             aria-pressed={previewActive}
             disabled={locked || !previewAvailable}
@@ -213,7 +259,7 @@ export function Hud() {
               {previewActive
                 ? t("hud.previewActive")
                 : previewAvailable
-                  ? t("hud.previewAvailable", { value: previewRemaining })
+                  ? t(touch ? "hud.previewAvailableTouch" : "hud.previewAvailable", { value: previewRemaining })
                   : t("hud.previewUsed")}
             </span>
           </button>
@@ -223,18 +269,20 @@ export function Hud() {
             </span>
             <span>{t("hud.fire")}</span>
           </button>
-          <button
-            aria-pressed={!muted}
-            onClick={toggleMuted}
-            title={t("hud.sound", { state: muted ? t("hud.soundOff") : t("hud.soundOn") })}
-          >
+          <button aria-pressed={!muted} onClick={toggleMuted} title={soundLabel}>
             <span className="hud-action-icon" aria-hidden="true">
               ♫
             </span>
-            <span>{t("hud.sound", { state: muted ? t("hud.soundOff") : t("hud.soundOn") })}</span>
+            <span>{soundLabel}</span>
           </button>
         </div>
       </div>
+      {!hintDismissed && (
+        <div className="orientation-hint" role="note">
+          <span>{t("hud.rotateHint")}</span>
+          <button onClick={() => setHintDismissed(true)}>{t("hud.rotateHintDismiss")}</button>
+        </div>
+      )}
     </div>
   );
 }

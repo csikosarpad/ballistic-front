@@ -235,6 +235,50 @@
   pointer-events: auto;
 }
 
+.hud-stepper {
+  display: grid;
+  grid-template-columns: auto minmax(60px, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.battle-hud .hud-step {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgba(78, 195, 234, 0.58);
+  border-radius: 3px 8px;
+  background: linear-gradient(180deg, rgba(24, 87, 119, 0.82), rgba(8, 35, 61, 0.9));
+  color: #c9f3ff;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.battle-hud .hud-step:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.battle-hud .hud-step:active:not(:disabled) {
+  border-color: #9ceeff;
+  background: linear-gradient(180deg, rgba(42, 132, 164, 0.92), rgba(10, 52, 80, 0.95));
+}
+
+.hud-actions button,
+.hud-step {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+}
+
+.orientation-hint {
+  display: none;
+}
+
 .hud-actions {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -1218,14 +1262,24 @@
   }
 
   .hud-actions button {
-    min-height: 48px;
-    padding: 4px 3px;
+    min-height: 38px;
+    padding: 3px;
     font-size: 11px;
     overflow-wrap: anywhere;
   }
 
   .hud-action-icon {
-    font-size: 16px;
+    font-size: 15px;
+  }
+
+  .battle-hud .hud-step {
+    width: 34px;
+    height: 34px;
+    font-size: 19px;
+  }
+
+  .hud-stepper {
+    gap: 4px;
   }
 
   .result-panel {
@@ -1280,5 +1334,127 @@
 
   .hud-actions button {
     min-height: 42px;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 760px) and (pointer: coarse) {
+  .orientation-hint {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px;
+    background: rgba(3, 9, 20, 0.92);
+    color: #ffe4a0;
+    font-size: 17px;
+    line-height: 1.4;
+    text-align: center;
+    pointer-events: auto;
+  }
+
+  .orientation-hint::before {
+    content: "⟳";
+    font-size: 56px;
+    line-height: 1;
+    color: #73e5ff;
+  }
+
+  .orientation-hint button {
+    min-height: 40px;
+    padding: 0 18px;
+    border: 1px solid rgba(78, 195, 234, 0.58);
+    border-radius: 3px 8px;
+    background: rgba(24, 87, 119, 0.82);
+    color: #c9f3ff;
+    font-size: 14px;
+    cursor: pointer;
+  }
+}
+
+/* Fekvő, alacsony képernyő: a vezérlők oldalra kerülnek, hogy a pálya szabad maradjon. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .battle-hud {
+    display: grid;
+    grid-template-columns: minmax(190px, 27vw) minmax(0, 1fr) minmax(150px, 24vw);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 6px 8px;
+    padding: 6px;
+  }
+
+  .hud-top {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    gap: 6px;
+  }
+
+  .hud-unit {
+    padding: 4px 8px;
+  }
+
+  .hud-command-dock {
+    display: contents;
+  }
+
+  .hud-controls,
+  .hud-actions {
+    align-self: end;
+    padding: 6px;
+    border: 1px solid rgba(73, 208, 255, 0.56);
+    border-radius: 4px 12px;
+    background: linear-gradient(135deg, rgba(4, 22, 42, 0.88), rgba(7, 14, 33, 0.82));
+    pointer-events: auto;
+  }
+
+  .hud-controls {
+    grid-column: 1;
+    grid-row: 2;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .hud-control {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    font-size: 12px;
+  }
+
+  .hud-actions {
+    grid-column: 3;
+    grid-row: 2;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .hud-actions button {
+    position: relative;
+    min-height: 32px;
+    font-size: 11px;
+  }
+
+  /* Az ikonos gombok szövege csak a képernyőolvasónak marad meg, hogy az oldalsáv alacsony legyen. */
+  .hud-actions button:not(.hud-fire-button) span:not(.hud-action-icon) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .hud-actions .hud-fire-button {
+    grid-column: 1 / 3;
+    grid-row: 2;
+    grid-auto-flow: column;
+    justify-content: center;
+    min-height: 36px;
+  }
+
+  .battle-hud .hud-step {
+    width: 30px;
+    height: 30px;
+    font-size: 17px;
   }
 }

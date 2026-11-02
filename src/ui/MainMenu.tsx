@@ -7,6 +7,7 @@ import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
 import { LanguageSwitch } from "./LanguageSwitch";
 import { MultiplayerLobby } from "./MultiplayerLobby";
+import { requestLandscape } from "./orientation";
 
 export function MainMenu() {
   const t = useT();
@@ -17,12 +18,14 @@ export function MainMenu() {
   const [showSettings, setShowSettings] = useState(false);
 
   const start = () => {
+    void requestLandscape();
     useMultiplayerStore.getState().leave();
     gameRef.current?.startOffline();
     setScreen("playing");
   };
 
   const startMultiplayer = (setup: MatchSetup, profiles: Record<string, Profile>, revision: number) => {
+    void requestLandscape();
     gameRef.current?.startMultiplayer(setup, profiles, revision);
     setScreen("playing");
   };

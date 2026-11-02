@@ -369,6 +369,46 @@ termékdöntés, adatmodell/protokoll-elemzés és saját TODO után kerülhet b
 - [x] Online játék (lobby) képernyő átállítva a Siege Protocol panelstílusra: címfejléc, beviteli mezők, szobakód-kijelző, hibaüzenet, egységes gombok; a lobby-logika változatlan.
 - [ ] Új sziluett/részletes tank csak jóváhagyott vizuális irány után.
 
+### Mobil játszhatóság felmérése
+
+Mérés (emulált telefon, a játéktér fix 1280×720-as világ, `layout()` arányt tartva illeszti az ablakba):
+
+| Nézet         | Mért állapot                                                                                  | Következmény                                                      |
+| ------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Álló 390×844  | a pálya 0,30× méretű, kb. 220 px magas sáv a képernyő közepén; a tank kb. 7 px széles         | a tankok és a becsapódás alig látszanak, felül és alul üres sáv   |
+| Fekvő 844×390 | a pálya 0,54× méretű; a HUD felül 65 px, alul 91 px, vagyis a 390 px magasból kb. 60% foglalt | a terep alsó része és a tankok takarásba kerülhetnek              |
+| Vezérlők      | a gombok 48 px magasak, a csúszkák 18–20 px magasak                                           | a gombok jók; a csúszkával pontos szög/erő beállítása ujjal nehéz |
+
+Ami már megvan: a HUD-gombok (mozgás, tűz, Smart Aim, hang) érintéssel működnek, a HUD nem csordul túl 320 px-en, a viewport meta rendben van.
+
+Ami hiányzik vagy gond:
+
+- **Méretezés (a legnagyobb gond):** álló módban a játéktér használhatatlanul kicsi. A megoldás fekvő tájolás ösztönzése, nem a világ átméretezése.
+- **Pontos célzás:** nincs ±1° / ±10 erő léptetés érintésre (a billentyűzet lépései elérhetők, a gombok nincsenek), és nincs húzásos célzás a tankon.
+- **Folyamatos mozgás:** a mozgás kattintásonként egy lépés; nincs nyomva tartásos ismétlés.
+- **Érintés-részletek:** nincs `touch-action` beállítás (dupla koppintásos nagyítás, görgetés zavarhat), nincs teljes képernyő, és a `Smart Aim (T)`, `Sound (M)` feliratok billentyűket említenek.
+- **Elrendezés fekvőben:** a HUD a pálya kb. 60%-át takarja.
+
+Javasolt lépések, a kockázat szerint növekvő sorrendben:
+
+1. `touch-action: manipulation` és a billentyűs feliratok elrejtése érintőeszközön (CSS, pointer: coarse). Kis kockázat.
+2. Fekvő tájolás ajánlása álló módban (fedőüzenet a játék fölött); nincs forgatáskényszerítés. Kis kockázat.
+3. Fekvő elrendezés újratervezése: a HUD oldalra (bal: mozgás és szög, jobb: erő és tűz) a vászon alsó/felső sáv helyett, hogy a pálya szabad maradjon. Közepes.
+4. Érintésbarát célzás: ±1° / ±10 gombok, hosszú nyomásra ismétlés (mozgás, szög, erő). Közepes; a fizikát és a protokollt nem érinti, csak a store-hívásokat.
+5. Húzásos célzás a tank körül (szög és erő egy ujjal). Nagyobb; külön döntés, és vizuális/UX terv kell hozzá.
+6. Nagyítás a tankra / követő kamera mobilon. Nagyobb; a render és a multiplayer megjelenítést is érinti, külön döntés.
+
+Döntés: az 1–5. lépés megvalósult, a 6. (követő kamera) nem része a hatókörnek.
+
+Megvalósítás:
+
+- [x] `touch-action: manipulation`; a billentyűs feliratok (T, M) érintőeszközön (`pointer: coarse`) elrejtve.
+- [x] Fekvő tájolás ajánlása álló telefonon (bezárható tipp, nincs kényszerítés).
+- [x] Fekvő, alacsony képernyőn a HUD oldalra kerül (bal: szög/erő, jobb: ikonos akciógombok, tűz), így a tankok szabadok maradnak.
+- [x] ±1° / ±10 erő gombok; nyomva tartásra ismétlés (szög, erő, mozgás).
+- [x] Húzásos célzás: a soron lévő tank közeléből (64 képernyő-px) indított húzás iránya a szög, hossza az erő (2 erő / világpixel), vezetővonallal; online csak a saját körben.
+- [ ] Valós telefonos próba (iOS Safari, Android Chrome) még hátravan.
+
 ### Tipográfia / fontkészlet TODO
 
 Javaslat: **Oxanium** (UI és címek), **Orbitron** (logó), **Rajdhani** (HUD adatok). Mind
