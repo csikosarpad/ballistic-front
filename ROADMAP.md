@@ -128,7 +128,7 @@ Javasolt, ingyenes (SIL OFL 1.1) fontkészlet a modern military sci-fi hangulath
 - [ ] Siege Platform vizuális megvalósíthatósági vizsgálata: gameplay-képernyő, egységsziluett, SVG-rétegek és animációk; játékmeneti és multiplayer-viselkedés változatlanul hagyásával
 - [x] Mobil játszhatóság: fekvő tájolás ajánlása, érintésbarát HUD és célzás (±1°/±10 gombok, nyomva tartás, húzásos célzás); részletes felmérés: `docs/game-redesign.md` „Mobil játszhatóság felmérése". Valós eszközös próba hátravan.
 - [ ] Neon, additív blend (erőtér-villanás, pajzsbuborék)
-- [ ] Parallax világűr-háttér
+- [x] Parallax világűr-háttér: csillagköd-kép (`src/game/assets/backgrounds/siege-sky.jpg`, 126 KB), lassan sodródó köd- és csillagréteg, három halványodó hegyréteg légköri homállyal; reduced-motion esetén mozdulatlan
 - [ ] Sötét cyberpunk UI továbbfejlesztése
 - [ ] Hang-redesign: angle/power visszajelző hangok
 - [ ] Hang-redesign: target hit, terrain impact és missed hangesemények
