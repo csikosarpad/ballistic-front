@@ -359,21 +359,20 @@ lépésektől haladnak a nagyobb és bizonytalanabb feladatok felé; a végső e
 függőségei miatt zárólépés. A megállási kapuknál a munka nem folytatódik a szükséges döntés
 vagy asset tisztázásáig.
 
-| Sorrend | Feladat                                                                                                                               |                         Becsült ráfordítás | Megvalósíthatóság / megállási pont                                                                                                                                                                                                                        |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------- | -----------------------------------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1.      | Meglévő menü és HUD vizuális alapjainak egységesítése: színek, panelek, gombok, fókusz- és letiltott állapotok.                       |                                  0,5–1 nap | Egyszerű, a meglévő CSS-re és komponensekre épít; új funkciót és képet nem igényel.                                                                                                                                                                       |
-| 2.      | Főmenü elrendezésének és képernyőváltásainak megtervezése a már létező offline/online indítással, nyelvváltással és haladástörléssel. |                                  0,5–1 nap | A jelenlegi funkciók megtarthatók; a menü és a játék külön képernyő marad.                                                                                                                                                                                |
-| 3.      | A menüfunkciók hatókörének rögzítése.                                                                                                 |                          Döntés megtörtént | A „Profil” és „Kilépés” menüpont egyelőre nem része a fejlesztésnek; a Beállítások csak a már létező nyelv- és hangkapcsolót tartalmazza.                                                                                                                 |
-| 4.      | Beállítások almenü kialakítása a nyelvváltóval és a meglévő hangkapcsolóval.                                                          |                                    0,5 nap | Kis kockázatú UI-munka; új beállítási modellt vagy mentési formátumot nem igényel.                                                                                                                                                                        |
-| 5.      | Aktív HUD és vezérlők újraelrendezése a meglévő adatokkal és műveletekkel.                                                            |                                    1–2 nap | Közepes ráfordítású React/CSS munka. A Pixi játéktér, a fizika és a játékmeneti állapot nem változik.                                                                                                                                                     |
-| 6.      | A referencia szerinti billentyűzetes vezérlés véglegesítése és bekötése.                                                              |                                0,5–1,5 nap | **MEGÁLLÁS:** előbb dönteni kell, hogy a jelenlegi kiosztás maradjon, vagy az ábrán jelzettől eltérő új kiosztást szeretnénk. A módosítás csak jóváhagyás után készülhet el.                                                                              |
-| 7.      | Egyedi főmenü-háttér vagy további illusztráció előkészítése és beillesztése.                                                          | 1–3 nap integráció; az assetkészítés külön | **MEGÁLLÁS:** csak akkor induljon, ha rendelkezésre áll a kívánt, felhasználható kép, vagy megszületett a döntés az elkészítés módjáról. A tervkép önmagában vizuális referencia; szöveget tartalmazó teljes képernyős háttérként nem javasolt beépíteni. |
-| 8.      | Desktop, keskeny mobil és nagyított nézet ellenőrzése; fókusz, görgetés, lokalizáció és reduced-motion viselkedés javítása.           |                                  0,5–1 nap | Az elkészült UI és assetek után végzendő záróellenőrzés.                                                                                                                                                                                                  |
+| Sorrend | Feladat                                                                                                                               |  Becsült ráfordítás | Megvalósíthatóság / megállási pont                                                                                                                                           |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.      | Meglévő menü és HUD vizuális alapjainak egységesítése: színek, panelek, gombok, fókusz- és letiltott állapotok.                       |           0,5–1 nap | Egyszerű, a meglévő CSS-re és komponensekre épít; új funkciót és képet nem igényel.                                                                                          |
+| 2.      | Főmenü elrendezésének és képernyőváltásainak megtervezése a már létező offline/online indítással, nyelvváltással és haladástörléssel. |           0,5–1 nap | A jelenlegi funkciók megtarthatók; a menü és a játék külön képernyő marad.                                                                                                   |
+| 3.      | A menüfunkciók hatókörének rögzítése.                                                                                                 |   Döntés megtörtént | A „Profil” és „Kilépés” menüpont egyelőre nem része a fejlesztésnek; a Beállítások csak a már létező nyelv- és hangkapcsolót tartalmazza.                                    |
+| 4.      | Beállítások almenü kialakítása a nyelvváltóval és a meglévő hangkapcsolóval.                                                          |             0,5 nap | Kis kockázatú UI-munka; új beállítási modellt vagy mentési formátumot nem igényel.                                                                                           |
+| 5.      | Aktív HUD és vezérlők újraelrendezése a meglévő adatokkal és műveletekkel.                                                            |             1–2 nap | Közepes ráfordítású React/CSS munka. A Pixi játéktér, a fizika és a játékmeneti állapot nem változik.                                                                        |
+| 6.      | Billentyűzetes vezérlés.                                                                                                              |   Döntés megtörtént | A meglévő kiosztás változatlan marad; más kiosztás csak külön kérésre kerülhet napirendre.                                                                                   |
+| 7.      | Egyedi főmenü-háttér vagy további illusztráció előkészítése és beillesztése.                                                          | Későbbi, opcionális | Most nem készül új háttérkép; a főmenü a meglévő játéktér fölötti overlayt használja. Később csak felhasználási joggal rendelkező, feliratmentes assettel érdemes folytatni. |
+| 8.      | Desktop, keskeny mobil és nagyított nézet ellenőrzése; fókusz, görgetés, lokalizáció és reduced-motion viselkedés javítása.           |           0,5–1 nap | Az elkészült UI és assetek után végzendő záróellenőrzés.                                                                                                                     |
 
 Az első négy lépés a meglévő funkcionalitásra támaszkodva, új menüpont-funkció kitalálása
-nélkül megvalósítható. A vezérlésváltás és az egyedi háttér külön jóváhagyási kapu. A becslés
-a 7. pont képi anyagának elkészítését nem tartalmazza, ezért a teljes naptári ütemezés csak az
-asset-döntés után adható meg.
+nélkül megvalósítható. Más billentyűzet-kiosztás csak külön kérésre készül. Az egyedi háttér
+jelenleg nincs a megvalósítás hatókörében; a meglévő játéktér marad a menü háttere.
 
 ### Megvalósítási TODO
 
@@ -385,8 +384,8 @@ váró megállási pontot jelent; az ilyen feladatot jóváhagyás előtt nem im
 - [x] Hatókör: „Profil” és „Kilépés” menüpont most nem készül; a Beállítások meglévő funkciókra korlátozódik.
 - [x] Beállítások nézet a nyelvváltóval és a már létező hangkapcsolóval, magyar és angol feliratokkal.
 - [x] Aktív HUD és vezérlők újraelrendezése a meglévő műveletekkel, fizika és vezérlési kiosztás módosítása nélkül.
-- [!] Döntés: maradjon a jelenlegi billentyűzet-kiosztás, vagy változzon a referencia alapján?
-- [!] Képi megállási pont: egyedi főmenü-háttér vagy illusztráció csak jóváhagyott, felhasználható assettel készüljön.
+- [x] Döntés: a jelenlegi billentyűzet-kiosztás marad; a redesign nem változtatja meg.
+- [x] Döntés: egyelőre nem készül plusz főmenü-háttérkép; a meglévő játéktér marad a háttér.
 - [ ] Záróellenőrzés desktopon, mobilon és nagyított nézetben; lokalizáció, fókusz, görgetés és reduced-motion.
 
 ### A meccs utáni bolt terve
@@ -431,8 +430,8 @@ eldöntendő.
 
 A főmenü alapvető sci-fi megjelenése, a meglévő nyelv-/hangbeállítások külön nézete és az
 aktív HUD újraelrendezése elkészült. A fizika és a billentyűzet-kiosztás változatlan maradt.
-Következőként a referencia szerinti egyedi főmenü-háttér készülhet el, de csak jóváhagyott,
-felhasználható assettel; a záró viewport-ellenőrzés ezután következik.
+Egyelőre nem készül új háttérasset; a hátralévő feladat a desktop, mobil és nagyított nézet
+záróellenőrzése. Egyedi háttér később, opcionálisan vehető fel a tervbe.
 
 A shop vizuális finomítása külön lépésként végezhető el, miután eldőlt, hogy az XP-felirat
 elkölthető egyenleget vagy életút alatt szerzett összes XP-t mutasson.

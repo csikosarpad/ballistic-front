@@ -93,6 +93,9 @@ describe("UnitPanel and Shop presentation contract", () => {
     expect(screen.getAllByText("Tank")).toHaveLength(2);
     expect(screen.getByRole("button", { name: "P1: Páncél" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "P2: Páncél" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "P1: Páncél" })).toHaveClass("is-purchasable");
+    expect(screen.getByRole("button", { name: "P2: Páncél" })).not.toHaveClass("is-purchasable");
+    expect(screen.getByRole("button", { name: "P2: Páncél" }).closest(".upgrade-row")).toHaveClass("is-unaffordable");
     expect(document.querySelector(".unit-illustration.facing-right")).toBeInTheDocument();
     expect(document.querySelector(".unit-illustration.facing-left")).toBeInTheDocument();
   });
