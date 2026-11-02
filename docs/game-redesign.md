@@ -1,4 +1,4 @@
-# Ballistic Front - játék redesign terv
+# Solvyr Prime: Siege Protocol - játék redesign terv
 
 ## Cél
 
@@ -368,7 +368,7 @@ vagy asset tisztázásáig.
 | 5.      | Aktív HUD és vezérlők újraelrendezése a meglévő adatokkal és műveletekkel.                                                            |             1–2 nap | Közepes ráfordítású React/CSS munka. A Pixi játéktér, a fizika és a játékmeneti állapot nem változik.                                                                        |
 | 6.      | Billentyűzetes vezérlés.                                                                                                              |   Döntés megtörtént | A meglévő kiosztás változatlan marad; más kiosztás csak külön kérésre kerülhet napirendre.                                                                                   |
 | 7.      | Egyedi főmenü-háttér vagy további illusztráció előkészítése és beillesztése.                                                          | Későbbi, opcionális | Most nem készül új háttérkép; a főmenü a meglévő játéktér fölötti overlayt használja. Később csak felhasználási joggal rendelkező, feliratmentes assettel érdemes folytatni. |
-| 8.      | Desktop, keskeny mobil és nagyított nézet ellenőrzése; fókusz, görgetés, lokalizáció és reduced-motion viselkedés javítása.           |           0,5–1 nap | Az elkészült UI és assetek után végzendő záróellenőrzés.                                                                                                                     |
+| 8.      | Desktop, keskeny mobil és nagyított nézet ellenőrzése; fókusz, görgetés, lokalizáció és reduced-motion viselkedés javítása.           |           0,5–1 nap | Az elkészült UI után végzendő záróellenőrzés; új háttérasset nem része a hatókörnek.                                                                                         |
 
 Az első négy lépés a meglévő funkcionalitásra támaszkodva, új menüpont-funkció kitalálása
 nélkül megvalósítható. Más billentyűzet-kiosztás csak külön kérésre készül. Az egyedi háttér
@@ -386,7 +386,7 @@ váró megállási pontot jelent; az ilyen feladatot jóváhagyás előtt nem im
 - [x] Aktív HUD és vezérlők újraelrendezése a meglévő műveletekkel, fizika és vezérlési kiosztás módosítása nélkül.
 - [x] Döntés: a jelenlegi billentyűzet-kiosztás marad; a redesign nem változtatja meg.
 - [x] Döntés: egyelőre nem készül plusz főmenü-háttérkép; a meglévő játéktér marad a háttér.
-- [ ] Záróellenőrzés desktopon, mobilon és nagyított nézetben; lokalizáció, fókusz, görgetés és reduced-motion.
+- [x] Záróellenőrzés desktopon, mobilon és nagyított nézetben; lokalizáció, fókusz, görgetés és reduced-motion.
 
 ### A meccs utáni bolt terve
 
@@ -430,8 +430,8 @@ eldöntendő.
 
 A főmenü alapvető sci-fi megjelenése, a meglévő nyelv-/hangbeállítások külön nézete és az
 aktív HUD újraelrendezése elkészült. A fizika és a billentyűzet-kiosztás változatlan maradt.
-Egyelőre nem készül új háttérasset; a hátralévő feladat a desktop, mobil és nagyított nézet
-záróellenőrzése. Egyedi háttér később, opcionálisan vehető fel a tervbe.
+A desktop, mobil és nagyított nézet záróellenőrzése megtörtént; új háttérasset nem készült.
+Egyedi háttér később, opcionálisan vehető fel a tervbe.
 
 A shop vizuális finomítása külön lépésként végezhető el, miután eldőlt, hogy az XP-felirat
 elkölthető egyenleget vagy életút alatt szerzett összes XP-t mutasson.

@@ -1,4 +1,4 @@
-# Neon eredményképernyő
+# Solvyr Prime: Siege Protocol – neon eredményképernyő
 
 - [x] A csatolt referencia sötét, cián/arany színvilágának követése.
 - [x] Trófeás győztes fejléc és másodlagos üzenet hozzáadása.

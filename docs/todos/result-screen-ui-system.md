@@ -1,4 +1,4 @@
-# Result screen UI asset rendszer
+# Solvyr Prime: Siege Protocol – Result screen UI asset rendszer
 
 ## Cél
 

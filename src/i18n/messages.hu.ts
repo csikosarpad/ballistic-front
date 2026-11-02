@@ -1,6 +1,6 @@
 /** Magyar szövegek: ez a forrásnyelv, a kulcsokat az angol fordítás típusa is ebből veszi. */
 export const hu = {
-  "menu.title": "Ballistic Front",
+  "menu.title": "Solvyr Prime: Siege Protocol",
   "menu.tagline": "Két játékos, egy gép. Lődd ki az ellenfeled tankját!",
   "menu.controls": "◀ ▶ mozgás · csúszkák: szög és erő · szóköz: tűz",
   "menu.start": "Játék indítása",

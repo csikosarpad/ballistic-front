@@ -1,7 +1,7 @@
 import type { MessageKey } from "./messages.hu";
 
 export const en: Record<MessageKey, string> = {
-  "menu.title": "Ballistic Front",
+  "menu.title": "Solvyr Prime: Siege Protocol",
   "menu.tagline": "Two players, one machine. Blast your opponent's tank!",
   "menu.controls": "◀ ▶ move · sliders: angle and power · space: fire",
   "menu.start": "Start game",

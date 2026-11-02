@@ -451,6 +451,7 @@
 
 .result-panel {
   position: relative;
+  box-sizing: border-box;
   width: min(1120px, calc(100vw - 32px));
   min-width: 0;
   max-height: 94%;
@@ -1037,6 +1038,14 @@
     width: auto;
   }
 
+  .hud-unit-p1 {
+    grid-column: 1;
+  }
+
+  .hud-unit-p2 {
+    grid-column: 2;
+  }
+
   .hud-unit {
     gap: 5px;
     padding: 7px 8px;
@@ -1054,6 +1063,7 @@
   }
 
   .hud-command-dock {
+    box-sizing: border-box;
     gap: 6px;
     padding: 7px;
   }

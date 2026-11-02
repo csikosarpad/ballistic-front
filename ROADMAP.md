@@ -1,4 +1,4 @@
-# Ballistic Front – ütemterv
+# Solvyr Prime: Siege Protocol – ütemterv
 
 Hosszú távú cél: sci-fi, Galaxy Tactics-hoz hasonló látvány (több karakter csapatonként, lebegő szigetek, képességek, erőterek, neon effektek). Ez több hónap, akár 1–2 év. A milestone-ok egymásra épülnek; mindegyik külön branchen és PR-ban készül.
 

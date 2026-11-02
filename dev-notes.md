@@ -1,4 +1,4 @@
-# Copilot Development Context for Ballistic Front
+# Copilot Development Context for Solvyr Prime: Siege Protocol
 
 This project is a 2D artillery/tank game built with:
 

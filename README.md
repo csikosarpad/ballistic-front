@@ -1,6 +1,6 @@
-# Ballistic Front
+# Solvyr Prime: Siege Protocol
 
-Böngészős 2D ágyús/tankos játék (Scorched Earth / Worms / Gunbound stílus).
+A Solvyr Prime univerzumban játszódó böngészős, körökre osztott taktikai tüzérségi játék.
 
 - két (vagy több) tank egymást lövi
 - ballisztikus fizika (szög, erő, szél)
