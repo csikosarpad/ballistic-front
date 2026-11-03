@@ -18,6 +18,12 @@ const CITY_LIGHTS_ALPHA = 0.6;
 /** A városfények alpha-szorzója 0,85 és 1,0 között pulzál. */
 const CITY_PULSE_MIN = 0.85;
 const CITY_PULSE_SPEED = 0.35;
+const SHAFT_COUNT = 4;
+const SHAFT_PULSE_SPEED = 0.22;
+const FOG_BLOBS = 9;
+const FOG_OVERSCAN = 80;
+const FOG_DRIFT_PX = 60;
+const FOG_DRIFT_SPEED = 0.05;
 
 function seededRandom(seed: number): () => number {
   let state = seed >>> 0 || 1;
@@ -58,6 +64,8 @@ export class BattlefieldLayers extends Container {
   private readonly haze = new Graphics();
   private readonly midMountains = new Graphics();
   private readonly nearMountains = new Graphics();
+  private readonly fog = new Graphics();
+  private readonly shafts = new Graphics();
   private readonly atmosphere = new Graphics();
   private readonly props = new BattlefieldProps();
   private readonly windDustClouds = new WindDustClouds();
@@ -76,16 +84,19 @@ export class BattlefieldLayers extends Container {
       layer.blendMode = "add";
       layer.visible = false;
     }
+    this.shafts.blendMode = "add";
     this.addChild(
       this.nebula,
       this.cityGlow,
       this.cityLights,
       this.skyShade,
+      this.shafts,
       this.stars,
       this.farMountains,
       this.haze,
       this.midMountains,
       this.nearMountains,
+      this.fog,
       this.atmosphere,
       this.props,
       this.windDustClouds,
@@ -107,6 +118,8 @@ export class BattlefieldLayers extends Container {
     this.midMountains.clear();
     this.nearMountains.clear();
     this.atmosphere.clear();
+    this.fog.clear();
+    this.shafts.clear();
 
     for (let index = 0; index < STAR_COUNT; index += 1) {
       const x = random() * width;
@@ -149,6 +162,45 @@ export class BattlefieldLayers extends Container {
       .moveTo(0, height * 0.62)
       .lineTo(width, height * 0.59)
       .stroke({ color: 0x65b7c8, alpha: 0.12, width: 1 });
+
+    this.drawShafts(width, height);
+    this.drawFog(width, height, seededRandom(seed ^ 0x5f0c));
+  }
+
+  /** A bolygó felől érkező, halvány additív fénysugarak; lassan pulzálnak (volumetrikus fény). */
+  private drawShafts(width: number, height: number): void {
+    for (let index = 0; index < SHAFT_COUNT; index += 1) {
+      const topX = width * (0.78 + index * 0.07);
+      const spread = width * (0.05 + index * 0.012);
+      const bottomX = topX - width * (0.42 + index * 0.06);
+      this.shafts
+        .poly([
+          topX - spread * 0.3,
+          -10,
+          topX + spread * 0.3,
+          -10,
+          bottomX + spread,
+          height * 0.7,
+          bottomX - spread,
+          height * 0.7,
+        ])
+        .fill({ color: index % 2 === 0 ? 0xffc877 : 0x8fd0ff, alpha: 0.03 });
+    }
+  }
+
+  /** Alacsony, kékes ködfoltok a terep fölött; a Terrain sprite eltakarja, ami a talaj alá esne. */
+  private drawFog(width: number, height: number, random: () => number): void {
+    for (let index = 0; index < FOG_BLOBS; index += 1) {
+      const x = random() * (width + FOG_OVERSCAN * 2) - FOG_OVERSCAN;
+      const y = height * (0.58 + random() * 0.14);
+      const rx = width * (0.1 + random() * 0.14);
+      const ry = height * (0.018 + random() * 0.03);
+      // Három koncentrikus réteg: puha, éles szél nélküli folt.
+      for (let layer = 0; layer < 3; layer += 1) {
+        const scale = 1 - layer * 0.3;
+        this.fog.ellipse(x, y, rx * scale, ry * scale).fill({ color: 0x7fb4d8, alpha: 0.035 });
+      }
+    }
   }
 
   private layoutNebula(width: number, height: number): void {
@@ -211,6 +263,7 @@ export class BattlefieldLayers extends Container {
     if (!enabled) {
       this.applyDrift(0);
       this.applyCityPulse(1);
+      this.applyAtmosphere(0, 1);
     }
   }
 
@@ -221,6 +274,7 @@ export class BattlefieldLayers extends Container {
     this.time += dt;
     this.applyDrift(Math.sin(this.time * DRIFT_SPEED));
     this.applyCityPulse(0.5 + 0.5 * Math.sin(this.time * CITY_PULSE_SPEED));
+    this.applyAtmosphere(Math.sin(this.time * FOG_DRIFT_SPEED), 0.5 + 0.5 * Math.sin(this.time * SHAFT_PULSE_SPEED));
   }
 
   /** A köd és a csillagok ellentétesen, eltérő sebességgel mozdulnak: ez adja a mélységérzetet. */
@@ -230,6 +284,12 @@ export class BattlefieldLayers extends Container {
     this.cityGlow.x = x;
     this.cityLights.x = x;
     this.stars.x = -phase * STAR_DRIFT_PX;
+  }
+
+  /** A földi köd lassan ide-oda úszik; a fénysugarak alpha-ja lassan pulzál. */
+  private applyAtmosphere(fogPhase: number, shaftPulse: number): void {
+    this.fog.x = fogPhase * FOG_DRIFT_PX;
+    this.shafts.alpha = 0.55 + 0.45 * shaftPulse;
   }
 
   public reactToImpact(intensity: number): void {
