@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createTank } from "../entities/tank";
+import { barrelTip, createTank } from "../entities/tank";
 import { DEFAULT_WORLD } from "../physics/ballistics";
 import { TerrainMask } from "../terrain/mask";
 import { newProfile, profileStars } from "./upgrades";
@@ -9,6 +9,7 @@ import {
   chooseUpgrades,
   experienceStrength,
   planShot,
+  planPreciseShot,
   rankStars,
   simulateImpact,
   skillFromMemory,
@@ -82,6 +83,24 @@ describe("planShot", () => {
   });
 });
 
+describe("planPreciseShot", () => {
+  it("olyan lövést választ, amelyet a játék fizikája közvetlen találatként szimulál", () => {
+    const { mask, shooter, target } = setup();
+    const plan = planPreciseShot(shooter, target, mask, 0, DEFAULT_WORLD.gravity);
+
+    expect(plan?.hit).toBe(true);
+    const impact = simulateImpact(
+      barrelTip({ ...shooter, angle: plan!.angle }),
+      plan!.angle,
+      plan!.power,
+      { gravity: DEFAULT_WORLD.gravity, wind: 0 },
+      mask,
+      target,
+    );
+    expect(impact?.hitTarget).toBe(true);
+  });
+});
+
 describe("AiBrain", () => {
   it("hatótávolságon kívül az ellenfél felé indul, közelről marad", () => {
     const { mask, target } = setup();
@@ -100,6 +119,22 @@ describe("AiBrain", () => {
     const perfect = planShot({ shooter, target, mask, wind: 0, gravity: DEFAULT_WORLD.gravity, correctionX: 0 })!;
     const shot = brain.decide(shooter, target, mask, 0, DEFAULT_WORLD.gravity)!;
     expect(shot.angle !== perfect.angle || shot.power !== perfect.power).toBe(true);
+  });
+
+  it("Smart Aim esetén nem ad zajt a található, pontos lövéshez", () => {
+    const { mask, shooter, target } = setup();
+    const brain = new AiBrain({ skill: 0.3, random: sequence([0.2, 0.7, 0.4, 0.9, 0.1]) });
+    const shot = brain.decide(shooter, target, mask, 0, DEFAULT_WORLD.gravity, true)!;
+    const impact = simulateImpact(
+      barrelTip({ ...shooter, angle: shot.angle }),
+      shot.angle,
+      shot.power,
+      { gravity: DEFAULT_WORLD.gravity, wind: 0 },
+      mask,
+      target,
+    );
+
+    expect(impact?.hitTarget).toBe(true);
   });
 
   it("a mellélövésből tanul: a korrekció az ellenkező irányba tolja a célpontot", () => {

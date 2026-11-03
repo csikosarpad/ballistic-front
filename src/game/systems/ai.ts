@@ -134,6 +134,7 @@ export function planPreciseShot(
   };
   const better = (a: PreciseShot, b: PreciseShot | null) =>
     !b || (a.hit && !b.hit) || (a.hit === b.hit && a.error < b.error);
+  const isHit = (shot: PreciseShot | null) => shot !== null && shot.hit;
 
   const coarse: PreciseShot[] = [];
   for (let angle = MIN_ANGLE; angle <= MAX_ANGLE; angle += 2) {
@@ -154,10 +155,12 @@ export function planPreciseShot(
         if (shot && better(shot, best)) best = shot;
       }
     }
-    if (best?.hit) break;
+    if (isHit(best)) break;
   }
   return best;
 }
+
+export interface AiBrainOptions {
   skill: number;
   random?: () => number;
 }
@@ -184,7 +187,22 @@ export class AiBrain {
   }
 
   /** A következő lövés szöge és ereje; null, ha nincs értelmes megoldás. */
-  decide(shooter: Tank, target: Tank, mask: TerrainMask, wind: number, gravity: number): ShotPlan | null {
+  decide(
+    shooter: Tank,
+    target: Tank,
+    mask: TerrainMask,
+    wind: number,
+    gravity: number,
+    smartAim = false,
+  ): ShotPlan | null {
+    if (smartAim) {
+      const precise = planPreciseShot(shooter, target, mask, wind, gravity);
+      if (precise?.hit) {
+        this.lastAimX = target.x;
+        return { angle: precise.angle, power: precise.power, error: precise.error };
+      }
+    }
+
     const plan = planShot({
       shooter,
       target,

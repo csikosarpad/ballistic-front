@@ -484,8 +484,9 @@ export class Game {
     const target = this.tanks.find((t) => t.id === "P1");
     if (!this.terrain || !this.aiBrain || !target) return;
     const wind = useGameStore.getState().wind;
-    if (this.previewAllowance.canUse("P2") && Math.random() < AI_PREVIEW_CHANCE) this.activatePreview();
-    const plan = this.aiBrain.decide(this.current, target, this.terrain.mask, wind, DEFAULT_WORLD.gravity);
+    const smartAim = this.previewAllowance.canUse("P2") && Math.random() < AI_PREVIEW_CHANCE;
+    if (smartAim) this.activatePreview();
+    const plan = this.aiBrain.decide(this.current, target, this.terrain.mask, wind, DEFAULT_WORLD.gravity, smartAim);
     const angle = Math.round(plan?.angle ?? 135);
     const power = Math.round(plan?.power ?? this.current.stats.maxPower * 0.6);
     useGameStore.getState().setAim(angle, power);
