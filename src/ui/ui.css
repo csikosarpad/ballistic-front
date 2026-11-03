@@ -1722,3 +1722,75 @@
     display: none;
   }
 }
+
+.command-console {
+  position: absolute;
+  top: 120px;
+  right: 16px;
+  width: min(300px, 40vw);
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid rgba(73, 208, 255, 0.45);
+  border-radius: 2px 10px;
+  background: rgba(4, 22, 42, 0.82);
+  box-shadow: 0 0 14px rgba(73, 208, 255, 0.18);
+  font: 600 13px var(--bf-font-data);
+  pointer-events: none;
+}
+
+.command-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(73, 208, 255, 0.25);
+  color: var(--bf-shield);
+  font-family: var(--bf-font-ui);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.command-feed-label {
+  color: var(--bf-muted);
+  font-size: 10px;
+}
+
+.command-feed {
+  min-height: 7.5em;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.command-line {
+  display: flex;
+  gap: 8px;
+  padding: 3px 4px;
+  color: var(--bf-shield);
+  text-transform: uppercase;
+}
+
+.command-time {
+  color: var(--bf-muted);
+  flex: none;
+}
+
+.command-warning {
+  color: var(--bf-armor);
+}
+
+.command-critical {
+  color: var(--bf-error);
+}
+
+.command-line.is-latest {
+  background: rgba(255, 211, 77, 0.1);
+  box-shadow: inset 2px 0 0 var(--bf-highlight);
+}
+
+@media (max-width: 700px) {
+  .command-console {
+    display: none;
+  }
+}

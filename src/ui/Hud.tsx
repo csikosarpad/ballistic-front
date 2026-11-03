@@ -5,6 +5,7 @@ import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
 import { RepeatButton } from "./RepeatButton";
+import { CommandConsole } from "./CommandConsole";
 import { WindIndicator } from "./WindIndicator";
 
 const toCss = (color?: number) => (color === undefined ? "#ffffff" : `#${color.toString(16).padStart(6, "0")}`);
@@ -135,6 +136,7 @@ export function Hud() {
           )}
         </div>
       </div>
+      <CommandConsole />
       <div className="hud-command-dock">
         <div className="hud-controls">
           <div className="hud-control">

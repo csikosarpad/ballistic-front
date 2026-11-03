@@ -90,6 +90,17 @@ export const hu = {
   "upgrade.smartAim.name": "Célzástámogatás",
   "upgrade.smartAim.desc": "+{value} röppálya-előnézet töltet meccsenként",
 
+  "command.title": "Parancsnoki konzol",
+  "command.feed": "Taktikai napló",
+  "command.targetAcquired": "Cél befogva",
+  "command.fire": "Tűzparancs!",
+  "command.miss": "A találat nem sikerült",
+  "command.hit": "A célpont megsérült",
+  "command.shieldDown": "Az ellenfél pajzsa összeomlott",
+  "command.armorBreach": "Páncélsérülés észlelve",
+  "command.critical": "Kritikus sérülést kaptunk, {id}!",
+  "command.destroyed": "Célpont megsemmisítve!",
+
   "error.createRoom": "Nem sikerült létrehozni a szobát.",
   "error.joinRoom": "Nem sikerült csatlakozni a szobához.",
   "error.refreshRoom": "Nem sikerült frissíteni a szobát.",

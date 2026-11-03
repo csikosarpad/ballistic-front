@@ -91,6 +91,17 @@ export const en: Record<MessageKey, string> = {
   "upgrade.smartAim.name": "Smart Aim",
   "upgrade.smartAim.desc": "+{value} trajectory preview charge per match",
 
+  "command.title": "Command console",
+  "command.feed": "Tactical feed",
+  "command.targetAcquired": "Target acquired",
+  "command.fire": "Fire order!",
+  "command.miss": "The shot missed",
+  "command.hit": "The target is damaged",
+  "command.shieldDown": "Enemy shield collapsed",
+  "command.armorBreach": "Armor breach detected",
+  "command.critical": "We have taken critical damage, {id}!",
+  "command.destroyed": "Target destroyed!",
+
   "error.createRoom": "Could not create the room.",
   "error.joinRoom": "Could not join the room.",
   "error.refreshRoom": "Could not refresh the room.",

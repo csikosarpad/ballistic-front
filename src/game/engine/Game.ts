@@ -42,7 +42,18 @@ import { newMatchStats, recordDamage, recordShot, recordXp, type MatchStats } fr
 import { loadProfiles, saveProfiles } from "../systems/profileStorage";
 import { MAX_ANGLE, MIN_POWER, useGameStore } from "../state/gameStore";
 import { useMultiplayerStore } from "../state/multiplayerStore";
+import { useCommandStore } from "../state/commandStore";
 import type { RoomEvent } from "../multiplayer/protocol";
+
+/** Ennyi HP-arány alatt kritikus a tank állapota. */
+const CRITICAL_HP_FRACTION = 0.3;
+
+interface ImpactReport {
+  tank: Tank;
+  hpBefore: number;
+  shieldDown: boolean;
+  armorBreach: boolean;
+}
 
 const FIXED_DT = 1 / 60;
 /** Fix logikai pályaméret; az ablak mérete csak a skálázást befolyásolja. */
@@ -227,6 +238,7 @@ export class Game {
   /** Új meccs: terep újragenerálása, tankok újraszórása. */
   restart(setup?: MatchSetup): void {
     if (!this.terrain) return;
+    useCommandStore.getState().clear();
     const width = WORLD_WIDTH;
     const matchSetup = setup ?? { seed: Math.floor(Math.random() * 1_000_000), starterIndex: this.nextStarter };
     this.matchRandom = createSeededRandom(matchSetup.seed);
@@ -349,7 +361,26 @@ export class Game {
     return this.tanks.find((t) => t.id === this.turns.current)!;
   }
 
+  private announceImpact(shooter: Tank, hurt: ImpactReport[]): void {
+    const { announce } = useCommandStore.getState();
+    const enemies = hurt.filter((r) => r.tank !== shooter);
+    if (enemies.length === 0) announce("command.miss", undefined, "warning");
+    for (const r of enemies) {
+      if (!isAlive(r.tank)) announce("command.destroyed", undefined, "critical");
+      else announce("command.hit");
+      if (r.shieldDown) announce("command.shieldDown");
+      if (r.armorBreach) announce("command.armorBreach", undefined, "warning");
+    }
+    for (const r of hurt) {
+      const max = r.tank.stats.maxHp;
+      if (isAlive(r.tank) && r.tank.hp / max <= CRITICAL_HP_FRACTION && r.hpBefore / max > CRITICAL_HP_FRACTION) {
+        announce("command.critical", { id: r.tank.id }, "critical");
+      }
+    }
+  }
+
   private beginTurn(): void {
+    useCommandStore.getState().announce("command.targetAcquired");
     const tank = this.current;
     regenTankShield(tank);
     tank.moveLeft = tank.stats.moveBudget;
@@ -432,6 +463,7 @@ export class Game {
     const tip = barrelTip(tank);
     this.particles.spawnMuzzleFlash(tip.x, tip.y, angle);
     this.audio?.play("shot", { rate: 0.95 + Math.random() * 0.1 });
+    useCommandStore.getState().announce("command.fire");
     this.shell = { pos: tip, vel: launchVelocity(angle, power) };
     const view = this.tankViews.get(tank.id);
     if (view) view.anim = kick(angle);
@@ -543,11 +575,23 @@ export class Game {
     this.audio?.play("explosion", { rate: 0.9 + Math.random() * 0.2 });
     // XP: az ellenfélnek okozott sérülés (1 HP, pajzs- vagy páncélpont = 1 XP).
     let dealt = 0;
+    const hurt: ImpactReport[] = [];
     for (const t of this.tanks) {
       const before = t.hp + t.shield + t.armor;
+      const shieldBefore = t.shield;
+      const armorBefore = t.armor;
+      const hpBefore = t.hp;
       applyDamage(t, explosionDamage(t, x, y, radius, shooter.stats.damage));
       if (t !== shooter) dealt += before - (t.hp + t.shield + t.armor);
+      if (before === t.hp + t.shield + t.armor) continue;
+      hurt.push({
+        tank: t,
+        shieldDown: shieldBefore > 0 && t.shield === 0,
+        armorBreach: armorBefore > 0 && t.armor === 0,
+        hpBefore,
+      });
     }
+    this.announceImpact(shooter, hurt);
     this.award(shooter.id, dealt);
     this.matchStats = recordDamage(this.matchStats, shooter.id, dealt);
     this.shake.trigger(Math.min(1, radius / 80) * 0.75 + (dealt > 0 ? 0.25 : 0));
