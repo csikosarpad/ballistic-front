@@ -103,6 +103,10 @@ export const en: Record<MessageKey, string> = {
   "command.destroyed": "Target destroyed!",
   "command.victory": "{name} has won the battle!",
   "menu.playerNames": "Player names",
+  "menu.audioChannels": "Sound channels",
+  "audio.music": "Music: {state}",
+  "audio.voice": "Commander: {state}",
+  "audio.effects": "Effects: {state}",
   "menu.playerName": "{id} name",
 
   "error.createRoom": "Could not create the room.",

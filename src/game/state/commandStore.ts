@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { t, useLocaleStore, type MessageKey, type Params } from "@/i18n";
 import { cancelSpeech, speak } from "../systems/speech";
 import { useGameStore } from "./gameStore";
+import { useAudioSettings } from "./audioSettings";
 
 export type CommandTone = "info" | "warning" | "critical";
 
@@ -32,7 +33,8 @@ export const useCommandStore = create<CommandState>((set) => ({
     set((s) => ({
       messages: [...s.messages, { id: nextId++, key, params, tone, time: clock() }].slice(-MAX_COMMAND_MESSAGES),
     }));
-    if (!useGameStore.getState().muted) speak(t(key, params), useLocaleStore.getState().locale);
+    const { muted } = useGameStore.getState();
+    if (!muted && useAudioSettings.getState().channels.voice) speak(t(key, params), useLocaleStore.getState().locale);
   },
   clear: () => {
     cancelSpeech();

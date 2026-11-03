@@ -9,7 +9,7 @@ A Solvyr Prime univerzumban játszódó böngészős, körökre osztott taktikai
 - fejleszthető ágyú, lövedék, páncél
 - XP, bolt, meta-progresszió
 - szép grafika (particle effektek, animációk, shaderek)
-- Web Audio hangrendszer OGG assetekkel (lövés, robbanás, tankmozgás)
+- Web Audio hangrendszer OGG assetekkel (lövés, robbanás, tankmozgás) és háttérzene (MP3, loop)
 - parancsnoki konzol és felolvasott közlések (Web Speech API, magyar és angol), győzelmi fanfár
 - beállítható játékosnevek (offline módban is)
 
@@ -26,6 +26,7 @@ Online mód (v1): szobakódos lobby, két kliens közös seed alapján futtatott
 ## Irányítás
 
 - Főmenü: Játék indítása, Online játék, Beállítások (nyelv, hang, játékosnevek), Mentés törlése (megerősítéssel)
+- Beállítások → Hangcsoportok: Zene, Parancsnok (felolvasás) és Effektek (lövés, robbanás, tankmozgás, fanfár) külön ki/be kapcsolható (`localStorage`: `ballistic-front:audio-settings`). A HUD-os némítás (M) mindhármat felülírja. Az alapértelmezett zene a `energysound-cyberpunk-neon-city` (az első kattintás/billentyű után indul); a számok listája a `src/game/data/music.ts`-ben van, a választó a beállításokban később jön.
 - Beállítások → Játékosnevek: P1 és P2 neve (legfeljebb 16 karakter, `localStorage`: `ballistic-front:player-names`); üresen az alapértelmezett P1/P2 marad. A név megjelenik a HUD-on, az eredményképernyőn, a boltban és a felolvasott közlésekben. Online meccsen a lobbyban megadott név az erősebb.
 - ◀ / ▶ nyilak: mozgás (körönként korlátozott távolság)
 - ▲ / ▼ nyilak: lövés ereje (±10, Shift: ±50)
@@ -89,7 +90,9 @@ A hangrendszer fejlesztési tervei, a parancsnoki beszéd és a következő esem
 
 A robbanás- és füstsprite-ok a [Kenney Particle Pack](https://kenney.nl/assets/particle-pack) csomagból valók (CC0), a licenc a `src/game/assets/fx/License.txt` fájlban van.
 
-A hangok (`src/game/assets/audio`) a [Freesound](https://freesound.org) oldalról származó, Creative Commons 0 (CC0) licenc szerinti forrásokból készültek. A WAV/FLAC fájlok OGG formátumba konvertálásához a [FreeConvert OGG Converter](https://www.freeconvert.com/ogg-converter/) eszközt használtam. A konvertálás a fájlméret és a webes betöltés optimalizálását szolgálja; a játék futásidejű hangbetöltése az OGG fájlokra hivatkozik. Az egyes eredeti Freesound-oldalak és szerzők még nincsenek fájlonként rögzítve, ezért publikálás előtt ezeket külön ellenőrizni kell.
+A hangeffektek (`src/game/assets/audio/*.ogg`: lövés, robbanás, tankmozgás) a [Freesound](https://freesound.org) oldalról származó, Creative Commons 0 (CC0) licenc szerinti forrásokból készültek. A WAV/FLAC fájlok OGG formátumba konvertálásához a [FreeConvert OGG Converter](https://www.freeconvert.com/ogg-converter/) eszközt használtam. A konvertálás a fájlméret és a webes betöltés optimalizálását szolgálja; a játék futásidejű hangbetöltése az OGG fájlokra hivatkozik. Az egyes eredeti Freesound-oldalak és szerzők még nincsenek fájlonként rögzítve, ezért publikálás előtt ezeket külön ellenőrizni kell.
+
+A háttérzene **nem CC0**, hanem a Pixabay Content License hatálya alá esik: „Cyberpunk Neon City" – [Pavel Prakapovich (energysound)](https://pixabay.com/hu/users/energysound-41316904/), [Pixabay](https://pixabay.com/music/). A forrás és a licenc-megjegyzések a `src/game/assets/audio/music/LICENSE.txt` fájlban vannak. A licenc önmagában álló terjesztést, értékesítést nem engedi, ezért a zenefájlt csak a játék részeként szabad terjeszteni; nyilvános repóba vagy publikus buildbe kerülés előtt a feltételeket ellenőrizni kell. A `plans/` mappában további próbaszámok vannak (energysound „Dark Cyberpunk Synthwave", Jamii „Warhammer Background Music"), ezek forrásai a `plans/license.txt`-ben vannak, és a játék nem használja őket. A játék a hang- és zenehasználatot nem jelzi a felületen; ha a megjelölést elvárjuk, a Beállításokban kell majd egy „Kreditek" nézet.
 
 A betűtípusok az **Oxanium** (UI) és a **Rajdhani** (HUD adatok), SIL Open Font License 1.1 alatt, a [Fontsource](https://fontsource.org) csomagokból önállóan hosztolva (`@fontsource/oxanium`, `@fontsource/rajdhani`).
 

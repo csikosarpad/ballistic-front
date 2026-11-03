@@ -6,6 +6,7 @@
 - A közléseket a `speechSynthesis` az aktuális nyelven (magyar/angol) felolvassa; mélyebb hang, férfi hang előnyben, a némítás a felolvasást is elnémítja. A hangjellemzők (`VoiceSettings`) később a beállításokból módosíthatók.
 - A közlések számát csökkentettük: „Cél befogva" körönként egyszer, az első célzás vagy mozgás után; lövésenként legfeljebb egy eredményjelzés; a „Tűzparancs!" egyelőre nem szól.
 - Győzelemkor szintetizált fanfár (helyettesítő) és „A csatát {név} nyerte!" bemondás.
+- Háttérzene került a játékba (energysound „Cyberpunk Neon City", loop; Pixabay Content License, forrás: `src/game/assets/audio/music/LICENSE.txt`); a zene, a parancsnoki hang és az effektek a Beállításokban külön kapcsolhatók.
 - A játékosnevek a Beállításokban állíthatók (offline), megjelennek a HUD-on, az eredményképernyőn, a boltban és a közlésekben.
 
 ## 2026-11-01

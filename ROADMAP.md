@@ -138,6 +138,9 @@ Javasolt, ingyenes (SIL OFL 1.1) fontkészlet a modern military sci-fi hangulath
 - [x] Parancsnoki felolvasás (`speech.ts`): `speechSynthesis`, nyelvenként férfi hang előnyben, mélyebb hangmagasság; némítás követi
 - [x] Győzelmi fanfár (szintetizált helyettesítő) és „A csatát {név} nyerte!" bemondás
 - [x] Játékosnevek a Beállításokban (offline), online a lobbynév az erősebb
+- [x] Háttérzene (alap: energysound „Cyberpunk Neon City"); zene, parancsnok és effektek külön ki/be kapcsolható a Beállításokban
+- [ ] Zeneválasztó és hangerőszabályzók a Beállításokban
+- [ ] Zene- és hangeffekt-licencek ellenőrzése publikálás előtt (Pixabay Content License, Freesound források fájlonként), „Kreditek" nézet
 - [ ] Valódi győzelmi fanfár hangfájl (OGG) bekötése, a bemondás késleltetésének igazítása
 - [ ] Parancsnoki beszéd beállításai: hang kiválasztása, sebesség és mélység (`VoiceSettings` már támogatja), közlések gyakorisága / felülírható szövegek, „Tűzparancs!" visszakötése (késleltetett lövéssel, online szinkron mellett)
 - [ ] Eredményképernyőn is látszó győzelmi közlés

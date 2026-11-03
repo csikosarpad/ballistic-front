@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useGameStore } from "@/game/state/gameStore";
 import { MAX_NAME_LENGTH, usePlayerNamesStore } from "@/game/state/playerNames";
+import { AUDIO_CHANNELS, useAudioSettings } from "@/game/state/audioSettings";
 import type { MatchSetup } from "@/game/systems/seededRandom";
 import type { Profile } from "@/game/systems/upgrades";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
-import { useT } from "@/i18n";
+import { useT, type MessageKey } from "@/i18n";
 import { gameRef } from "./gameRef";
 import { LanguageSwitch } from "./LanguageSwitch";
 import { MultiplayerLobby } from "./MultiplayerLobby";
@@ -17,6 +18,8 @@ export function MainMenu() {
   const toggleMuted = useGameStore((s) => s.toggleMuted);
   const names = usePlayerNamesStore((s) => s.names);
   const setName = usePlayerNamesStore((s) => s.setName);
+  const channels = useAudioSettings((s) => s.channels);
+  const setChannel = useAudioSettings((s) => s.setChannel);
   const [showLobby, setShowLobby] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -56,6 +59,23 @@ export function MainMenu() {
               <button className="btn secondary" aria-pressed={!muted} onClick={toggleMuted}>
                 {t("hud.sound", { state: muted ? t("hud.soundOff") : t("hud.soundOn") })}
               </button>
+            </div>
+            <div className="main-menu-setting">
+              <span>{t("menu.audioChannels")}</span>
+              <div className="audio-channel-buttons">
+                {AUDIO_CHANNELS.map((channel) => (
+                  <button
+                    key={channel}
+                    className="btn secondary"
+                    aria-pressed={channels[channel]}
+                    onClick={() => setChannel(channel, !channels[channel])}
+                  >
+                    {t(`audio.${channel}` as MessageKey, {
+                      state: channels[channel] ? t("hud.soundOn") : t("hud.soundOff"),
+                    })}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="main-menu-setting">
               <span>{t("menu.playerNames")}</span>

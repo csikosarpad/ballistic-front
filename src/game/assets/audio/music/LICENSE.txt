@@ -1,0 +1,18 @@
+Háttérzenék – források és licenc
+
+A zenék a Pixabay-ről származnak (Pixabay Content License). A licenc részleteit publikálás előtt a
+https://pixabay.com/service/license-summary/ oldalon kell ellenőrizni; a licenc többek között tiltja a
+tartalom önálló (a játéktól különálló) terjesztését vagy értékesítését, ezért a zenefájlokat csak a játék
+részeként szabad terjeszteni.
+
+Az alapértelmezett, a játékba épített szám (src/game/assets/audio/music/):
+
+energysound-cyberpunk-neon-city-505278.mp3
+Music by Pavel Prakapovich (energysound) from Pixabay
+https://pixabay.com/hu/users/energysound-41316904/
+Forrás: https://pixabay.com/music/ (azonosító: 505278)
+
+A további, még be nem épített számok (próbaanyag a repó plans/ mappájában, forrásaik a plans/license.txt-ben):
+
+- energysound-dark-cyberpunk-synthwave-505274.mp3 – Pavel Prakapovich (energysound), Pixabay
+- jamii-warhammer-background-music-596775.mp3 – Jamii, Pixabay

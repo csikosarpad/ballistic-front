@@ -102,6 +102,10 @@ export const hu = {
   "command.destroyed": "Célpont megsemmisítve!",
   "command.victory": "A csatát {name} nyerte!",
   "menu.playerNames": "Játékosnevek",
+  "menu.audioChannels": "Hangcsoportok",
+  "audio.music": "Zene: {state}",
+  "audio.voice": "Parancsnok: {state}",
+  "audio.effects": "Effektek: {state}",
   "menu.playerName": "{id} neve",
 
   "error.createRoom": "Nem sikerült létrehozni a szobát.",
