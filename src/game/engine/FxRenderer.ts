@@ -3,7 +3,7 @@ import type { Particle, ParticleKind } from "../systems/particles";
 import type { FxTextures } from "./fxTextures";
 
 /** A tűz, a gyűrű és a torkolattűz additív keverést kap, így "izzik". */
-const ADDITIVE: ReadonlySet<ParticleKind> = new Set(["fire", "ring", "muzzle"]);
+const ADDITIVE: ReadonlySet<ParticleKind> = new Set(["fire", "ring", "muzzle", "spark"]);
 
 /** Sprite-készletet újrahasznosító renderer a ParticleSystem részecskéihez. */
 export class FxRenderer {
@@ -25,6 +25,8 @@ export class FxRenderer {
         return t.ring;
       case "muzzle":
         return t.muzzle;
+      case "spark":
+        return t.glow;
     }
   }
 

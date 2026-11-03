@@ -1,6 +1,6 @@
 import { DEFAULT_THEME, type Theme } from "../theme";
 
-export type ParticleKind = "fire" | "smoke" | "debris" | "ring" | "muzzle";
+export type ParticleKind = "fire" | "smoke" | "debris" | "ring" | "muzzle" | "spark";
 
 export interface Particle {
   kind: ParticleKind;
@@ -23,6 +23,9 @@ export interface Particle {
   gravity: number;
   opacity: number;
 }
+
+/** Robbanásonként keletkező szikrák száma. */
+const SPARK_COUNT = 14;
 
 /** Pixi-független részecskerendszer; a rajzolást a FxRenderer végzi a `particles` tömb alapján. */
 export class ParticleSystem {
@@ -55,8 +58,40 @@ export class ParticleSystem {
 
   spawnExplosion(x: number, y: number, radius: number): void {
     const r = radius;
-    // Lökéshullám-gyűrű.
+    // Lökéshullám-gyűrű, mögötte egy lassabb, halványabb külső gyűrű.
     this.add({ kind: "ring", x, y, size: r, grow: r * 7, life: 0.25, color: this.colors.shockwave, opacity: 0.45 });
+    this.add({
+      kind: "ring",
+      x,
+      y,
+      size: r * 0.6,
+      grow: r * 11,
+      life: 0.45,
+      color: this.colors.shockwave,
+      opacity: 0.2,
+    });
+    // Rövid, erős villanás a becsapódás pontján.
+    this.add({ kind: "spark", x, y, size: r * 3.2, grow: r * 2, life: 0.14, color: this.colors.muzzle, opacity: 0.9 });
+
+    // Gyors, ívben hulló, izzó szikrák.
+    for (let i = 0; i < SPARK_COUNT; i++) {
+      const a = this.between(Math.PI * 1.05, Math.PI * 1.95);
+      const speed = this.between(r * 4, r * 10);
+      this.add({
+        kind: "spark",
+        x,
+        y,
+        vx: Math.cos(a) * speed,
+        vy: Math.sin(a) * speed,
+        size: this.between(5, 11),
+        grow: -4,
+        life: this.between(0.35, 0.8),
+        spin: this.between(-6, 6),
+        color: this.rng() < 0.6 ? this.colors.fire[0] : this.colors.fire[1],
+        gravity: 520,
+        opacity: 0.95,
+      });
+    }
 
     for (let i = 0; i < 6; i++) {
       const a = this.between(0, Math.PI * 2);
