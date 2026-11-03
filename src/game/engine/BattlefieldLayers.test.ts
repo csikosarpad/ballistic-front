@@ -11,8 +11,8 @@ describe("BattlefieldLayers", () => {
     first.draw(1280, 720, 42);
     second.draw(1280, 720, 42);
 
-    expect(first.children).toHaveLength(6);
-    expect(second.children).toHaveLength(6);
+    expect(first.children).toHaveLength(14);
+    expect(second.children).toHaveLength(14);
     expect(first.getBounds().width).toBe(second.getBounds().width);
     expect(first.getBounds().height).toBe(second.getBounds().height);
   });

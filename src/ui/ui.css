@@ -1458,3 +1458,360 @@
     font-size: 17px;
   }
 }
+
+/* HUD glow: csak box-shadow/text-shadow, így mobilon is olcsó (nincs szűrő). */
+.hud-unit {
+  box-shadow:
+    0 0 16px color-mix(in srgb, var(--unit-accent) 22%, transparent),
+    inset 0 0 12px color-mix(in srgb, var(--unit-accent) 8%, transparent);
+}
+
+.hud-unit-heading,
+.hud-top-center .hud-readout strong {
+  text-shadow: 0 0 8px color-mix(in srgb, currentColor 55%, transparent);
+}
+
+.hud-top-center {
+  box-shadow:
+    0 0 18px rgba(0, 170, 255, 0.22),
+    inset 0 0 12px rgba(0, 185, 255, 0.08);
+}
+
+.hud-command-dock {
+  box-shadow:
+    0 0 0 1px rgba(0, 170, 255, 0.18),
+    0 0 28px rgba(0, 170, 255, 0.26),
+    inset 0 0 18px rgba(0, 185, 255, 0.1);
+}
+
+.hud-actions button:not(:disabled) {
+  box-shadow: 0 0 8px rgba(36, 216, 255, 0.14);
+}
+
+.hud-actions button:hover:not(:disabled),
+.hud-actions button:focus-visible,
+.hud-actions button[aria-pressed="true"]:not(:disabled) {
+  box-shadow:
+    0 0 14px rgba(36, 216, 255, 0.45),
+    inset 0 0 10px rgba(36, 216, 255, 0.18);
+}
+
+.hud-actions .hud-fire-button:not(:disabled) {
+  box-shadow:
+    0 0 14px rgba(255, 170, 40, 0.38),
+    inset 0 0 10px rgba(255, 170, 40, 0.14);
+  animation: hud-fire-pulse 2.4s ease-in-out infinite;
+}
+
+.battle-hud .hud-step:active:not(:disabled) {
+  box-shadow: 0 0 14px rgba(36, 216, 255, 0.55);
+}
+
+@keyframes hud-fire-pulse {
+  50% {
+    box-shadow:
+      0 0 22px rgba(255, 170, 40, 0.6),
+      inset 0 0 12px rgba(255, 170, 40, 0.22);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-actions .hud-fire-button:not(:disabled) {
+    animation: none;
+  }
+}
+
+/* Animált HUD: belépő hologram-reveal, végigfutó scanline, az aktív egység pulzálása. */
+.hud-unit,
+.hud-top-center,
+.hud-command-dock {
+  animation: hud-reveal 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+
+.hud-unit-p2 {
+  animation-delay: 0.08s;
+}
+
+.hud-top-center {
+  animation-name: hud-reveal-down;
+  animation-delay: 0.15s;
+}
+
+.hud-command-dock {
+  position: relative;
+  overflow: hidden;
+  animation-name: hud-reveal-up;
+  animation-delay: 0.22s;
+}
+
+.hud-command-dock::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 38%;
+  background: linear-gradient(180deg, transparent, rgba(120, 225, 255, 0.1) 70%, rgba(150, 235, 255, 0.28));
+  border-bottom: 1px solid rgba(150, 235, 255, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-100%);
+  animation: hud-scan 0.9s ease-out 0.5s 1 backwards;
+}
+
+.hud-unit.is-active {
+  animation:
+    hud-reveal 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) backwards,
+    hud-active-pulse 2.8s ease-in-out 0.6s infinite;
+}
+
+@keyframes hud-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+    filter: brightness(2.2) saturate(0.6);
+    clip-path: inset(0 100% 0 0);
+  }
+  60% {
+    filter: brightness(1.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    clip-path: inset(-40px);
+  }
+}
+
+@keyframes hud-reveal-down {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+    filter: brightness(2.2);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes hud-reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: brightness(1.8);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes hud-scan {
+  0% {
+    opacity: 0.9;
+    transform: translateY(-100%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(300%);
+  }
+}
+
+@keyframes hud-active-pulse {
+  50% {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--unit-accent) 45%, transparent),
+      0 0 28px color-mix(in srgb, var(--unit-accent) 40%, transparent),
+      inset 0 0 18px color-mix(in srgb, var(--unit-accent) 16%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-unit,
+  .hud-unit.is-active,
+  .hud-top-center,
+  .hud-command-dock,
+  .hud-command-dock::after {
+    animation: none;
+  }
+}
+
+/* Műszerfal-mérők: gyűrűs HP/pajzs/páncél és félkör alakú erőmérő */
+.hud-unit {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 10px;
+}
+
+.hud-unit-meters {
+  display: block;
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.hud-unit-heading {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.unit-gauge {
+  display: block;
+  width: 64px;
+  height: 64px;
+}
+
+.ring-track,
+.ring-fill,
+.dial-track,
+.dial-fill {
+  fill: none;
+}
+
+.ring-track,
+.dial-track {
+  stroke: rgba(116, 161, 181, 0.2);
+}
+
+.ring-fill,
+.dial-fill {
+  transition: stroke-dasharray 0.25s;
+}
+
+.ring-hp .ring-fill {
+  stroke: #4ce1c3;
+}
+
+.ring-shield .ring-fill {
+  stroke: #4dd0ff;
+}
+
+.ring-armor .ring-fill {
+  stroke: #ffd06a;
+}
+
+.unit-gauge-value {
+  fill: currentColor;
+  font: 700 17px var(--bf-font-data);
+}
+
+.hud-control-label {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+}
+
+.power-dial {
+  display: block;
+  width: 64px;
+  height: 37px;
+}
+
+.dial-fill {
+  stroke: var(--bf-highlight);
+  filter: drop-shadow(0 0 3px rgba(255, 211, 77, 0.6));
+}
+
+.dial-value {
+  fill: #fff;
+  font: 700 15px var(--bf-font-data);
+}
+
+@media (max-height: 500px) {
+  .power-dial {
+    display: none;
+  }
+}
+
+.command-console {
+  position: absolute;
+  top: 120px;
+  right: 16px;
+  width: min(300px, 40vw);
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid rgba(73, 208, 255, 0.45);
+  border-radius: 2px 10px;
+  background: rgba(4, 22, 42, 0.82);
+  box-shadow: 0 0 14px rgba(73, 208, 255, 0.18);
+  font: 600 13px var(--bf-font-data);
+  pointer-events: none;
+}
+
+.command-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(73, 208, 255, 0.25);
+  color: var(--bf-shield);
+  font-family: var(--bf-font-ui);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.command-feed-label {
+  color: var(--bf-muted);
+  font-size: 10px;
+}
+
+.command-feed {
+  min-height: 7.5em;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.command-line {
+  display: flex;
+  gap: 8px;
+  padding: 3px 4px;
+  color: var(--bf-shield);
+  text-transform: uppercase;
+}
+
+.command-time {
+  color: var(--bf-muted);
+  flex: none;
+}
+
+.command-warning {
+  color: var(--bf-armor);
+}
+
+.command-critical {
+  color: var(--bf-error);
+}
+
+.command-line.is-latest {
+  background: rgba(255, 211, 77, 0.1);
+  box-shadow: inset 2px 0 0 var(--bf-highlight);
+}
+
+@media (max-width: 700px) {
+  .command-console {
+    display: none;
+  }
+}
+.player-name-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.player-name-fields input {
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(91, 177, 210, 0.32);
+  border-radius: 2px 6px;
+  background: var(--bf-input-bg);
+  color: var(--bf-text);
+  font-size: 14px;
+}
+
+.audio-channel-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

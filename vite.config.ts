@@ -14,7 +14,7 @@ export default defineConfig({
         target: process.env.MULTIPLAYER_API_TARGET ?? "http://127.0.0.1:8000",
         changeOrigin: true,
       },
-      "/ballistic-front/api": {
+      "/solvyr-prime/api": {
         target: process.env.MULTIPLAYER_API_TARGET ?? "http://127.0.0.1:8000",
         changeOrigin: true,
       },

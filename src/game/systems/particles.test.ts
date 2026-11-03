@@ -12,11 +12,30 @@ describe("ParticleSystem", () => {
     expect(ps.particles.find((p) => p.kind === "ring")?.color).toBe(0x123456);
     expect(ps.particles.find((p) => p.kind === "debris")?.color).toBe(0x654321);
   });
-  it("a robbanás tüzet, füstöt, törmeléket és lökéshullámot is létrehoz", () => {
+  it("a robbanás tüzet, füstöt, törmeléket, szikrát és lökéshullámot is létrehoz", () => {
     const ps = make();
     ps.spawnExplosion(0, 0, 30);
     const kinds = new Set(ps.particles.map((p) => p.kind));
-    expect(kinds).toEqual(new Set(["ring", "fire", "debris", "smoke"]));
+    expect(kinds).toEqual(new Set(["ring", "fire", "debris", "smoke", "spark"]));
+  });
+
+  it("a szikrák felfelé indulnak, majd a gravitáció visszahúzza őket", () => {
+    const ps = make();
+    ps.spawnExplosion(0, 0, 30);
+    const spark = ps.particles.find((p) => p.kind === "spark" && p.gravity > 0)!;
+    expect(spark.vy).toBeLessThan(0);
+    ps.update(1 / 60);
+    const rising = spark.vy;
+    for (let i = 0; i < 60; i++) ps.update(1 / 60);
+    expect(spark.vy).toBeGreaterThan(rising);
+  });
+
+  it("két lökéshullám-gyűrű van, a külső lassabban halványul", () => {
+    const ps = make();
+    ps.spawnExplosion(0, 0, 30);
+    const rings = ps.particles.filter((p) => p.kind === "ring");
+    expect(rings).toHaveLength(2);
+    expect(rings[1]!.life).toBeGreaterThan(rings[0]!.life);
   });
 
   it("a torkolattűz a cső irányába fordul (90° = felfelé = 0 forgatás)", () => {

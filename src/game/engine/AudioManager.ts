@@ -3,12 +3,15 @@ import explosionUrl from "@game/assets/audio/explosion.ogg?url";
 import moveUrl from "@game/assets/audio/tank-move.ogg?url";
 import { useGameStore } from "@game/state/gameStore";
 import { HoldGate } from "@game/systems/holdGate";
+import { useAudioSettings } from "@game/state/audioSettings";
+import { DEFAULT_TRACK_ID, trackById } from "@game/data/music";
 
 export type SoundName = "shot" | "explosion" | "move";
 
 const URLS: Record<SoundName, string> = { shot: shotUrl, explosion: explosionUrl, move: moveUrl };
 const MASTER_VOLUME = 0.6;
 const MOVE_VOLUME = 0.5;
+const MUSIC_VOLUME = 0.25;
 /** A mozgáshang ennyi ideig marad meg az utolsó lépés után (a billentyű-ismétlés késése miatt). */
 const MOVE_HOLD_MS = 250;
 const GESTURES = ["pointerup", "touchend", "click", "keydown"] as const;
@@ -20,7 +23,9 @@ export class AudioManager {
   private buffers: Partial<Record<SoundName, AudioBuffer>> = {};
   private move: { source: AudioBufferSourceNode; gain: GainNode } | null = null;
   private moveGate = new HoldGate(MOVE_HOLD_MS);
+  private music: HTMLAudioElement | null = null;
   private unsubscribe: () => void;
+  private unsubscribeSettings: () => void;
   private onGesture = () => this.unlock();
   private onVisible = () => {
     if (!document.hidden && this.ctx && this.ctx.state !== "running") void this.ctx.resume().catch(() => {});
@@ -30,11 +35,23 @@ export class AudioManager {
     // Mobilon a pointerdown/touchstart nem számít felhasználói aktivációnak; a felengedés/koppintás igen.
     for (const type of GESTURES) window.addEventListener(type, this.onGesture);
     document.addEventListener("visibilitychange", this.onVisible);
-    this.unsubscribe = useGameStore.subscribe((s) => this.applyMute(s.muted));
+    this.unsubscribe = useGameStore.subscribe((s) => {
+      this.applyMute(s.muted);
+      this.syncMusic();
+    });
+    this.unsubscribeSettings = useAudioSettings.subscribe(() => this.syncMusic());
   }
 
   private applyMute(muted: boolean): void {
     if (this.master) this.master.gain.value = muted ? 0 : MASTER_VOLUME;
+  }
+
+  /** A zene a globális némítástól és a zenecsatorna kapcsolójától függ; a lejátszás felhasználói gesztusra indulhat. */
+  private syncMusic(): void {
+    if (!this.music) return;
+    const wanted = !useGameStore.getState().muted && useAudioSettings.getState().channels.music;
+    if (wanted) void this.music.play().catch(() => {});
+    else this.music.pause();
   }
 
   private removeGestureListeners(): void {
@@ -45,8 +62,14 @@ export class AudioManager {
     if (this.ctx) {
       // Felfüggesztett (pl. háttérbe került) kontextus újraélesztése; a resume() függőben maradhat, ezért nem várjuk meg.
       if (this.ctx.state !== "running") void this.ctx.resume().catch(() => {});
+      this.syncMusic();
       return;
     }
+    const music = new Audio(trackById(DEFAULT_TRACK_ID).url);
+    music.loop = true;
+    music.volume = MUSIC_VOLUME;
+    this.music = music;
+    this.syncMusic();
     const ctx = new AudioContext();
     this.ctx = ctx;
     this.master = ctx.createGain();
@@ -74,7 +97,7 @@ export class AudioManager {
 
   play(name: SoundName, { rate = 1, volume = 1 }: { rate?: number; volume?: number } = {}): void {
     const buffer = this.buffers[name];
-    if (!this.ctx || !this.master || !buffer) return;
+    if (!this.ctx || !this.master || !buffer || !useAudioSettings.getState().channels.effects) return;
     if (this.ctx.state !== "running") void this.ctx.resume().catch(() => {});
     const source = this.ctx.createBufferSource();
     source.buffer = buffer;
@@ -85,8 +108,40 @@ export class AudioManager {
     source.start();
   }
 
+  /**
+   * Szintetizált helyettesítő fanfár; ha lesz valódi hangfájl, ide kell bekötni (SoundName + URLS).
+   */
+  playFanfare(): void {
+    if (!this.ctx || !this.master || !useAudioSettings.getState().channels.effects) return;
+    if (this.ctx.state !== "running") void this.ctx.resume().catch(() => {});
+    const start = this.ctx.currentTime + 0.05;
+    // C-dúr felfelé futó hármashangzat, a végén hosszan kitartott akkord.
+    const notes: Array<[freq: number, at: number, length: number]> = [
+      [261.63, 0, 0.18],
+      [329.63, 0.2, 0.18],
+      [392.0, 0.4, 0.18],
+      [523.25, 0.6, 0.9],
+      [392.0, 0.6, 0.9],
+      [329.63, 0.6, 0.9],
+    ];
+    for (const [freq, at, length] of notes) {
+      const osc = this.ctx.createOscillator();
+      osc.type = "sawtooth";
+      osc.frequency.value = freq;
+      const gain = this.ctx.createGain();
+      const t0 = start + at;
+      gain.gain.setValueAtTime(0, t0);
+      gain.gain.linearRampToValueAtTime(0.12, t0 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + length);
+      osc.connect(gain).connect(this.master);
+      osc.start(t0);
+      osc.stop(t0 + length + 0.05);
+    }
+  }
+
   /** Minden mozgáslépésnél hívandó; a hang addig szól, amíg a lépések tartanak. */
   moveTick(now = performance.now()): void {
+    if (!useAudioSettings.getState().channels.effects) return;
     this.moveGate.touch(now);
     const buffer = this.buffers.move;
     if (this.move || !this.ctx || !this.master || !buffer) return;
@@ -122,6 +177,9 @@ export class AudioManager {
     this.removeGestureListeners();
     document.removeEventListener("visibilitychange", this.onVisible);
     this.unsubscribe();
+    this.unsubscribeSettings();
+    this.music?.pause();
+    this.music = null;
     this.stopMove();
     void this.ctx?.close();
   }

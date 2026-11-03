@@ -10,6 +10,7 @@ Hosszú távú cél: sci-fi, Galaxy Tactics-hoz hasonló látvány (több karakt
 - A tank és a terep részletes SVG assetjei bekerültek; a fák és antennatornyok jelenleg nincsenek aktív pályadekorációként használva.
 - A hangassetek OGG formátumra lettek optimalizálva; a hangrendszer jelenleg lövés-, robbanás- és tankmozgás-hangot kezel.
 - A röppálya-előnézet most játékosonként és meccsenként fejleszthető töltetekkel működik; a fejlesztés neve magyarul **Célzástámogatás**, angolul **Smart Aim**.
+- Elkészült a parancsnoki konzol: gépelési effektes taktikai napló, a közlések felolvasása Web Speech API-val (magyar/angol), győzelmi fanfár (egyelőre szintetizált) és a győztes bemondása. Offline módban a játékosnevek a Beállításokban állíthatók.
 - A részletes UX- és hang-redesign következő lépései külön checklistként szerepelnek alább.
 
 ## Alapelvek
@@ -128,11 +129,58 @@ Javasolt, ingyenes (SIL OFL 1.1) fontkészlet a modern military sci-fi hangulath
 - [ ] Siege Platform vizuális megvalósíthatósági vizsgálata: gameplay-képernyő, egységsziluett, SVG-rétegek és animációk; játékmeneti és multiplayer-viselkedés változatlanul hagyásával
 - [x] Mobil játszhatóság: fekvő tájolás ajánlása, érintésbarát HUD és célzás (±1°/±10 gombok, nyomva tartás, húzásos célzás); részletes felmérés: `docs/game-redesign.md` „Mobil játszhatóság felmérése". Valós eszközös próba hátravan.
 - [ ] Neon, additív blend (erőtér-villanás, pajzsbuborék)
-- [ ] Parallax világűr-háttér
+- [x] Parallax világűr-háttér: csillagköd-kép (`src/game/assets/backgrounds/siege-sky.jpg`, 126 KB), lassan sodródó köd- és csillagréteg, három halványodó hegyréteg légköri homállyal; reduced-motion esetén mozdulatlan
 - [ ] Sötét cyberpunk UI továbbfejlesztése
 - [ ] Hang-redesign: angle/power visszajelző hangok
 - [ ] Hang-redesign: target hit, terrain impact és missed hangesemények
 - [ ] Tank motorhang lazy loading és további mobil optimalizálása
+- [x] Parancsnoki konzol a HUD-ban (`CommandConsole`, `commandStore`): időbélyeges napló, gépelési effekt, reduced-motion esetén azonnali kiírás
+- [x] Parancsnoki felolvasás (`speech.ts`): `speechSynthesis`, nyelvenként férfi hang előnyben, mélyebb hangmagasság; némítás követi
+- [x] Győzelmi fanfár (szintetizált helyettesítő) és „A csatát {név} nyerte!" bemondás
+- [x] Játékosnevek a Beállításokban (offline), online a lobbynév az erősebb
+- [x] Háttérzene (alap: energysound „Cyberpunk Neon City"); zene, parancsnok és effektek külön ki/be kapcsolható a Beállításokban
+- [ ] Zeneválasztó és hangerőszabályzók a Beállításokban
+- [ ] Zene- és hangeffekt-licencek ellenőrzése publikálás előtt (Pixabay Content License, Freesound források fájlonként), „Kreditek" nézet
+- [ ] Valódi győzelmi fanfár hangfájl (OGG) bekötése, a bemondás késleltetésének igazítása
+- [ ] Parancsnoki beszéd beállításai: hang kiválasztása, sebesség és mélység (`VoiceSettings` már támogatja), közlések gyakorisága / felülírható szövegek, „Tűzparancs!" visszakötése (késleltetett lövéssel, online szinkron mellett)
+- [ ] Eredményképernyőn is látszó győzelmi közlés
+- [ ] Offline AI-ellenfél (tank): a konzol közléseit (`announce`) az AI is használhatja
+
+### M7b – Látványugrás: „orbitális sci-fi hadviselés" (PixiJS 8)
+
+Alapelv: nem új UI-elemek, hanem a meglévő képernyők „megélénkítése". Csak megjelenítés; a fizika, mentés és multiplayer protokoll változatlan. Minden effektnek legyen kikapcsolható/`prefers-reduced-motion` változata, és mobilon mérni kell a teljesítményt (gyengébb eszközön alacsonyabb minőség).
+
+**Első kör – hangulat**
+- [x] Glow/Bloom a terepre: `pixi-filters` `AdvancedBloomFilter` (asztalon erősség 1,2 / blur 8, érintőeszközön 0,4 / blur 2; `bloomQuality.ts`). HUD glow: CSS `box-shadow`/`text-shadow` (panelek, aktív/hover gombok, pulzáló Tűz gomb; reduced-motion esetén nem pulzál). Hátravan: bloom a lövedékre, „Alacsony minőség" beállítás a bloom teljes kikapcsolásához
+- [x] Parallax háttér (köd, csillagok, 3 hegyréteg) – kész, lásd M7
+- [x] Solvyr Prime bolygó a háttérben – a háttérkép tartalmazza (bolygókorong, légkörfény)
+- [x] Orbitális gyűrűállomás – a háttérkép tartalmazza
+- [x] Bolygó finomítás: `siege-city-glow.jpg` és `siege-city-lights.jpg` additív rétegek a háttér bolygóján (a köddel együtt sodródnak, alpha lassan pulzál, reduced-motion esetén fix); külön bolygó-asset nem kellett
+- [x] Animált HUD: fade-in, scanline, hologram-reveal, energy charge (CSS/Pixi ticker, GSAP nélkül)
+- [x] Műszerfal-mérők: gyűrűs HP/pajzs/páncél a HUD-ban (a tankok feletti csíkok maradtak), félkör alakú erőmérő a power csúszka mellett (`gauges.tsx`; mobil fekvő nézetben a félkör rejtett); üveg/folyadék hatás nélkül
+- [ ] „Command hologram" HUD: finom zaj, scanline, villogó célkereszt, adatfolyam
+
+**Második kör – visszajelzés**
+- [x] Lövedéknyom: 26 pontos additív plazmacsík (`shellTrail.ts`), a lövedék felé vastagodó és erősödő, becsapódás után elhalványul; a korábbi füstcsík megmaradt
+- [x] Részecskerendszer bővítése (becsapódás, szikra, törmelék)
+- [x] Kamera-rázkódás találatkor (`screenShake.ts`): 0,35 s, lineárisan csillapodó, a robbanás sugarával és a sebzéssel arányos; reduced-motion esetén ki
+- [x] Becsapódási effektek: lökéshullám, villanás
+- [x] Köd és volumetrikus fény a terep fölött: űrpor, légköri köd, energia-haze
+
+**Harmadik kör – shaderek**
+- [ ] GLSL/fragment shaderek: pajzs-találat, energiafegyver, taktikai AI aktiválás
+- [ ] Terep „scan" effekt: kör elején kék energiahullám fut végig a pályán („SCAN COMPLETE"), shader + maszk
+- [ ] Orbitális csata a háttérben: flottaágyúk, védelmi állomások, pályán kívüli tüzek villanása (csak atmoszféra, nem játékelem)
+
+Döntések (rögzítve):
+- `pixi-filters`: **igen**. Első körben csak BloomFilter, GlowFilter, szükség esetén AdjustmentFilter (terepvonal, lövedéknyom, HUD-panelek, aktív gomb).
+- GSAP: **nem**. Menü fade-in, panel slide-in, XP számláló, győzelmi banner CSS-sel vagy Pixi tickerrel megoldható; akkor kerül elő, ha kameramozgás, cinematic intro vagy komplex cutscene lesz.
+- Bloom: asztalon erősség 1.2 / blur 8; mobilon 0.4 / blur 2, vagy teljesen ki „Alacsony minőség" módban (új beállítás).
+- Külön bolygó-grafika: **nem**, a háttérkép bolygója marad.
+- Városfény-réteg: **igen**, egyetlen új asset: `city_lights_overlay.png` (arany fények, várospöttyök, ipari zónák; átlátszó háttér), alpha 0,85↔1,0 lassú pulzálással (reduced-motion esetén fix). **Kép kell hozzá.**
+- Hatás szerinti sorrend: 1. gameplay háttér (kész), 2. bloom a terepre, 3. bloom a HUD-ra, 4. lövedéknyom, 5. screen shake találatkor.
+
+Döntési pontok: nincs nyitott; a városfény-PNG-re várunk.
 
 ### M8 – Galaxy Tactics-szintű látvány (hosszú táv)
 

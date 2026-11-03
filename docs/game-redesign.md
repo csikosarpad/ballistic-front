@@ -309,6 +309,7 @@ rombolhatók, és nem módosítják a lövedékek vagy a tankok mozgását.
 - [Solvyr Prime: Siege Protocol – eredményképernyő](../plans/solvyr-prime_siege_protocol_result.png)
 - [Játékmenet és főmenü vizuális terve](../plans/visual_plan_game.png)
 - [Meccs utáni fejlesztőbolt terve](../plans/ballistic-front_shop.png)
+- [Parancsnoki konzol terve](../plans/solvyr-prime_siege_protocol_command_concolse.png) – megvalósítva (`CommandConsole`); a képen szereplő „AI ONLINE" / „VOICE ACTIVE" állapotjelzők még nincsenek meg, az AI-ellenfél későbbi feladat.
 
 A képek vizuális irányt és elrendezési ötletet adnak, nem kész, közvetlenül beépíthető UI-k:
 a feliratokat, vezérlőket és állapotokat a meglévő React/Pixi felülettel kell újrarajzolni.
@@ -448,7 +449,7 @@ szükséges; a főmenü és az aktív játékképernyő komolyabb React/CSS elre
   esetleges újrakötésről külön döntés és célzott teszt kell.
 - A főmenü most egyszerű overlay, benne offline/online indítással, nyelvváltással és
   haladástörléssel. A redesign első implementációja ezeket sci-fi katonai panelbe rendezi;
-  a Beállítások nézet a meglévő nyelvváltót és hangkapcsolót tartalmazza. Új profilfunkció
+  a Beállítások nézet a nyelvváltót, a hangkapcsolót és a játékosnevek mezőit tartalmazza. Új profilfunkció
   nem készül.
 - A böngészős „Kilépés” nem zárható megbízhatóan programból; a menüpont jelenleg nincs
   implementálva, és egyelőre nem része a fejlesztési hatókörnek.
@@ -492,6 +493,7 @@ váró megállási pontot jelent; az ilyen feladatot jóváhagyás előtt nem im
 - [x] Főmenü: a meglévő offline/online indítás, haladástörlés és nyelvváltás átrendezése külön menüképernyőbe.
 - [x] Hatókör: „Profil” és „Kilépés” menüpont most nem készül; a Beállítások meglévő funkciókra korlátozódik.
 - [x] Beállítások nézet a nyelvváltóval és a már létező hangkapcsolóval, magyar és angol feliratokkal.
+- [x] Beállítások bővítése a játékosnevekkel (offline; `playerNames` store, `localStorage`). A hang kiválasztása, sebessége és mélysége a parancsnoki beszédhez még hátravan.
 - [x] Aktív HUD és vezérlők újraelrendezése a meglévő műveletekkel, fizika és vezérlési kiosztás módosítása nélkül.
 - [x] Döntés: a jelenlegi billentyűzet-kiosztás marad; a redesign nem változtatja meg.
 - [x] Döntés: egyelőre nem készül plusz főmenü-háttérkép; a meglévő játéktér marad a háttér.

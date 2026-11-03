@@ -1,18 +1,23 @@
 import { UPGRADES } from "@/game/data/upgrades";
 import { useT } from "@/i18n";
+import { usePlayerName } from "@/game/state/playerNames";
 import { UpgradeRow } from "./UpgradeRow";
 import { UnitIllustration } from "./UnitIllustration";
 import type { UnitPanelProps } from "./result.types";
 
 export function UnitPanel({ id, profile, presentation, editable, disabled }: UnitPanelProps) {
   const t = useT();
+  const name = usePlayerName();
 
   return (
-    <section className={`player-upgrades-panel unit-panel accent-${presentation.accent}`} aria-labelledby={`unit-${id}`}>
+    <section
+      className={`player-upgrades-panel unit-panel accent-${presentation.accent}`}
+      aria-labelledby={`unit-${id}`}
+    >
       <div className="player-upgrades-header">
         <div>
           <span className="unit-domain">{presentation.displayName}</span>
-          <h3 id={`unit-${id}`}>{id}</h3>
+          <h3 id={`unit-${id}`}>{name(id)}</h3>
         </div>
         <div className="player-earned-xp">
           <span>{t("shop.totalXp")}</span>

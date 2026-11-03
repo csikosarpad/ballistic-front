@@ -11,7 +11,7 @@ return [
         'charset' => 'utf8mb4',
     ],
     'api' => [
-        'base_path' => '/ballistic-front/api',
+        'base_path' => '/solvyr-prime/api',
         'route_aliases' => ['/api'],
         'max_payload_bytes' => 262144,
         'allowed_origins' => [

@@ -1,4 +1,6 @@
 import { Application, Assets, Container, Graphics, Sprite, type Texture } from "pixi.js";
+import { AdvancedBloomFilter } from "pixi-filters";
+import { bloomSettings } from "./bloomQuality";
 import tankBodyUrl from "../assets/tank-body.svg?url";
 import tankBarrelUrl from "../assets/tank-barrel.svg?url";
 import { kick, stepBarrel, type BarrelState } from "../systems/barrelAnimation";
@@ -13,6 +15,8 @@ import {
 import { PreviewAllowance } from "../systems/previewAllowance";
 import { dragToAim, DRAG_POWER_PER_PX } from "../systems/dragAim";
 import { createSeededRandom, type MatchSetup } from "../systems/seededRandom";
+import { ScreenShake } from "../systems/screenShake";
+import { ShellTrail } from "../systems/shellTrail";
 import { Terrain } from "../terrain/Terrain";
 import { ParticleSystem } from "../systems/particles";
 import { DEFAULT_THEME, type Theme } from "../theme";
@@ -38,7 +42,21 @@ import { newMatchStats, recordDamage, recordShot, recordXp, type MatchStats } fr
 import { loadProfiles, saveProfiles } from "../systems/profileStorage";
 import { MAX_ANGLE, MIN_POWER, useGameStore } from "../state/gameStore";
 import { useMultiplayerStore } from "../state/multiplayerStore";
+import { useCommandStore } from "../state/commandStore";
+import { playerName } from "../state/playerNames";
 import type { RoomEvent } from "../multiplayer/protocol";
+
+/** Ennyi HP-arány alatt kritikus a tank állapota. */
+const CRITICAL_HP_FRACTION = 0.3;
+/** A fanfár hossza; ennyi idő után hangzik el a győztes neve. */
+const VICTORY_ANNOUNCE_DELAY_MS = 1800;
+
+interface ImpactReport {
+  tank: Tank;
+  hpBefore: number;
+  shieldDown: boolean;
+  armorBreach: boolean;
+}
 
 const FIXED_DT = 1 / 60;
 /** Fix logikai pályaméret; az ablak mérete csak a skálázást befolyásolja. */
@@ -72,6 +90,11 @@ export class Game {
   private tankTextures: { body: Texture; barrel: Texture } | null = null;
   private shellGfx = new Graphics();
   private shellGlow = new Sprite();
+  private trailGfx = new Graphics();
+  private shellTrail = new ShellTrail();
+  private shake = new ScreenShake();
+  private shakeEnabled = true;
+  private stageBase = { x: 0, y: 0 };
   private fx: FxRenderer | null = null;
   private audio: AudioManager | null = null;
   private previewGfx = new Graphics();
@@ -94,6 +117,9 @@ export class Game {
   private pendingMultiplayerStart: { setup: MatchSetup; profiles: Record<string, Profile>; revision: number } | null =
     null;
   private unsubscribeMultiplayer: (() => void) | null = null;
+  private unsubscribeAim: (() => void) | null = null;
+  private targetLocked = false;
+  private victoryTimer = 0;
   private shell: BallisticBody | null = null;
   private shellAge = 0;
   private acc = 0;
@@ -115,6 +141,11 @@ export class Game {
     // Az asset-betöltés alatt is megszúnhetett a komponens (StrictMode).
     if (this.destroyed) return;
     this.audio = new AudioManager();
+    this.unsubscribeAim = useGameStore.subscribe((state, prev) => {
+      if (this.turns.phase === "aiming" && (state.angle !== prev.angle || state.power !== prev.power)) {
+        this.lockTarget();
+      }
+    });
     this.tankTextures = { body, barrel };
     this.fx = new FxRenderer(fxTextures);
     this.shellGlow.texture = fxTextures.glow;
@@ -123,8 +154,18 @@ export class Game {
     this.shellGlow.tint = this.theme.shell.glow;
     this.shellGlow.blendMode = "add";
     this.shellGlow.visible = false;
+    this.trailGfx.blendMode = "add";
 
     this.terrain = new Terrain(this.app.renderer, this.theme.terrain);
+    const bloom = bloomSettings(window.matchMedia("(pointer: coarse)").matches);
+    this.terrain.sprite.filters = [
+      new AdvancedBloomFilter({
+        threshold: 0.45,
+        bloomScale: bloom.strength,
+        blur: bloom.blur,
+        quality: bloom.blur > 4 ? 4 : 2,
+      }),
+    ];
     const backdrop = new Graphics().rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT).fill(this.theme.sky);
     this.app.stage.addChild(
       backdrop,
@@ -134,10 +175,12 @@ export class Game {
       this.tankLayer,
       this.tanksGfx,
       this.shellGfx,
+      this.trailGfx,
       this.shellGlow,
       this.fx.layer,
     );
     this.battlefieldLayers.setMotionEnabled(!window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    this.shakeEnabled = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     this.layout();
     const pendingStart = this.pendingMultiplayerStart;
     if (pendingStart) this.startMultiplayer(pendingStart.setup, pendingStart.profiles, pendingStart.revision);
@@ -156,7 +199,15 @@ export class Game {
     const { width, height } = this.app.screen;
     const scale = Math.min(width / WORLD_WIDTH, height / WORLD_HEIGHT);
     this.app.stage.scale.set(scale);
-    this.app.stage.position.set((width - WORLD_WIDTH * scale) / 2, (height - WORLD_HEIGHT * scale) / 2);
+    this.stageBase = { x: (width - WORLD_WIDTH * scale) / 2, y: (height - WORLD_HEIGHT * scale) / 2 };
+    this.applyShake();
+  }
+
+  /** A rázkódás a kamerát (stage) tolja el, a világ koordinátái és a logika változatlanok. */
+  private applyShake(): void {
+    const { x, y } = this.shakeEnabled ? this.shake.offset(Math.random) : { x: 0, y: 0 };
+    const scale = this.app.stage.scale.x;
+    this.app.stage.position.set(this.stageBase.x + x * scale, this.stageBase.y + y * scale);
   }
 
   /** Húzásos célzás: a soron lévő tank közeléből indított húzás iránya a szög, hossza az erő. */
@@ -198,6 +249,8 @@ export class Game {
   /** Új meccs: terep újragenerálása, tankok újraszórása. */
   restart(setup?: MatchSetup): void {
     if (!this.terrain) return;
+    useCommandStore.getState().clear();
+    window.clearTimeout(this.victoryTimer);
     const width = WORLD_WIDTH;
     const matchSetup = setup ?? { seed: Math.floor(Math.random() * 1_000_000), starterIndex: this.nextStarter };
     this.matchRandom = createSeededRandom(matchSetup.seed);
@@ -320,7 +373,43 @@ export class Game {
     return this.tanks.find((t) => t.id === this.turns.current)!;
   }
 
+  /** Lövésenként legfeljebb egy közlés hangzik el, a legfontosabb esemény szerint. */
+  private announceImpact(shooter: Tank, hurt: ImpactReport[]): void {
+    const { announce } = useCommandStore.getState();
+    const enemies = hurt.filter((r) => r.tank !== shooter);
+    const destroyed = enemies.some((r) => !isAlive(r.tank));
+    const critical = hurt.find((r) => {
+      const max = r.tank.stats.maxHp;
+      return isAlive(r.tank) && r.tank.hp / max <= CRITICAL_HP_FRACTION && r.hpBefore / max > CRITICAL_HP_FRACTION;
+    });
+    if (destroyed) announce("command.destroyed", undefined, "critical");
+    else if (critical) announce("command.critical", { id: playerName(critical.tank.id) }, "critical");
+    else if (enemies.some((r) => r.armorBreach)) announce("command.armorBreach", undefined, "warning");
+    else if (enemies.some((r) => r.shieldDown)) announce("command.shieldDown");
+    else if (enemies.length > 0) announce("command.hit");
+    else announce("command.miss", undefined, "warning");
+  }
+
+  /** Fanfár, majd a fanfár lecsengése után a győztes bemondása. */
+  private announceVictory(winnerId: string): void {
+    this.audio?.playFanfare();
+    window.clearTimeout(this.victoryTimer);
+    this.victoryTimer = window.setTimeout(
+      () => useCommandStore.getState().announce("command.victory", { name: playerName(winnerId) }, "info"),
+      VICTORY_ANNOUNCE_DELAY_MS,
+    );
+  }
+
+  /** Körönként egyszer, az első célzás vagy mozgás után jelzi, hogy a cél be van fogva. */
+  private lockTarget(): void {
+    if (this.targetLocked) return;
+    this.targetLocked = true;
+    useCommandStore.getState().announce("command.targetAcquired");
+  }
+
   private beginTurn(): void {
+    // A kör elején beállított szög/erő még nem játékos-beavatkozás.
+    this.targetLocked = true;
     const tank = this.current;
     regenTankShield(tank);
     tank.moveLeft = tank.stats.moveBudget;
@@ -330,6 +419,7 @@ export class Game {
     this.battlefieldLayers.setWind(wind);
     useGameStore.getState().sync({ angle: tank.angle, power: tank.power, maxPower: tank.stats.maxPower, wind });
     this.syncStore();
+    this.targetLocked = false;
   }
 
   private syncStore(): void {
@@ -376,6 +466,7 @@ export class Game {
     }
     if (moveTank(this.current, dir, this.terrain.mask)) {
       this.audio?.moveTick();
+      this.lockTarget();
       this.syncStore();
     }
   }
@@ -407,6 +498,7 @@ export class Game {
     const view = this.tankViews.get(tank.id);
     if (view) view.anim = kick(angle);
     this.shellAge = 0;
+    this.shellTrail.clear();
     this.syncStore();
   }
 
@@ -490,6 +582,7 @@ export class Game {
           moveTank(this.current, direction, this.terrain.mask)
         ) {
           this.audio?.moveTick();
+          this.lockTarget();
         }
         continue;
       }
@@ -513,19 +606,35 @@ export class Game {
     this.audio?.play("explosion", { rate: 0.9 + Math.random() * 0.2 });
     // XP: az ellenfélnek okozott sérülés (1 HP, pajzs- vagy páncélpont = 1 XP).
     let dealt = 0;
+    const hurt: ImpactReport[] = [];
     for (const t of this.tanks) {
       const before = t.hp + t.shield + t.armor;
+      const shieldBefore = t.shield;
+      const armorBefore = t.armor;
+      const hpBefore = t.hp;
       applyDamage(t, explosionDamage(t, x, y, radius, shooter.stats.damage));
       if (t !== shooter) dealt += before - (t.hp + t.shield + t.armor);
+      if (before === t.hp + t.shield + t.armor) continue;
+      hurt.push({
+        tank: t,
+        shieldDown: shieldBefore > 0 && t.shield === 0,
+        armorBreach: armorBefore > 0 && t.armor === 0,
+        hpBefore,
+      });
     }
+    this.announceImpact(shooter, hurt);
     this.award(shooter.id, dealt);
     this.matchStats = recordDamage(this.matchStats, shooter.id, dealt);
+    this.shake.trigger(Math.min(1, radius / 80) * 0.75 + (dealt > 0 ? 0.25 : 0));
     for (const t of this.tanks) if (this.terrain) settleTank(t, this.terrain.mask);
     this.shell = null;
     this.turns.endShot(this.tanks.filter(isAlive).map((t) => t.id));
     if (this.turns.phase === "aiming") this.beginTurn();
     else {
-      if (this.turns.winner) this.award(this.turns.winner, WIN_BONUS_XP);
+      if (this.turns.winner) {
+        this.award(this.turns.winner, WIN_BONUS_XP);
+        this.announceVictory(this.turns.winner);
+      }
       const onlineRoom = useMultiplayerStore.getState();
       if (this.multiplayer && onlineRoom.credentials?.playerId === "P1" && onlineRoom.session?.status === "playing") {
         void useMultiplayerStore.getState().publish("match_finished", { winner: this.turns.winner });
@@ -539,6 +648,7 @@ export class Game {
     this.shell = stepBody(this.shell, { ...DEFAULT_WORLD, wind: useGameStore.getState().wind }, FIXED_DT);
     this.shellAge++;
     const { x, y } = this.shell.pos;
+    this.shellTrail.push(x, y);
     if (this.shellAge % 3 === 0) this.particles.spawnTrail(x, y);
     const hitTank = this.tanks.some(
       (t) => isAlive(t) && (t.id !== this.turns.current || this.shellAge > SELF_HIT_GRACE) && tankContains(t, x, y),
@@ -611,6 +721,20 @@ export class Game {
     this.tanksGfx.circle(ex, ey, 7).fill({ color, alpha: 0.9 });
   }
 
+  /** Plazmanyom: két rétegű, additív, a lövedék felé vastagodó és erősödő fénycsík. */
+  private drawShellTrail(): void {
+    for (const { from, to, t } of this.shellTrail.segments()) {
+      this.trailGfx
+        .moveTo(from.x, from.y)
+        .lineTo(to.x, to.y)
+        .stroke({ width: 2 + t * 7, color: this.theme.shell.glow, alpha: t * 0.22, cap: "round" });
+      this.trailGfx
+        .moveTo(from.x, from.y)
+        .lineTo(to.x, to.y)
+        .stroke({ width: 1 + t * 2, color: this.theme.shell.core, alpha: t * 0.7, cap: "round" });
+    }
+  }
+
   private draw(dt: number): void {
     const aiming = this.turns.phase === "aiming";
     const aimAngle = useGameStore.getState().angle;
@@ -654,6 +778,11 @@ export class Game {
 
     this.fx?.render(this.particles.particles);
     this.shellGfx.clear();
+    this.trailGfx.clear();
+    if (!this.shell) this.shellTrail.shrink();
+    this.drawShellTrail();
+    this.shake.update(dt);
+    this.applyShake();
     this.shellGlow.visible = !!this.shell;
     if (this.shell) {
       this.shellGlow.position.set(this.shell.pos.x, this.shell.pos.y);
@@ -663,8 +792,11 @@ export class Game {
 
   destroy(): void {
     this.destroyed = true;
+    window.clearTimeout(this.victoryTimer);
     this.unsubscribeMultiplayer?.();
     this.unsubscribeMultiplayer = null;
+    this.unsubscribeAim?.();
+    this.unsubscribeAim = null;
     this.pendingMultiplayerEvents = [];
     this.audio?.destroy();
     if (this.app.renderer) this.app.destroy(true, { children: true });
