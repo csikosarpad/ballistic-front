@@ -8,6 +8,9 @@
 - Győzelemkor szintetizált fanfár (helyettesítő) és „A csatát {név} nyerte!" bemondás.
 - Háttérzene került a játékba (energysound „Cyberpunk Neon City", loop; Pixabay Content License, forrás: `src/game/assets/audio/music/LICENSE.txt`); a zene, a parancsnoki hang és az effektek a Beállításokban külön kapcsolhatók.
 - A játékosnevek a Beállításokban állíthatók (offline), megjelennek a HUD-on, az eredményképernyőn, a boltban és a közlésekben.
+- Offline AI-ellenfél (Beállítások → Ellenfél): a P2-t a gép vezérli; szimulációval célozva, hibázva, a becsapódásokból és a korábbi meccsekből tanulva játszik, és meccs végén maga választja ki a fejlesztéseit.
+- Az AI tapasztalati ereje külön skálára került (0–1); a rendfokozatot 0–5 csillag jelzi a HUD-on mindkét játékosnál (AI: tapasztalat, ember: fejlesztések aránya). Az AI egész értékre kerekített szöget/erőt állít.
+- A két játékos parancsnoka eltérő hangon szól (két hang esetén külön hang, egy hangnál más hangmagasság/tempó).
 
 ## 2026-11-01
 

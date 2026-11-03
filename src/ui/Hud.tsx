@@ -3,6 +3,9 @@ import { PowerDial, UnitGauge } from "./gauges";
 import { MAX_ANGLE, MIN_ANGLE, MIN_POWER, useGameStore } from "@/game/state/gameStore";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { usePlayerName } from "@/game/state/playerNames";
+import { useAiSettings } from "@/game/state/aiSettings";
+import { MAX_RANK, rankStars } from "@/game/systems/ai";
+import { newProfile, profileStars } from "@/game/systems/upgrades";
 import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
 import { RepeatButton } from "./RepeatButton";
@@ -29,9 +32,14 @@ export function Hud() {
     muted,
     toggleMuted,
     setAim,
+    profiles,
   } = useGameStore();
   const online = useMultiplayerStore((state) => state.credentials !== null);
   const multiplayerError = useMultiplayerStore((state) => state.error);
+  const aiActive = useAiSettings((state) => state.enabled) && !online;
+  const aiMemory = useAiSettings((state) => state.memory);
+  const starsFor = (id: string) =>
+    id === "P2" && aiActive ? rankStars(aiMemory) : profileStars(profiles[id] ?? newProfile(), MAX_RANK);
   const locked = phase !== "aiming" || !canControl;
   const me = tanks.find((t) => t.id === currentId);
   // Érintőeszközön a billentyűkre utaló jelzések fölöslegesek.
@@ -104,6 +112,17 @@ export function Hud() {
             <div className="hud-unit-heading">
               <span style={{ fontWeight: unit.id === currentId ? "bold" : "normal" }}>
                 {name(unit.id)}: {unit.hp}/{unit.maxHp} HP
+              </span>
+              <span
+                className="hud-rank"
+                role="img"
+                aria-label={t("hud.rank", { stars: starsFor(unit.id), max: MAX_RANK })}
+              >
+                {Array.from({ length: MAX_RANK }, (_, i) => (
+                  <span key={i} className={i < starsFor(unit.id) ? "is-earned" : undefined}>
+                    ★
+                  </span>
+                ))}
               </span>
             </div>
             <div className="hud-unit-meters">

@@ -144,7 +144,9 @@ Javasolt, ingyenes (SIL OFL 1.1) fontkészlet a modern military sci-fi hangulath
 - [ ] Valódi győzelmi fanfár hangfájl (OGG) bekötése, a bemondás késleltetésének igazítása
 - [ ] Parancsnoki beszéd beállításai: hang kiválasztása, sebesség és mélység (`VoiceSettings` már támogatja), közlések gyakorisága / felülírható szövegek, „Tűzparancs!" visszakötése (késleltetett lövéssel, online szinkron mellett)
 - [ ] Eredményképernyőn is látszó győzelmi közlés
-- [ ] Offline AI-ellenfél (tank): a konzol közléseit (`announce`) az AI is használhatja
+- [x] Offline AI-ellenfél (tank): beállítás szerint a P2-t gép vezérli (szimulációval célzó, hibázó, tanuló, fejlesztéseit maga választó); lásd `src/game/systems/ai.ts`
+- [x] Rendfokozat külön skálán, csillagokkal (0–5) a HUD-on mindkét játékosnál (a tankon nem fér el)
+- [ ] AI finomhangolás: nehézségi szint választása, az AI közléseinek (`announce`) megjelenítése, fegyverváltás, ha lesz több fegyver
 
 ### M7b – Látványugrás: „orbitális sci-fi hadviselés" (PixiJS 8)
 

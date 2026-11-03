@@ -20,8 +20,11 @@ const clock = () => new Date().toLocaleTimeString("hu-HU", { hour12: false });
 
 interface CommandState {
   messages: CommandMessage[];
-  /** Megjeleníti a parancsot a konzolon, és az aktuális nyelven fel is mondja (némítva csak kiírja). */
-  announce: (key: MessageKey, params?: Params, tone?: CommandTone) => void;
+  /**
+   * Megjeleníti a parancsot a konzolon, és az aktuális nyelven fel is mondja (némítva csak kiírja).
+   * A `speaker` (játékos azonosító) határozza meg, melyik parancsnok hangján szól.
+   */
+  announce: (key: MessageKey, params?: Params, tone?: CommandTone, speaker?: string) => void;
   clear: () => void;
 }
 
@@ -29,12 +32,14 @@ let nextId = 1;
 
 export const useCommandStore = create<CommandState>((set) => ({
   messages: [],
-  announce: (key, params, tone = "info") => {
+  announce: (key, params, tone = "info", speaker) => {
     set((s) => ({
       messages: [...s.messages, { id: nextId++, key, params, tone, time: clock() }].slice(-MAX_COMMAND_MESSAGES),
     }));
     const { muted } = useGameStore.getState();
-    if (!muted && useAudioSettings.getState().channels.voice) speak(t(key, params), useLocaleStore.getState().locale);
+    if (!muted && useAudioSettings.getState().channels.voice) {
+      speak(t(key, params), useLocaleStore.getState().locale, undefined, speaker === "P2" ? 1 : 0);
+    }
   },
   clear: () => {
     cancelSpeech();

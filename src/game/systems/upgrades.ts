@@ -36,3 +36,11 @@ export function buyUpgrade(profile: Profile, id: string, defs: readonly UpgradeD
 export function awardXp(profile: Profile, amount: number): Profile {
   return amount > 0 ? { ...profile, xp: profile.xp + amount } : profile;
 }
+
+/** Emberi játékos rendfokozata: a megvásárolt fejlesztések aránya a maximumhoz képest, 0–`maxStars` csillag. */
+export function profileStars(profile: Profile, maxStars = 5, defs: readonly UpgradeDef[] = UPGRADES): number {
+  const total = defs.reduce((sum, d) => sum + d.maxLevel, 0);
+  if (total === 0) return 0;
+  const owned = defs.reduce((sum, d) => sum + Math.min(profile.levels[d.id] ?? 0, d.maxLevel), 0);
+  return Math.min(maxStars, Math.floor((owned / total) * maxStars + 1e-9));
+}
