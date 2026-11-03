@@ -5,7 +5,8 @@ This project is a 2D artillery/tank game built with:
 - React 18 + TypeScript
 - PixiJS 8 (WebGL)
 - Vite
-- Zustand (HUD state only)
+- Zustand (HUD state, parancsnoki közlések, játékosnevek)
+- Web Audio (hangok) és Web Speech API (parancsnoki felolvasás)
 - Deterministic physics engine (src/game/physics)
 - Destructible terrain (RenderTexture + heightmap)
 - Turn-based gameplay (src/game/systems/turnManager)

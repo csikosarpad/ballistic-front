@@ -10,6 +10,7 @@ Hosszú távú cél: sci-fi, Galaxy Tactics-hoz hasonló látvány (több karakt
 - A tank és a terep részletes SVG assetjei bekerültek; a fák és antennatornyok jelenleg nincsenek aktív pályadekorációként használva.
 - A hangassetek OGG formátumra lettek optimalizálva; a hangrendszer jelenleg lövés-, robbanás- és tankmozgás-hangot kezel.
 - A röppálya-előnézet most játékosonként és meccsenként fejleszthető töltetekkel működik; a fejlesztés neve magyarul **Célzástámogatás**, angolul **Smart Aim**.
+- Elkészült a parancsnoki konzol: gépelési effektes taktikai napló, a közlések felolvasása Web Speech API-val (magyar/angol), győzelmi fanfár (egyelőre szintetizált) és a győztes bemondása. Offline módban a játékosnevek a Beállításokban állíthatók.
 - A részletes UX- és hang-redesign következő lépései külön checklistként szerepelnek alább.
 
 ## Alapelvek
@@ -133,6 +134,14 @@ Javasolt, ingyenes (SIL OFL 1.1) fontkészlet a modern military sci-fi hangulath
 - [ ] Hang-redesign: angle/power visszajelző hangok
 - [ ] Hang-redesign: target hit, terrain impact és missed hangesemények
 - [ ] Tank motorhang lazy loading és további mobil optimalizálása
+- [x] Parancsnoki konzol a HUD-ban (`CommandConsole`, `commandStore`): időbélyeges napló, gépelési effekt, reduced-motion esetén azonnali kiírás
+- [x] Parancsnoki felolvasás (`speech.ts`): `speechSynthesis`, nyelvenként férfi hang előnyben, mélyebb hangmagasság; némítás követi
+- [x] Győzelmi fanfár (szintetizált helyettesítő) és „A csatát {név} nyerte!" bemondás
+- [x] Játékosnevek a Beállításokban (offline), online a lobbynév az erősebb
+- [ ] Valódi győzelmi fanfár hangfájl (OGG) bekötése, a bemondás késleltetésének igazítása
+- [ ] Parancsnoki beszéd beállításai: hang kiválasztása, sebesség és mélység (`VoiceSettings` már támogatja), közlések gyakorisága / felülírható szövegek, „Tűzparancs!" visszakötése (késleltetett lövéssel, online szinkron mellett)
+- [ ] Eredményképernyőn is látszó győzelmi közlés
+- [ ] Offline AI-ellenfél (tank): a konzol közléseit (`announce`) az AI is használhatja
 
 ### M7b – Látványugrás: „orbitális sci-fi hadviselés" (PixiJS 8)
 

@@ -1,5 +1,13 @@
 # Fejlődési napló
 
+## 2026-11-03
+
+- Elkészült a parancsnoki konzol (`plans/solvyr-prime_siege_protocol_command_concolse.png` alapján): időbélyeges napló gépelési effekttel a HUD jobb oldalán.
+- A közléseket a `speechSynthesis` az aktuális nyelven (magyar/angol) felolvassa; mélyebb hang, férfi hang előnyben, a némítás a felolvasást is elnémítja. A hangjellemzők (`VoiceSettings`) később a beállításokból módosíthatók.
+- A közlések számát csökkentettük: „Cél befogva" körönként egyszer, az első célzás vagy mozgás után; lövésenként legfeljebb egy eredményjelzés; a „Tűzparancs!" egyelőre nem szól.
+- Győzelemkor szintetizált fanfár (helyettesítő) és „A csatát {név} nyerte!" bemondás.
+- A játékosnevek a Beállításokban állíthatók (offline), megjelennek a HUD-on, az eredményképernyőn, a boltban és a közlésekben.
+
 ## 2026-11-01
 
 - Az eredményképernyő a referencia alapján új, széles eredménykártyát kapott.

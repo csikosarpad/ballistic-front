@@ -10,6 +10,8 @@ A Solvyr Prime univerzumban játszódó böngészős, körökre osztott taktikai
 - XP, bolt, meta-progresszió
 - szép grafika (particle effektek, animációk, shaderek)
 - Web Audio hangrendszer OGG assetekkel (lövés, robbanás, tankmozgás)
+- parancsnoki konzol és felolvasott közlések (Web Speech API, magyar és angol), győzelmi fanfár
+- beállítható játékosnevek (offline módban is)
 
 ## Tech stack
 
@@ -23,14 +25,16 @@ Online mód (v1): szobakódos lobby, két kliens közös seed alapján futtatott
 
 ## Irányítás
 
-- Főmenü: Játék indítása, Online játék, Mentés törlése (megerősítéssel), nyelvválasztó (Magyar / English)
+- Főmenü: Játék indítása, Online játék, Beállítások (nyelv, hang, játékosnevek), Mentés törlése (megerősítéssel)
+- Beállítások → Játékosnevek: P1 és P2 neve (legfeljebb 16 karakter, `localStorage`: `ballistic-front:player-names`); üresen az alapértelmezett P1/P2 marad. A név megjelenik a HUD-on, az eredményképernyőn, a boltban és a felolvasott közlésekben. Online meccsen a lobbyban megadott név az erősebb.
 - ◀ / ▶ nyilak: mozgás (körönként korlátozott távolság)
 - ▲ / ▼ nyilak: lövés ereje (±10, Shift: ±50)
 - Ctrl + ◀ / ▶: cső szöge (±1°, Shift: ±5°; ◀ a bal oldali irány felé forgat)
 - T: röppálya-előnézet (játékosonként meccsenként egyszer, az adott kör végéig)
-- M: némítás be/ki (a beállítás megmarad)
+- M: némítás be/ki (a beállítás megmarad; a hangot és a felolvasást is érinti)
 - Szög és erő csúszók a HUD-on
 - Szóköz: tűz
+- Parancsnoki konzol (HUD, jobb oldalt): időbélyeges taktikai napló „gépelési effekttel", a szöveget a böngésző `speechSynthesis` hangja az aktuális nyelven fel is mondja (mélyebb, lehetőleg férfi hang). Közlések: „Cél befogva" (körönként egyszer, az első célzás/mozgás után), lövésenként legfeljebb egy eredményjelzés (megsemmisítés, kritikus sérülés, páncélsérülés, pajzsösszeomlás, találat, nem sikerült), meccs végén fanfár és „A csatát {név} nyerte!". A szövegek a `command.*` i18n kulcsok; a hang jellemzői (`VoiceSettings`) később a beállításokból módosíthatók lesznek.
 - Meccs végén: eredményképernyő statisztikával, bolt (XP-ből fejlesztés), Visszavágó és Főmenü
 - Védelem: három réteg, ebben a sorrendben kopnak: erőtér pajzs → fizikai páncél → HP (1:1 arányban, `src/game/systems/damage.ts`). A pajzs a soron lévő egységnél körönként a maximum 20%-ával töltődik vissza, kivéve ha az egységet a két köre között találat érte (akkor abban a körben nem). A páncél nem töltődik vissza. A HUD és a tank fölötti kijelzés egymás feletti vékony csíkokat mutat: HP, pajzs, páncél; a pajzs és a páncél csíkja csak akkor látszik, ha az egységnek van (alapból nincs, a boltban vehető: Erőtér pajzs, Páncél). Az XP a pajzsnak, a páncélnak és a HP-nak okozott sebzés után is jár.
 - Mentés: az XP és a szintek verziózott borítékban (`ballistic-front:profiles`, `version: 2`) maradnak meg; a régi `…:profiles:v1` mentést a játék első betöltéskor átveszi. Online meccsen mindkét kliensnek ugyanazt a buildet kell futtatnia.
@@ -60,18 +64,18 @@ server/                 # PHP/MySQL multiplayer backend (nem része a Vite build
 └── schema.sql
 src/
 ├── main.tsx, App.tsx
-├── ui/                 # React: GameCanvas, HUD, MainMenu, MultiplayerLobby, ResultScreen, Shop, LanguageSwitch, ui.css
+├── ui/                 # React: GameCanvas, HUD, CommandConsole, MainMenu (beállításokkal), MultiplayerLobby, ResultScreen, Shop, LanguageSwitch, ui.css
 ├── i18n/               # többnyelvűség (hu/en): messages.hu.ts (forrásnyelv), messages.en.ts, t() / useT()
 ├── test/               # Vitest setup
 └── game/               # Reacttől független játékmag
-    ├── engine/         # Game (Pixi app, fix időlépéses loop, skálázás), AudioManager, FxRenderer
+    ├── engine/         # Game (Pixi app, fix időlépéses loop, skálázás), AudioManager (hangok, szintetizált fanfár), FxRenderer
     ├── assets/         # SVG tank/terep assetek, fx/ (Kenney Particle Pack PNG-k), audio/ (OGG hangok)
     ├── entities/       # tank
     ├── multiplayer/    # API kliens és protokoll (HTTP polling)
-    ├── systems/        # turnManager, upgrades, matchStats, barrelAnimation, particles, profileStorage, seededRandom
+    ├── systems/        # turnManager, upgrades, matchStats, barrelAnimation, particles, profileStorage, seededRandom, speech (Web Speech felolvasás, hangválasztás)
     ├── terrain/        # heightmap, TerrainMask (ütközés), Terrain (RenderTexture)
     ├── physics/        # ballisztika
-    ├── state/          # Zustand store (HUD-nézet, multiplayer lobby)
+    ├── state/          # Zustand store-ok: gameStore (HUD-nézet), multiplayerStore, commandStore (parancsnoki közlések), playerNames (játékosnevek)
     └── data/           # adatvezérelt definíciók (upgrade-ek)
 ```
 
@@ -79,7 +83,7 @@ A frontend (`src/`) és a backend (`server/`) szétválasztott: a Vite és a `ts
 
 Elv: a nagy gyakoriságú adat (pozíciók) az engine-ben él, a Zustand store csak a HUD-hoz szükséges állapotot tartja.
 
-A hangrendszer fejlesztési tervei és a következő eseményhangok (angle/power, target hit, terrain impact, missed) a [sound-redesign.md](docs/sound-redesign.md) dokumentumban vannak.
+A hangrendszer fejlesztési tervei, a parancsnoki beszéd és a következő eseményhangok (angle/power, target hit, terrain impact, missed) a [sound-redesign.md](docs/sound-redesign.md) dokumentumban vannak.
 
 ## Köszönet
 
@@ -189,6 +193,8 @@ A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) f�
 - [x] Menü (indítás, haladás törlése)
 - [x] Upgrade képernyő (bolt az eredményképernyőn)
 - [x] Eredmény kijelzés (győztes, lövés/sebzés/XP statisztika)
+- [x] Parancsnoki konzol (gépelési effekt, felolvasás), győzelmi fanfár és bemondás
+- [x] Beállítások: nyelv, hang, játékosnevek
 - [x] Animált UI elemek (CSS: fade-in, pop-in, gomb hover; `prefers-reduced-motion` támogatás)
 
 ### 9. Tesztelés
@@ -200,6 +206,7 @@ A sci-fi irányú továbbfejlesztés milestone-jai a [ROADMAP.md](ROADMAP.md) f�
 - [x] Védelmi modell tesztek (sebzésfüggvény, pajzsregeneráció)
 - [x] i18n és nyelvváltó tesztek
 - [x] React komponens tesztek (menü, eredményképernyő)
+- [x] Parancsnoki közlések és hangválasztás tesztjei
 
 ### 10. Multiplayer (v1: PHP/MySQL, HTTP polling)
 
