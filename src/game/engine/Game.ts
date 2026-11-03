@@ -56,6 +56,8 @@ const VICTORY_ANNOUNCE_DELAY_MS = 1800;
 const AI_THINK_MS = 900;
 const AI_AIM_MS = 700;
 const AI_MOVE_STEP_MS = 45;
+/** Esélye, hogy a gép a Smart Aimet is bekapcsolja, ha van még töltete. */
+const AI_PREVIEW_CHANCE = 0.5;
 
 interface ImpactReport {
   tank: Tank;
@@ -482,6 +484,7 @@ export class Game {
     const target = this.tanks.find((t) => t.id === "P1");
     if (!this.terrain || !this.aiBrain || !target) return;
     const wind = useGameStore.getState().wind;
+    if (this.previewAllowance.canUse("P2") && Math.random() < AI_PREVIEW_CHANCE) this.activatePreview();
     const plan = this.aiBrain.decide(this.current, target, this.terrain.mask, wind, DEFAULT_WORLD.gravity);
     const angle = Math.round(plan?.angle ?? 135);
     const power = Math.round(plan?.power ?? this.current.stats.maxPower * 0.6);
@@ -544,10 +547,34 @@ export class Game {
 
   /** Meccsenként és játékosonként egyszer: az aktuális kör végéig mutatja a várható röppályát. */
   requestPreview(): void {
-    if (this.turns.inputLocked || !this.canControlCurrentTurn() || !this.previewAllowance.use(this.turns.current))
-      return;
+    if (this.turns.inputLocked || !this.canControlCurrentTurn()) return;
+    this.activatePreview();
+  }
+
+  /** Bekapcsolja az előnézetet, és jelzi a konzolon (az ellenfél tankján célkereszt jelenik meg). */
+  private activatePreview(): void {
+    if (!this.previewAllowance.use(this.turns.current)) return;
     this.previewActive = true;
+    useCommandStore.getState().announce("command.smartAim", undefined, "info", this.turns.current);
     this.syncStore();
+  }
+
+  /** Célkereszt a bemért tankon, amíg az ellenfél Smart Aim előnézete aktív. */
+  private drawLockOn(t: Tank): void {
+    const cy = t.y - 6;
+    const color = this.theme.hud.lockOn;
+    const g = this.tanksGfx;
+    g.circle(t.x, cy, 18).stroke({ width: 2, color, alpha: 0.9 });
+    for (const [dx, dy] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ] as const) {
+      g.moveTo(t.x + dx * 12, cy + dy * 12)
+        .lineTo(t.x + dx * 26, cy + dy * 26)
+        .stroke({ width: 2, color, alpha: 0.9 });
+    }
   }
 
   /** Mozgás a jelenlegi tankkal; zárolt bemenetnél nem csinál semmit. */
@@ -866,6 +893,7 @@ export class Game {
         top -= 4;
         this.drawStripe(t.x, top, t.armor / t.stats.maxArmor, this.theme.hud.armorFill);
       }
+      if (this.previewActive && t.id !== this.turns.current && this.turns.phase !== "gameOver") this.drawLockOn(t);
       if (t.id === this.turns.current && this.turns.phase === "aiming") {
         const my = top - 8;
         this.tanksGfx.poly([t.x - 4, my, t.x + 4, my, t.x, my + 6]).fill(this.theme.hud.turnMarker);

@@ -10,6 +10,7 @@
 - A játékosnevek a Beállításokban állíthatók (offline), megjelennek a HUD-on, az eredményképernyőn, a boltban és a közlésekben.
 - Offline AI-ellenfél (Beállítások → Ellenfél): a P2-t a gép vezérli; szimulációval célozva, hibázva, a becsapódásokból és a korábbi meccsekből tanulva játszik, és meccs végén maga választja ki a fejlesztéseit.
 - Az AI tapasztalati ereje külön skálára került (0–1); a rendfokozatot 0–5 csillag jelzi a HUD-on mindkét játékosnál (AI: tapasztalat, ember: fejlesztések aránya). Az AI egész értékre kerekített szöget/erőt állít.
+- A Smart Aim bekapcsolását a konzol jelzi, és amíg az előnézet aktív, az ellenfél tankján piros célkereszt jelenik meg („becéloztak"). Az AI is használja a Smart Aimet (50% eséllyel, ha van töltete).
 - A két játékos parancsnoka eltérő hangon szól (két hang esetén külön hang, egy hangnál más hangmagasság/tempó).
 
 ## 2026-11-01

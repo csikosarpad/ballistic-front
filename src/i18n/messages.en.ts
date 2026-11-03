@@ -94,6 +94,7 @@ export const en: Record<MessageKey, string> = {
   "command.title": "Command console",
   "command.feed": "Tactical feed",
   "command.targetAcquired": "Target acquired",
+  "command.smartAim": "Smart Aim online – target painted",
   "command.fire": "Fire order!",
   "command.miss": "The shot missed",
   "command.hit": "The target is damaged",

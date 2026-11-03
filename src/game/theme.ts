@@ -19,6 +19,7 @@ export interface Theme {
     shieldFill: number;
     armorFill: number;
     turnMarker: number;
+    lockOn: number;
     previewLine: number;
   };
   shell: { core: number; glow: number };
@@ -50,6 +51,7 @@ export const DEFAULT_THEME: Theme = {
     shieldFill: 0x4dd0ff,
     armorFill: 0xffb347,
     turnMarker: 0xffffff,
+    lockOn: 0xff3b3b,
     previewLine: 0xffffff,
   },
   shell: { core: 0xeafcff, glow: 0x5fe0ff },

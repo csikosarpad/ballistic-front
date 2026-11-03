@@ -93,6 +93,7 @@ export const hu = {
   "command.title": "Parancsnoki konzol",
   "command.feed": "Taktikai napló",
   "command.targetAcquired": "Cél befogva",
+  "command.smartAim": "Célzástámogatás aktiválva – becélozva",
   "command.fire": "Tűzparancs!",
   "command.miss": "Eredménytelen találat",
   "command.hit": "A célpont megsérült",

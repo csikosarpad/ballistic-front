@@ -16,6 +16,8 @@ const MIN_POWER = 100;
 const MAX_CORRECTION = 160;
 /** Ennyi lépésenként (2 px) értékeli újra a lövési lehetőséget mozgás közben. */
 const MOVE_EVAL_INTERVAL = 6;
+/** Smart Aim finomításnál ennyi legjobb durva jelölt körül keres. */
+const PRECISE_SEEDS = 4;
 
 /** A tudásszint a meccsek számától és a találati aránytól függ, és sosem éri el a tökéletest. */
 export function skillFromMemory(memory: AiMemory): number {
@@ -105,7 +107,57 @@ export function planShot({ shooter, target, mask, wind, gravity, correctionX }: 
   return best;
 }
 
-export interface AiBrainOptions {
+export interface PreciseShot extends ShotPlan {
+  /** Igaz, ha a szimuláció szerint a lövés közvetlenül eltalálja a célpontot. */
+  hit: boolean;
+}
+
+/**
+ * Smart Aim: a valódi széllel, egész szöggel és erővel (ahogy a játék is lő) keres találó lövést.
+ * Előbb durva rácson, majd a legjobb jelöltek körül finomít; null, ha nincs értelmes megoldás.
+ */
+export function planPreciseShot(
+  shooter: Tank,
+  target: Tank,
+  mask: TerrainMask,
+  wind: number,
+  gravity: number,
+): PreciseShot | null {
+  const world: World = { gravity, wind };
+  const aim = { x: target.x, y: target.y - 6 };
+  const safeDistance = shooter.stats.blastRadius * 2;
+  const evaluate = (angle: number, power: number): PreciseShot | null => {
+    const impact = simulateImpact(barrelTip({ ...shooter, angle }), angle, power, world, mask, target);
+    if (!impact) return null;
+    if (Math.hypot(impact.pos.x - shooter.x, impact.pos.y - shooter.y) < safeDistance) return null;
+    return { angle, power, error: Math.hypot(impact.pos.x - aim.x, impact.pos.y - aim.y), hit: impact.hitTarget };
+  };
+  const better = (a: PreciseShot, b: PreciseShot | null) =>
+    !b || (a.hit && !b.hit) || (a.hit === b.hit && a.error < b.error);
+
+  const coarse: PreciseShot[] = [];
+  for (let angle = MIN_ANGLE; angle <= MAX_ANGLE; angle += 2) {
+    for (let power = MIN_POWER; power <= shooter.stats.maxPower; power += 10) {
+      const shot = evaluate(angle, power);
+      if (shot) coarse.push(shot);
+    }
+  }
+  coarse.sort((a, b) => (better(a, b) ? -1 : 1));
+  let best: PreciseShot | null = null;
+  // A legjobb néhány jelölt körül egész lépésekkel finomít (több ív is szóba jöhet: lapos és magas).
+  for (const seed of coarse.slice(0, PRECISE_SEEDS)) {
+    for (let angle = seed.angle - 2; angle <= seed.angle + 2; angle++) {
+      if (angle < MIN_ANGLE || angle > MAX_ANGLE) continue;
+      for (let power = seed.power - 10; power <= seed.power + 10; power++) {
+        if (power < MIN_POWER || power > shooter.stats.maxPower) continue;
+        const shot = evaluate(angle, power);
+        if (shot && better(shot, best)) best = shot;
+      }
+    }
+    if (best?.hit) break;
+  }
+  return best;
+}
   skill: number;
   random?: () => number;
 }
