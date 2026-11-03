@@ -44,6 +44,8 @@ describe("voiceForSlot", () => {
     const second = voiceForSlot(voices, "en", 1);
     expect(first.voice).not.toBe(second.voice);
     expect(second.voice).not.toBeNull();
+    expect(second.pitch).toBeGreaterThan(first.pitch);
+    expect(second.rate).toBeGreaterThan(first.rate);
   });
 
   it("egyetlen hangnál ugyanaz a hang, de más magassággal és tempóval", () => {
@@ -51,7 +53,7 @@ describe("voiceForSlot", () => {
     const first = voiceForSlot(voices, "hu", 0);
     const second = voiceForSlot(voices, "hu", 1);
     expect(second.voice).toBe(first.voice);
-    expect(second.pitch).toBeGreaterThan(first.pitch);
-    expect(second.rate).not.toBe(first.rate);
+    expect(second.pitch - first.pitch).toBeGreaterThanOrEqual(0.7);
+    expect(second.rate - first.rate).toBeCloseTo(0.15);
   });
 });

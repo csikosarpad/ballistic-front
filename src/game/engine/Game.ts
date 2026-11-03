@@ -45,7 +45,7 @@ import { useMultiplayerStore } from "../state/multiplayerStore";
 import { useCommandStore } from "../state/commandStore";
 import { playerName } from "../state/playerNames";
 import { useAiSettings } from "../state/aiSettings";
-import { AiBrain, chooseUpgrades, skillFromMemory } from "../systems/ai";
+import { AiBrain, chooseUpgrades, simulateImpact, skillFromMemory } from "../systems/ai";
 import type { RoomEvent } from "../multiplayer/protocol";
 
 /** Ennyi HP-arány alatt kritikus a tank állapota. */
@@ -108,6 +108,7 @@ export class Game {
   private previewGfx = new Graphics();
   private previewAllowance = new PreviewAllowance();
   private previewActive = false;
+  private previewLocked = false;
   private dragPointerId: number | null = null;
   private theme: Theme = DEFAULT_THEME;
   private particles = new ParticleSystem(Math.random, this.theme.fx);
@@ -432,6 +433,7 @@ export class Game {
     regenTankShield(tank);
     tank.moveLeft = tank.stats.moveBudget;
     this.previewActive = false;
+    this.previewLocked = false;
     // Új szél minden körben.
     const wind = Math.round((this.matchRandom() - 0.5) * 120);
     this.battlefieldLayers.setWind(wind);
@@ -552,29 +554,31 @@ export class Game {
     this.activatePreview();
   }
 
-  /** Bekapcsolja az előnézetet, és jelzi a konzolon (az ellenfél tankján célkereszt jelenik meg). */
+  /** Bekapcsolja a röppálya-előnézetet. */
   private activatePreview(): void {
     if (!this.previewAllowance.use(this.turns.current)) return;
     this.previewActive = true;
+    this.previewLocked = false;
     useCommandStore.getState().announce("command.smartAim", undefined, "info", this.turns.current);
     this.syncStore();
   }
 
-  /** Célkereszt a bemért tankon, amíg az ellenfél Smart Aim előnézete aktív. */
+  /** Neon célkereszt a célponton, ha az aktuális röppálya eltalálja. */
   private drawLockOn(t: Tank): void {
     const cy = t.y - 6;
-    const color = this.theme.hud.lockOn;
+    const color = 0xff1744;
     const g = this.tanksGfx;
-    g.circle(t.x, cy, 18).stroke({ width: 2, color, alpha: 0.9 });
+    g.circle(t.x, cy, 12).stroke({ width: 5, color, alpha: 0.3 });
+    g.circle(t.x, cy, 12).stroke({ width: 2, color, alpha: 1 });
     for (const [dx, dy] of [
       [1, 0],
       [-1, 0],
       [0, 1],
       [0, -1],
     ] as const) {
-      g.moveTo(t.x + dx * 12, cy + dy * 12)
-        .lineTo(t.x + dx * 26, cy + dy * 26)
-        .stroke({ width: 2, color, alpha: 0.9 });
+      g.moveTo(t.x + dx * 8, cy + dy * 8)
+        .lineTo(t.x + dx * 17, cy + dy * 17)
+        .stroke({ width: 2, color, alpha: 1 });
     }
   }
 
@@ -808,6 +812,22 @@ export class Game {
     if (!this.previewActive || this.turns.phase !== "aiming" || !this.terrain || !tank || !isAlive(tank)) return;
     const { angle, power, wind } = useGameStore.getState();
     const mask = this.terrain.mask;
+    const target = this.tanks.find((t) => t.id !== tank.id && isAlive(t));
+    const impact = target
+      ? simulateImpact(
+          barrelTip({ ...tank, angle }),
+          angle,
+          power,
+          { ...DEFAULT_WORLD, wind },
+          mask,
+          target,
+        )
+      : null;
+    const locked = impact?.hitTarget === true;
+    if (locked && !this.previewLocked) {
+      useCommandStore.getState().announce("command.aimed", undefined, "info", this.turns.current);
+    }
+    this.previewLocked = locked;
     const points = predictTrajectory(
       barrelTip({ ...tank, angle }),
       angle,
@@ -894,7 +914,7 @@ export class Game {
         top -= 4;
         this.drawStripe(t.x, top, t.armor / t.stats.maxArmor, this.theme.hud.armorFill);
       }
-      if (this.previewActive && t.id !== this.turns.current && this.turns.phase !== "gameOver") this.drawLockOn(t);
+      if (this.previewLocked && t.id !== this.turns.current && this.turns.phase !== "gameOver") this.drawLockOn(t);
       if (t.id === this.turns.current && this.turns.phase === "aiming") {
         const my = top - 8;
         this.tanksGfx.poly([t.x - 4, my, t.x + 4, my, t.x, my + 6]).fill(this.theme.hud.turnMarker);

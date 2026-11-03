@@ -56,13 +56,13 @@ export interface SlotVoice {
   rate: number;
 }
 
-/** A második parancsnok hangmagasság- és tempóeltolása, ha nincs külön hang, amivel megkülönböztethető. */
-const SECOND_SLOT_PITCH_SHIFT = 0.35;
-const SECOND_SLOT_RATE_SHIFT = 0.1;
+/** A második parancsnok hangmagasság- és tempóeltolása, külön hang használatakor is. */
+const SECOND_SLOT_PITCH_SHIFT = 0.7;
+const SECOND_SLOT_RATE_SHIFT = 0.15;
 
 /**
  * Játékosonként (0 = P1, 1 = P2) eltérő hang: ha van legalább két megfelelő hang, mindenki a sajátját kapja,
- * különben ugyanaz a hang más magassággal és tempóval szólal meg.
+ * a második hang minden esetben magasabban és gyorsabban szólal meg.
  */
 export function voiceForSlot(
   voices: readonly SpeechSynthesisVoice[],
@@ -73,9 +73,8 @@ export function voiceForSlot(
   const first = pickVoice(voices, locale, settings.voiceName);
   if (slot <= 0) return { voice: first, pitch: settings.pitch, rate: settings.rate };
   const distinct = rankVoices(voices, locale).find((voice) => voice !== first);
-  if (distinct) return { voice: distinct, pitch: settings.pitch, rate: settings.rate };
   return {
-    voice: first,
+    voice: distinct ?? first,
     pitch: Math.min(2, settings.pitch + SECOND_SLOT_PITCH_SHIFT),
     rate: settings.rate + SECOND_SLOT_RATE_SHIFT,
   };
