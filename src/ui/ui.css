@@ -1794,3 +1794,18 @@
     display: none;
   }
 }
+.player-name-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.player-name-fields input {
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(91, 177, 210, 0.32);
+  border-radius: 2px 6px;
+  background: var(--bf-input-bg);
+  color: var(--bf-text);
+  font-size: 14px;
+}

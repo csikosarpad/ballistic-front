@@ -85,6 +85,37 @@ export class AudioManager {
     source.start();
   }
 
+  /**
+   * Szintetizált helyettesítő fanfár; ha lesz valódi hangfájl, ide kell bekötni (SoundName + URLS).
+   */
+  playFanfare(): void {
+    if (!this.ctx || !this.master) return;
+    if (this.ctx.state !== "running") void this.ctx.resume().catch(() => {});
+    const start = this.ctx.currentTime + 0.05;
+    // C-dúr felfelé futó hármashangzat, a végén hosszan kitartott akkord.
+    const notes: Array<[freq: number, at: number, length: number]> = [
+      [261.63, 0, 0.18],
+      [329.63, 0.2, 0.18],
+      [392.0, 0.4, 0.18],
+      [523.25, 0.6, 0.9],
+      [392.0, 0.6, 0.9],
+      [329.63, 0.6, 0.9],
+    ];
+    for (const [freq, at, length] of notes) {
+      const osc = this.ctx.createOscillator();
+      osc.type = "sawtooth";
+      osc.frequency.value = freq;
+      const gain = this.ctx.createGain();
+      const t0 = start + at;
+      gain.gain.setValueAtTime(0, t0);
+      gain.gain.linearRampToValueAtTime(0.12, t0 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + length);
+      osc.connect(gain).connect(this.master);
+      osc.start(t0);
+      osc.stop(t0 + length + 0.05);
+    }
+  }
+
   /** Minden mozgáslépésnél hívandó; a hang addig szól, amíg a lépések tartanak. */
   moveTick(now = performance.now()): void {
     this.moveGate.touch(now);

@@ -1,5 +1,6 @@
 import { useGameStore } from "@/game/state/gameStore";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
+import { usePlayerName } from "@/game/state/playerNames";
 import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
 import { Shop } from "./Shop";
@@ -9,6 +10,7 @@ import { getUnitPresentation } from "./result/unitPresentation";
 /** Meccs végén: győztes, statisztika, bolt és továbblépés. */
 export function ResultScreen() {
   const t = useT();
+  const name = usePlayerName();
   const { winner, matchStats, setScreen } = useGameStore();
   const credentials = useMultiplayerStore((state) => state.credentials);
   const session = useMultiplayerStore((state) => state.session);
@@ -24,7 +26,7 @@ export function ResultScreen() {
           <span className="winner-trophy" aria-hidden="true">
             ★
           </span>
-          <h2 className="winner">{winner ? t("result.wins", { name: winner }) : t("result.draw")}</h2>
+          <h2 className="winner">{winner ? t("result.wins", { name: name(winner) }) : t("result.draw")}</h2>
           <span className="winner-subtitle">{t("result.goodGame")}</span>
         </div>
         <table className="stats result-stats" cellPadding={0} cellSpacing={0} border={0}>
@@ -40,7 +42,7 @@ export function ResultScreen() {
             {Object.entries(matchStats).map(([id, s]) => (
               <tr key={id}>
                 <td>
-                  <u>{id}</u>
+                  <u>{name(id)}</u>
                 </td>
                 <td>{s.shots}</td>
                 <td>{s.damage}</td>

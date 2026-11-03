@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { PowerDial, UnitGauge } from "./gauges";
 import { MAX_ANGLE, MIN_ANGLE, MIN_POWER, useGameStore } from "@/game/state/gameStore";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
+import { usePlayerName } from "@/game/state/playerNames";
 import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
 import { RepeatButton } from "./RepeatButton";
@@ -12,6 +13,7 @@ const toCss = (color?: number) => (color === undefined ? "#ffffff" : `#${color.t
 
 export function Hud() {
   const t = useT();
+  const name = usePlayerName();
   const {
     angle,
     power,
@@ -101,7 +103,7 @@ export function Hud() {
           >
             <div className="hud-unit-heading">
               <span style={{ fontWeight: unit.id === currentId ? "bold" : "normal" }}>
-                {unit.id}: {unit.hp}/{unit.maxHp} HP
+                {name(unit.id)}: {unit.hp}/{unit.maxHp} HP
               </span>
             </div>
             <div className="hud-unit-meters">
@@ -120,7 +122,7 @@ export function Hud() {
         <div className="hud-top-center">
           <WindIndicator wind={wind} />
           <div className="hud-readout">
-            {t("hud.turn")} <strong style={{ color: toCss(me?.color) }}>{currentId}</strong>
+            {t("hud.turn")} <strong style={{ color: toCss(me?.color) }}>{name(currentId)}</strong>
             <span aria-hidden="true">·</span>
             {t("hud.move", { value: me?.moveLeft ?? 0 })}
           </div>
@@ -131,7 +133,7 @@ export function Hud() {
                   ? t("hud.shotInFlight")
                   : canControl
                     ? t("hud.yourTurn")
-                    : t("hud.opponentTurn", { id: currentId }))}
+                    : t("hud.opponentTurn", { id: name(currentId) }))}
             </div>
           )}
         </div>

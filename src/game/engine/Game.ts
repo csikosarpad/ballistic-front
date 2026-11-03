@@ -43,10 +43,13 @@ import { loadProfiles, saveProfiles } from "../systems/profileStorage";
 import { MAX_ANGLE, MIN_POWER, useGameStore } from "../state/gameStore";
 import { useMultiplayerStore } from "../state/multiplayerStore";
 import { useCommandStore } from "../state/commandStore";
+import { playerName } from "../state/playerNames";
 import type { RoomEvent } from "../multiplayer/protocol";
 
 /** Ennyi HP-arány alatt kritikus a tank állapota. */
 const CRITICAL_HP_FRACTION = 0.3;
+/** A fanfár hossza; ennyi idő után hangzik el a győztes neve. */
+const VICTORY_ANNOUNCE_DELAY_MS = 1800;
 
 interface ImpactReport {
   tank: Tank;
@@ -114,6 +117,9 @@ export class Game {
   private pendingMultiplayerStart: { setup: MatchSetup; profiles: Record<string, Profile>; revision: number } | null =
     null;
   private unsubscribeMultiplayer: (() => void) | null = null;
+  private unsubscribeAim: (() => void) | null = null;
+  private targetLocked = false;
+  private victoryTimer = 0;
   private shell: BallisticBody | null = null;
   private shellAge = 0;
   private acc = 0;
@@ -135,6 +141,11 @@ export class Game {
     // Az asset-betöltés alatt is megszúnhetett a komponens (StrictMode).
     if (this.destroyed) return;
     this.audio = new AudioManager();
+    this.unsubscribeAim = useGameStore.subscribe((state, prev) => {
+      if (this.turns.phase === "aiming" && (state.angle !== prev.angle || state.power !== prev.power)) {
+        this.lockTarget();
+      }
+    });
     this.tankTextures = { body, barrel };
     this.fx = new FxRenderer(fxTextures);
     this.shellGlow.texture = fxTextures.glow;
@@ -239,6 +250,7 @@ export class Game {
   restart(setup?: MatchSetup): void {
     if (!this.terrain) return;
     useCommandStore.getState().clear();
+    window.clearTimeout(this.victoryTimer);
     const width = WORLD_WIDTH;
     const matchSetup = setup ?? { seed: Math.floor(Math.random() * 1_000_000), starterIndex: this.nextStarter };
     this.matchRandom = createSeededRandom(matchSetup.seed);
@@ -361,26 +373,43 @@ export class Game {
     return this.tanks.find((t) => t.id === this.turns.current)!;
   }
 
+  /** Lövésenként legfeljebb egy közlés hangzik el, a legfontosabb esemény szerint. */
   private announceImpact(shooter: Tank, hurt: ImpactReport[]): void {
     const { announce } = useCommandStore.getState();
     const enemies = hurt.filter((r) => r.tank !== shooter);
-    if (enemies.length === 0) announce("command.miss", undefined, "warning");
-    for (const r of enemies) {
-      if (!isAlive(r.tank)) announce("command.destroyed", undefined, "critical");
-      else announce("command.hit");
-      if (r.shieldDown) announce("command.shieldDown");
-      if (r.armorBreach) announce("command.armorBreach", undefined, "warning");
-    }
-    for (const r of hurt) {
+    const destroyed = enemies.some((r) => !isAlive(r.tank));
+    const critical = hurt.find((r) => {
       const max = r.tank.stats.maxHp;
-      if (isAlive(r.tank) && r.tank.hp / max <= CRITICAL_HP_FRACTION && r.hpBefore / max > CRITICAL_HP_FRACTION) {
-        announce("command.critical", { id: r.tank.id }, "critical");
-      }
-    }
+      return isAlive(r.tank) && r.tank.hp / max <= CRITICAL_HP_FRACTION && r.hpBefore / max > CRITICAL_HP_FRACTION;
+    });
+    if (destroyed) announce("command.destroyed", undefined, "critical");
+    else if (critical) announce("command.critical", { id: playerName(critical.tank.id) }, "critical");
+    else if (enemies.some((r) => r.armorBreach)) announce("command.armorBreach", undefined, "warning");
+    else if (enemies.some((r) => r.shieldDown)) announce("command.shieldDown");
+    else if (enemies.length > 0) announce("command.hit");
+    else announce("command.miss", undefined, "warning");
+  }
+
+  /** Fanfár, majd a fanfár lecsengése után a győztes bemondása. */
+  private announceVictory(winnerId: string): void {
+    this.audio?.playFanfare();
+    window.clearTimeout(this.victoryTimer);
+    this.victoryTimer = window.setTimeout(
+      () => useCommandStore.getState().announce("command.victory", { name: playerName(winnerId) }, "info"),
+      VICTORY_ANNOUNCE_DELAY_MS,
+    );
+  }
+
+  /** Körönként egyszer, az első célzás vagy mozgás után jelzi, hogy a cél be van fogva. */
+  private lockTarget(): void {
+    if (this.targetLocked) return;
+    this.targetLocked = true;
+    useCommandStore.getState().announce("command.targetAcquired");
   }
 
   private beginTurn(): void {
-    useCommandStore.getState().announce("command.targetAcquired");
+    // A kör elején beállított szög/erő még nem játékos-beavatkozás.
+    this.targetLocked = true;
     const tank = this.current;
     regenTankShield(tank);
     tank.moveLeft = tank.stats.moveBudget;
@@ -390,6 +419,7 @@ export class Game {
     this.battlefieldLayers.setWind(wind);
     useGameStore.getState().sync({ angle: tank.angle, power: tank.power, maxPower: tank.stats.maxPower, wind });
     this.syncStore();
+    this.targetLocked = false;
   }
 
   private syncStore(): void {
@@ -436,6 +466,7 @@ export class Game {
     }
     if (moveTank(this.current, dir, this.terrain.mask)) {
       this.audio?.moveTick();
+      this.lockTarget();
       this.syncStore();
     }
   }
@@ -463,7 +494,6 @@ export class Game {
     const tip = barrelTip(tank);
     this.particles.spawnMuzzleFlash(tip.x, tip.y, angle);
     this.audio?.play("shot", { rate: 0.95 + Math.random() * 0.1 });
-    useCommandStore.getState().announce("command.fire");
     this.shell = { pos: tip, vel: launchVelocity(angle, power) };
     const view = this.tankViews.get(tank.id);
     if (view) view.anim = kick(angle);
@@ -552,6 +582,7 @@ export class Game {
           moveTank(this.current, direction, this.terrain.mask)
         ) {
           this.audio?.moveTick();
+          this.lockTarget();
         }
         continue;
       }
@@ -600,7 +631,10 @@ export class Game {
     this.turns.endShot(this.tanks.filter(isAlive).map((t) => t.id));
     if (this.turns.phase === "aiming") this.beginTurn();
     else {
-      if (this.turns.winner) this.award(this.turns.winner, WIN_BONUS_XP);
+      if (this.turns.winner) {
+        this.award(this.turns.winner, WIN_BONUS_XP);
+        this.announceVictory(this.turns.winner);
+      }
       const onlineRoom = useMultiplayerStore.getState();
       if (this.multiplayer && onlineRoom.credentials?.playerId === "P1" && onlineRoom.session?.status === "playing") {
         void useMultiplayerStore.getState().publish("match_finished", { winner: this.turns.winner });
@@ -758,8 +792,11 @@ export class Game {
 
   destroy(): void {
     this.destroyed = true;
+    window.clearTimeout(this.victoryTimer);
     this.unsubscribeMultiplayer?.();
     this.unsubscribeMultiplayer = null;
+    this.unsubscribeAim?.();
+    this.unsubscribeAim = null;
     this.pendingMultiplayerEvents = [];
     this.audio?.destroy();
     if (this.app.renderer) this.app.destroy(true, { children: true });

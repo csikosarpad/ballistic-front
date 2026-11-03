@@ -101,6 +101,9 @@ export const en: Record<MessageKey, string> = {
   "command.armorBreach": "Armor breach detected",
   "command.critical": "We have taken critical damage, {id}!",
   "command.destroyed": "Target destroyed!",
+  "command.victory": "{name} has won the battle!",
+  "menu.playerNames": "Player names",
+  "menu.playerName": "{id} name",
 
   "error.createRoom": "Could not create the room.",
   "error.joinRoom": "Could not join the room.",
