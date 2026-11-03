@@ -144,15 +144,15 @@ Alapelv: nem új UI-elemek, hanem a meglévő képernyők „megélénkítése".
 - [x] Solvyr Prime bolygó a háttérben – a háttérkép tartalmazza (bolygókorong, légkörfény)
 - [x] Orbitális gyűrűállomás – a háttérkép tartalmazza
 - [x] Bolygó finomítás: `siege-city-glow.jpg` és `siege-city-lights.jpg` additív rétegek a háttér bolygóján (a köddel együtt sodródnak, alpha lassan pulzál, reduced-motion esetén fix); külön bolygó-asset nem kellett
-- [ ] Animált HUD: fade-in, scanline, hologram-reveal, energy charge (CSS/Pixi ticker, GSAP nélkül)
+- [x] Animált HUD: fade-in, scanline, hologram-reveal, energy charge (CSS/Pixi ticker, GSAP nélkül)
 - [ ] „Command hologram" HUD: finom zaj, scanline, villogó célkereszt, adatfolyam
 
 **Második kör – visszajelzés**
 - [x] Lövedéknyom: 26 pontos additív plazmacsík (`shellTrail.ts`), a lövedék felé vastagodó és erősödő, becsapódás után elhalványul; a korábbi füstcsík megmaradt
-- [ ] Részecskerendszer bővítése (becsapódás, szikra, törmelék)
+- [x] Részecskerendszer bővítése (becsapódás, szikra, törmelék)
 - [x] Kamera-rázkódás találatkor (`screenShake.ts`): 0,35 s, lineárisan csillapodó, a robbanás sugarával és a sebzéssel arányos; reduced-motion esetén ki
-- [ ] Becsapódási effektek: lökéshullám, villanás
-- [ ] Köd és volumetrikus fény a terep fölött: űrpor, légköri köd, energia-haze
+- [x] Becsapódási effektek: lökéshullám, villanás
+- [x] Köd és volumetrikus fény a terep fölött: űrpor, légköri köd, energia-haze
 
 **Harmadik kör – shaderek**
 - [ ] GLSL/fragment shaderek: pajzs-találat, energiafegyver, taktikai AI aktiválás

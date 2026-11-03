@@ -1520,3 +1520,119 @@
     animation: none;
   }
 }
+
+/* Animált HUD: belépő hologram-reveal, végigfutó scanline, az aktív egység pulzálása. */
+.hud-unit,
+.hud-top-center,
+.hud-command-dock {
+  animation: hud-reveal 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+
+.hud-unit-p2 {
+  animation-delay: 0.08s;
+}
+
+.hud-top-center {
+  animation-name: hud-reveal-down;
+  animation-delay: 0.15s;
+}
+
+.hud-command-dock {
+  position: relative;
+  overflow: hidden;
+  animation-name: hud-reveal-up;
+  animation-delay: 0.22s;
+}
+
+.hud-command-dock::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 38%;
+  background: linear-gradient(180deg, transparent, rgba(120, 225, 255, 0.1) 70%, rgba(150, 235, 255, 0.28));
+  border-bottom: 1px solid rgba(150, 235, 255, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-100%);
+  animation: hud-scan 0.9s ease-out 0.5s 1 backwards;
+}
+
+.hud-unit.is-active {
+  animation:
+    hud-reveal 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) backwards,
+    hud-active-pulse 2.8s ease-in-out 0.6s infinite;
+}
+
+@keyframes hud-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+    filter: brightness(2.2) saturate(0.6);
+    clip-path: inset(0 100% 0 0);
+  }
+  60% {
+    filter: brightness(1.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    clip-path: inset(-40px);
+  }
+}
+
+@keyframes hud-reveal-down {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+    filter: brightness(2.2);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes hud-reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: brightness(1.8);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes hud-scan {
+  0% {
+    opacity: 0.9;
+    transform: translateY(-100%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(300%);
+  }
+}
+
+@keyframes hud-active-pulse {
+  50% {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--unit-accent) 45%, transparent),
+      0 0 28px color-mix(in srgb, var(--unit-accent) 40%, transparent),
+      inset 0 0 18px color-mix(in srgb, var(--unit-accent) 16%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-unit,
+  .hud-unit.is-active,
+  .hud-top-center,
+  .hud-command-dock,
+  .hud-command-dock::after {
+    animation: none;
+  }
+}
