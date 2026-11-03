@@ -421,11 +421,11 @@
 
 .main-menu-header h1 {
   color: #e4f7ff;
-  font-size: clamp(28px, 6vw, 42px);
+  font-size: clamp(28px, 7vw, 40px);
   font-style: italic;
   letter-spacing: 2px;
   text-transform: uppercase;
-  text-shadow: 0 0 16px rgba(67, 218, 255, 0.45);
+  text-shadow: 2px 2px 18px rgba(67, 218, 255, 0.75);
 }
 
 .main-menu-header p {
