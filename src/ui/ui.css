@@ -1636,3 +1636,89 @@
     animation: none;
   }
 }
+
+/* Műszerfal-mérők: gyűrűs HP/pajzs/páncél és félkör alakú erőmérő */
+.hud-unit {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 10px;
+}
+
+.hud-unit-meters {
+  display: block;
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.hud-unit-heading {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.unit-gauge {
+  display: block;
+  width: 64px;
+  height: 64px;
+}
+
+.ring-track,
+.ring-fill,
+.dial-track,
+.dial-fill {
+  fill: none;
+}
+
+.ring-track,
+.dial-track {
+  stroke: rgba(116, 161, 181, 0.2);
+}
+
+.ring-fill,
+.dial-fill {
+  transition: stroke-dasharray 0.25s;
+}
+
+.ring-hp .ring-fill {
+  stroke: #4ce1c3;
+}
+
+.ring-shield .ring-fill {
+  stroke: #4dd0ff;
+}
+
+.ring-armor .ring-fill {
+  stroke: #ffd06a;
+}
+
+.unit-gauge-value {
+  fill: currentColor;
+  font: 700 17px var(--bf-font-data);
+}
+
+.hud-control-label {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+}
+
+.power-dial {
+  display: block;
+  width: 64px;
+  height: 37px;
+}
+
+.dial-fill {
+  stroke: var(--bf-highlight);
+  filter: drop-shadow(0 0 3px rgba(255, 211, 77, 0.6));
+}
+
+.dial-value {
+  fill: #fff;
+  font: 700 15px var(--bf-font-data);
+}
+
+@media (max-height: 500px) {
+  .power-dial {
+    display: none;
+  }
+}

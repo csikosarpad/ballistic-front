@@ -145,6 +145,7 @@ Alapelv: nem új UI-elemek, hanem a meglévő képernyők „megélénkítése".
 - [x] Orbitális gyűrűállomás – a háttérkép tartalmazza
 - [x] Bolygó finomítás: `siege-city-glow.jpg` és `siege-city-lights.jpg` additív rétegek a háttér bolygóján (a köddel együtt sodródnak, alpha lassan pulzál, reduced-motion esetén fix); külön bolygó-asset nem kellett
 - [x] Animált HUD: fade-in, scanline, hologram-reveal, energy charge (CSS/Pixi ticker, GSAP nélkül)
+- [x] Műszerfal-mérők: gyűrűs HP/pajzs/páncél a HUD-ban (a tankok feletti csíkok maradtak), félkör alakú erőmérő a power csúszka mellett (`gauges.tsx`; mobil fekvő nézetben a félkör rejtett); üveg/folyadék hatás nélkül
 - [ ] „Command hologram" HUD: finom zaj, scanline, villogó célkereszt, adatfolyam
 
 **Második kör – visszajelzés**

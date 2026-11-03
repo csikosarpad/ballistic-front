@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { PowerDial, UnitGauge } from "./gauges";
 import { MAX_ANGLE, MIN_ANGLE, MIN_POWER, useGameStore } from "@/game/state/gameStore";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { useT } from "@/i18n";
@@ -7,33 +8,6 @@ import { RepeatButton } from "./RepeatButton";
 import { WindIndicator } from "./WindIndicator";
 
 const toCss = (color?: number) => (color === undefined ? "#ffffff" : `#${color.toString(16).padStart(6, "0")}`);
-
-interface StripeProps {
-  kind: "hp" | "shield" | "armor";
-  label: string;
-  value: number;
-  max: number;
-}
-
-/** Vékony, jelölt csík; a pontos érték a tooltipben és a képernyőolvasónak szóló attribútumokban van. */
-function Stripe({ kind, label, value, max }: StripeProps) {
-  const percent = max > 0 ? Math.min(100, Math.max(0, (value / max) * 100)) : 0;
-  const shown = `${value}/${max}`;
-  return (
-    <div
-      className={`stripe stripe-${kind}`}
-      role="meter"
-      aria-label={label}
-      aria-valuemin={0}
-      aria-valuemax={max}
-      aria-valuenow={value}
-      aria-valuetext={shown}
-      title={`${label}: ${shown}`}
-    >
-      <div className="stripe-fill" style={{ width: `${percent}%` }} />
-    </div>
-  );
-}
 
 export function Hud() {
   const t = useT();
@@ -130,13 +104,15 @@ export function Hud() {
               </span>
             </div>
             <div className="hud-unit-meters">
-              <Stripe kind="hp" label="HP" value={unit.hp} max={unit.maxHp} />
-              {unit.maxShield > 0 && (
-                <Stripe kind="shield" label={t("hud.shield")} value={unit.shield} max={unit.maxShield} />
-              )}
-              {unit.maxArmor > 0 && (
-                <Stripe kind="armor" label={t("hud.armor")} value={unit.armor} max={unit.maxArmor} />
-              )}
+              <UnitGauge
+                hp={unit.hp}
+                maxHp={unit.maxHp}
+                shield={unit.shield}
+                maxShield={unit.maxShield}
+                armor={unit.armor}
+                maxArmor={unit.maxArmor}
+                labels={{ hp: "HP", shield: t("hud.shield"), armor: t("hud.armor") }}
+              />
             </div>
           </section>
         ))}
@@ -192,7 +168,10 @@ export function Hud() {
             </div>
           </div>
           <div className="hud-control">
-            <span id="hud-power-label">{t("hud.power", { value: power })}</span>
+            <div className="hud-control-label">
+              <span id="hud-power-label">{t("hud.power", { value: power })}</span>
+              <PowerDial value={power} min={MIN_POWER} max={maxPower} />
+            </div>
             <div className="hud-stepper">
               <RepeatButton
                 className="hud-step"
