@@ -1458,3 +1458,65 @@
     font-size: 17px;
   }
 }
+
+/* HUD glow: csak box-shadow/text-shadow, így mobilon is olcsó (nincs szűrő). */
+.hud-unit {
+  box-shadow:
+    0 0 16px color-mix(in srgb, var(--unit-accent) 22%, transparent),
+    inset 0 0 12px color-mix(in srgb, var(--unit-accent) 8%, transparent);
+}
+
+.hud-unit-heading,
+.hud-top-center .hud-readout strong {
+  text-shadow: 0 0 8px color-mix(in srgb, currentColor 55%, transparent);
+}
+
+.hud-top-center {
+  box-shadow:
+    0 0 18px rgba(0, 170, 255, 0.22),
+    inset 0 0 12px rgba(0, 185, 255, 0.08);
+}
+
+.hud-command-dock {
+  box-shadow:
+    0 0 0 1px rgba(0, 170, 255, 0.18),
+    0 0 28px rgba(0, 170, 255, 0.26),
+    inset 0 0 18px rgba(0, 185, 255, 0.1);
+}
+
+.hud-actions button:not(:disabled) {
+  box-shadow: 0 0 8px rgba(36, 216, 255, 0.14);
+}
+
+.hud-actions button:hover:not(:disabled),
+.hud-actions button:focus-visible,
+.hud-actions button[aria-pressed="true"]:not(:disabled) {
+  box-shadow:
+    0 0 14px rgba(36, 216, 255, 0.45),
+    inset 0 0 10px rgba(36, 216, 255, 0.18);
+}
+
+.hud-actions .hud-fire-button:not(:disabled) {
+  box-shadow:
+    0 0 14px rgba(255, 170, 40, 0.38),
+    inset 0 0 10px rgba(255, 170, 40, 0.14);
+  animation: hud-fire-pulse 2.4s ease-in-out infinite;
+}
+
+.battle-hud .hud-step:active:not(:disabled) {
+  box-shadow: 0 0 14px rgba(36, 216, 255, 0.55);
+}
+
+@keyframes hud-fire-pulse {
+  50% {
+    box-shadow:
+      0 0 22px rgba(255, 170, 40, 0.6),
+      inset 0 0 12px rgba(255, 170, 40, 0.22);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-actions .hud-fire-button:not(:disabled) {
+    animation: none;
+  }
+}

@@ -1,5 +1,7 @@
 import { Assets, Container, Graphics, Sprite, type Texture } from "pixi.js";
 import skyUrl from "../assets/backgrounds/siege-sky.jpg?url";
+import cityGlowUrl from "../assets/backgrounds/siege-city-glow.jpg?url";
+import cityLightsUrl from "../assets/backgrounds/siege-city-lights.jpg?url";
 import { WindDustClouds } from "./WindDustClouds";
 import { BattlefieldProps } from "./BattlefieldProps";
 
@@ -11,6 +13,11 @@ const SKY_TOP_CROP = 0.55;
 const SKY_DRIFT_PX = 22;
 const STAR_DRIFT_PX = 9;
 const DRIFT_SPEED = 0.07;
+const CITY_GLOW_ALPHA = 0.4;
+const CITY_LIGHTS_ALPHA = 0.6;
+/** A városfények alpha-szorzója 0,85 és 1,0 között pulzál. */
+const CITY_PULSE_MIN = 0.85;
+const CITY_PULSE_SPEED = 0.35;
 
 function seededRandom(seed: number): () => number {
   let state = seed >>> 0 || 1;
@@ -43,6 +50,8 @@ function mountainPoints(
 /** Statikus, újrarajzolható játéktér-háttér a terrain mögött; a köd és a csillagok lassan sodródnak (parallax). */
 export class BattlefieldLayers extends Container {
   private readonly nebula = new Sprite();
+  private readonly cityGlow = new Sprite();
+  private readonly cityLights = new Sprite();
   private readonly skyShade = new Graphics();
   private readonly stars = new Graphics();
   private readonly farMountains = new Graphics();
@@ -53,6 +62,8 @@ export class BattlefieldLayers extends Container {
   private readonly props = new BattlefieldProps();
   private readonly windDustClouds = new WindDustClouds();
   private skyTexture: Texture | null = null;
+  private cityGlowTexture: Texture | null = null;
+  private cityLightsTexture: Texture | null = null;
   private nebulaBaseX = 0;
   private time = 0;
   private motionEnabled = true;
@@ -60,8 +71,15 @@ export class BattlefieldLayers extends Container {
   public constructor() {
     super();
     this.nebula.visible = false;
+    // A fekete háttérre komponált képek additív keveréssel csak a fényeket adják hozzá.
+    for (const layer of [this.cityGlow, this.cityLights]) {
+      layer.blendMode = "add";
+      layer.visible = false;
+    }
     this.addChild(
       this.nebula,
+      this.cityGlow,
+      this.cityLights,
       this.skyShade,
       this.stars,
       this.farMountains,
@@ -139,11 +157,26 @@ export class BattlefieldLayers extends Container {
     const scale = Math.max((width * SKY_OVERSCAN) / texture.width, (height * SKY_OVERSCAN) / texture.height);
     const w = texture.width * scale;
     const h = texture.height * scale;
-    this.nebula.texture = texture;
-    this.nebula.scale.set(scale);
     this.nebulaBaseX = (width - w) / 2;
-    this.nebula.position.set(this.nebulaBaseX, -(h - height) * SKY_TOP_CROP);
-    this.nebula.visible = true;
+    const y = -(h - height) * SKY_TOP_CROP;
+    const layers: [Sprite, Texture | null][] = [
+      [this.nebula, texture],
+      [this.cityGlow, this.cityGlowTexture],
+      [this.cityLights, this.cityLightsTexture],
+    ];
+    for (const [sprite, spriteTexture] of layers) {
+      if (!spriteTexture) continue;
+      sprite.texture = spriteTexture;
+      sprite.scale.set(scale);
+      sprite.position.set(this.nebulaBaseX, y);
+      sprite.visible = true;
+    }
+    this.applyCityPulse(1);
+  }
+
+  private applyCityPulse(pulse: number): void {
+    this.cityGlow.alpha = CITY_GLOW_ALPHA * pulse;
+    this.cityLights.alpha = CITY_LIGHTS_ALPHA * (CITY_PULSE_MIN + (1 - CITY_PULSE_MIN) * pulse);
   }
 
   public setWind(wind: number): void {
@@ -159,14 +192,26 @@ export class BattlefieldLayers extends Container {
         // A vektoros égbolt (Game háttérszíne és csillagok) hiba esetén is használható marad.
         console.error("Battlefield sky texture could not be loaded.", error);
       });
-    await Promise.all([this.props.loadAssets(), sky]);
+    // A városfény-rétegek díszek: hiányuk esetén a háttérkép önmagában is jó.
+    const city = Promise.all([Assets.load<Texture>(cityGlowUrl), Assets.load<Texture>(cityLightsUrl)])
+      .then(([glow, lights]) => {
+        this.cityGlowTexture = glow;
+        this.cityLightsTexture = lights;
+      })
+      .catch((error) => {
+        console.error("City light textures could not be loaded.", error);
+      });
+    await Promise.all([this.props.loadAssets(), sky, city]);
   }
 
   public setMotionEnabled(enabled: boolean): void {
     this.motionEnabled = enabled;
     this.props.setMotionEnabled(enabled);
     this.windDustClouds.setMotionEnabled(enabled);
-    if (!enabled) this.applyDrift(0);
+    if (!enabled) {
+      this.applyDrift(0);
+      this.applyCityPulse(1);
+    }
   }
 
   public update(dt: number): void {
@@ -175,11 +220,15 @@ export class BattlefieldLayers extends Container {
     if (!this.motionEnabled) return;
     this.time += dt;
     this.applyDrift(Math.sin(this.time * DRIFT_SPEED));
+    this.applyCityPulse(0.5 + 0.5 * Math.sin(this.time * CITY_PULSE_SPEED));
   }
 
   /** A köd és a csillagok ellentétesen, eltérő sebességgel mozdulnak: ez adja a mélységérzetet. */
   private applyDrift(phase: number): void {
-    this.nebula.x = this.nebulaBaseX + phase * SKY_DRIFT_PX;
+    const x = this.nebulaBaseX + phase * SKY_DRIFT_PX;
+    this.nebula.x = x;
+    this.cityGlow.x = x;
+    this.cityLights.x = x;
     this.stars.x = -phase * STAR_DRIFT_PX;
   }
 

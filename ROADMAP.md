@@ -134,6 +134,41 @@ Javasolt, ingyenes (SIL OFL 1.1) fontkészlet a modern military sci-fi hangulath
 - [ ] Hang-redesign: target hit, terrain impact és missed hangesemények
 - [ ] Tank motorhang lazy loading és további mobil optimalizálása
 
+### M7b – Látványugrás: „orbitális sci-fi hadviselés" (PixiJS 8)
+
+Alapelv: nem új UI-elemek, hanem a meglévő képernyők „megélénkítése". Csak megjelenítés; a fizika, mentés és multiplayer protokoll változatlan. Minden effektnek legyen kikapcsolható/`prefers-reduced-motion` változata, és mobilon mérni kell a teljesítményt (gyengébb eszközön alacsonyabb minőség).
+
+**Első kör – hangulat**
+- [x] Glow/Bloom a terepre: `pixi-filters` `AdvancedBloomFilter` (asztalon erősség 1,2 / blur 8, érintőeszközön 0,4 / blur 2; `bloomQuality.ts`). HUD glow: CSS `box-shadow`/`text-shadow` (panelek, aktív/hover gombok, pulzáló Tűz gomb; reduced-motion esetén nem pulzál). Hátravan: bloom a lövedékre, „Alacsony minőség" beállítás a bloom teljes kikapcsolásához
+- [x] Parallax háttér (köd, csillagok, 3 hegyréteg) – kész, lásd M7
+- [x] Solvyr Prime bolygó a háttérben – a háttérkép tartalmazza (bolygókorong, légkörfény)
+- [x] Orbitális gyűrűállomás – a háttérkép tartalmazza
+- [x] Bolygó finomítás: `siege-city-glow.jpg` és `siege-city-lights.jpg` additív rétegek a háttér bolygóján (a köddel együtt sodródnak, alpha lassan pulzál, reduced-motion esetén fix); külön bolygó-asset nem kellett
+- [ ] Animált HUD: fade-in, scanline, hologram-reveal, energy charge (CSS/Pixi ticker, GSAP nélkül)
+- [ ] „Command hologram" HUD: finom zaj, scanline, villogó célkereszt, adatfolyam
+
+**Második kör – visszajelzés**
+- [~] Lövedéknyom: alap részecskenyom van (`spawnTrail`); hiányzik a fénycsík/plazmanyom
+- [ ] Részecskerendszer bővítése (becsapódás, szikra, törmelék)
+- [ ] Kamera-rázkódás találatkor (rövid, csillapodó; reduced-motion esetén ki)
+- [ ] Becsapódási effektek: lökéshullám, villanás
+- [ ] Köd és volumetrikus fény a terep fölött: űrpor, légköri köd, energia-haze
+
+**Harmadik kör – shaderek**
+- [ ] GLSL/fragment shaderek: pajzs-találat, energiafegyver, taktikai AI aktiválás
+- [ ] Terep „scan" effekt: kör elején kék energiahullám fut végig a pályán („SCAN COMPLETE"), shader + maszk
+- [ ] Orbitális csata a háttérben: flottaágyúk, védelmi állomások, pályán kívüli tüzek villanása (csak atmoszféra, nem játékelem)
+
+Döntések (rögzítve):
+- `pixi-filters`: **igen**. Első körben csak BloomFilter, GlowFilter, szükség esetén AdjustmentFilter (terepvonal, lövedéknyom, HUD-panelek, aktív gomb).
+- GSAP: **nem**. Menü fade-in, panel slide-in, XP számláló, győzelmi banner CSS-sel vagy Pixi tickerrel megoldható; akkor kerül elő, ha kameramozgás, cinematic intro vagy komplex cutscene lesz.
+- Bloom: asztalon erősség 1.2 / blur 8; mobilon 0.4 / blur 2, vagy teljesen ki „Alacsony minőség" módban (új beállítás).
+- Külön bolygó-grafika: **nem**, a háttérkép bolygója marad.
+- Városfény-réteg: **igen**, egyetlen új asset: `city_lights_overlay.png` (arany fények, várospöttyök, ipari zónák; átlátszó háttér), alpha 0,85↔1,0 lassú pulzálással (reduced-motion esetén fix). **Kép kell hozzá.**
+- Hatás szerinti sorrend: 1. gameplay háttér (kész), 2. bloom a terepre, 3. bloom a HUD-ra, 4. lövedéknyom, 5. screen shake találatkor.
+
+Döntési pontok: nincs nyitott; a városfény-PNG-re várunk.
+
 ### M8 – Galaxy Tactics-szintű látvány (hosszú táv)
 
 - [ ] Animált karakterek (skeleton alapú)

@@ -1,4 +1,6 @@
 import { Application, Assets, Container, Graphics, Sprite, type Texture } from "pixi.js";
+import { AdvancedBloomFilter } from "pixi-filters";
+import { bloomSettings } from "./bloomQuality";
 import tankBodyUrl from "../assets/tank-body.svg?url";
 import tankBarrelUrl from "../assets/tank-barrel.svg?url";
 import { kick, stepBarrel, type BarrelState } from "../systems/barrelAnimation";
@@ -125,6 +127,15 @@ export class Game {
     this.shellGlow.visible = false;
 
     this.terrain = new Terrain(this.app.renderer, this.theme.terrain);
+    const bloom = bloomSettings(window.matchMedia("(pointer: coarse)").matches);
+    this.terrain.sprite.filters = [
+      new AdvancedBloomFilter({
+        threshold: 0.45,
+        bloomScale: bloom.strength,
+        blur: bloom.blur,
+        quality: bloom.blur > 4 ? 4 : 2,
+      }),
+    ];
     const backdrop = new Graphics().rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT).fill(this.theme.sky);
     this.app.stage.addChild(
       backdrop,
