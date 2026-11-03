@@ -15,6 +15,8 @@ import {
 import { PreviewAllowance } from "../systems/previewAllowance";
 import { dragToAim, DRAG_POWER_PER_PX } from "../systems/dragAim";
 import { createSeededRandom, type MatchSetup } from "../systems/seededRandom";
+import { ScreenShake } from "../systems/screenShake";
+import { ShellTrail } from "../systems/shellTrail";
 import { Terrain } from "../terrain/Terrain";
 import { ParticleSystem } from "../systems/particles";
 import { DEFAULT_THEME, type Theme } from "../theme";
@@ -74,6 +76,11 @@ export class Game {
   private tankTextures: { body: Texture; barrel: Texture } | null = null;
   private shellGfx = new Graphics();
   private shellGlow = new Sprite();
+  private trailGfx = new Graphics();
+  private shellTrail = new ShellTrail();
+  private shake = new ScreenShake();
+  private shakeEnabled = true;
+  private stageBase = { x: 0, y: 0 };
   private fx: FxRenderer | null = null;
   private audio: AudioManager | null = null;
   private previewGfx = new Graphics();
@@ -125,6 +132,7 @@ export class Game {
     this.shellGlow.tint = this.theme.shell.glow;
     this.shellGlow.blendMode = "add";
     this.shellGlow.visible = false;
+    this.trailGfx.blendMode = "add";
 
     this.terrain = new Terrain(this.app.renderer, this.theme.terrain);
     const bloom = bloomSettings(window.matchMedia("(pointer: coarse)").matches);
@@ -145,10 +153,12 @@ export class Game {
       this.tankLayer,
       this.tanksGfx,
       this.shellGfx,
+      this.trailGfx,
       this.shellGlow,
       this.fx.layer,
     );
     this.battlefieldLayers.setMotionEnabled(!window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    this.shakeEnabled = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     this.layout();
     const pendingStart = this.pendingMultiplayerStart;
     if (pendingStart) this.startMultiplayer(pendingStart.setup, pendingStart.profiles, pendingStart.revision);
@@ -167,7 +177,15 @@ export class Game {
     const { width, height } = this.app.screen;
     const scale = Math.min(width / WORLD_WIDTH, height / WORLD_HEIGHT);
     this.app.stage.scale.set(scale);
-    this.app.stage.position.set((width - WORLD_WIDTH * scale) / 2, (height - WORLD_HEIGHT * scale) / 2);
+    this.stageBase = { x: (width - WORLD_WIDTH * scale) / 2, y: (height - WORLD_HEIGHT * scale) / 2 };
+    this.applyShake();
+  }
+
+  /** A rázkódás a kamerát (stage) tolja el, a világ koordinátái és a logika változatlanok. */
+  private applyShake(): void {
+    const { x, y } = this.shakeEnabled ? this.shake.offset(Math.random) : { x: 0, y: 0 };
+    const scale = this.app.stage.scale.x;
+    this.app.stage.position.set(this.stageBase.x + x * scale, this.stageBase.y + y * scale);
   }
 
   /** Húzásos célzás: a soron lévő tank közeléből indított húzás iránya a szög, hossza az erő. */
@@ -418,6 +436,7 @@ export class Game {
     const view = this.tankViews.get(tank.id);
     if (view) view.anim = kick(angle);
     this.shellAge = 0;
+    this.shellTrail.clear();
     this.syncStore();
   }
 
@@ -531,6 +550,7 @@ export class Game {
     }
     this.award(shooter.id, dealt);
     this.matchStats = recordDamage(this.matchStats, shooter.id, dealt);
+    this.shake.trigger(Math.min(1, radius / 80) * 0.75 + (dealt > 0 ? 0.25 : 0));
     for (const t of this.tanks) if (this.terrain) settleTank(t, this.terrain.mask);
     this.shell = null;
     this.turns.endShot(this.tanks.filter(isAlive).map((t) => t.id));
@@ -550,6 +570,7 @@ export class Game {
     this.shell = stepBody(this.shell, { ...DEFAULT_WORLD, wind: useGameStore.getState().wind }, FIXED_DT);
     this.shellAge++;
     const { x, y } = this.shell.pos;
+    this.shellTrail.push(x, y);
     if (this.shellAge % 3 === 0) this.particles.spawnTrail(x, y);
     const hitTank = this.tanks.some(
       (t) => isAlive(t) && (t.id !== this.turns.current || this.shellAge > SELF_HIT_GRACE) && tankContains(t, x, y),
@@ -622,6 +643,20 @@ export class Game {
     this.tanksGfx.circle(ex, ey, 7).fill({ color, alpha: 0.9 });
   }
 
+  /** Plazmanyom: két rétegű, additív, a lövedék felé vastagodó és erősödő fénycsík. */
+  private drawShellTrail(): void {
+    for (const { from, to, t } of this.shellTrail.segments()) {
+      this.trailGfx
+        .moveTo(from.x, from.y)
+        .lineTo(to.x, to.y)
+        .stroke({ width: 2 + t * 7, color: this.theme.shell.glow, alpha: t * 0.22, cap: "round" });
+      this.trailGfx
+        .moveTo(from.x, from.y)
+        .lineTo(to.x, to.y)
+        .stroke({ width: 1 + t * 2, color: this.theme.shell.core, alpha: t * 0.7, cap: "round" });
+    }
+  }
+
   private draw(dt: number): void {
     const aiming = this.turns.phase === "aiming";
     const aimAngle = useGameStore.getState().angle;
@@ -665,6 +700,11 @@ export class Game {
 
     this.fx?.render(this.particles.particles);
     this.shellGfx.clear();
+    this.trailGfx.clear();
+    if (!this.shell) this.shellTrail.shrink();
+    this.drawShellTrail();
+    this.shake.update(dt);
+    this.applyShake();
     this.shellGlow.visible = !!this.shell;
     if (this.shell) {
       this.shellGlow.position.set(this.shell.pos.x, this.shell.pos.y);

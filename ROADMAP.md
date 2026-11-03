@@ -148,9 +148,9 @@ Alapelv: nem új UI-elemek, hanem a meglévő képernyők „megélénkítése".
 - [ ] „Command hologram" HUD: finom zaj, scanline, villogó célkereszt, adatfolyam
 
 **Második kör – visszajelzés**
-- [~] Lövedéknyom: alap részecskenyom van (`spawnTrail`); hiányzik a fénycsík/plazmanyom
+- [x] Lövedéknyom: 26 pontos additív plazmacsík (`shellTrail.ts`), a lövedék felé vastagodó és erősödő, becsapódás után elhalványul; a korábbi füstcsík megmaradt
 - [ ] Részecskerendszer bővítése (becsapódás, szikra, törmelék)
-- [ ] Kamera-rázkódás találatkor (rövid, csillapodó; reduced-motion esetén ki)
+- [x] Kamera-rázkódás találatkor (`screenShake.ts`): 0,35 s, lineárisan csillapodó, a robbanás sugarával és a sebzéssel arányos; reduced-motion esetén ki
 - [ ] Becsapódási effektek: lökéshullám, villanás
 - [ ] Köd és volumetrikus fény a terep fölött: űrpor, légköri köd, energia-haze
 
