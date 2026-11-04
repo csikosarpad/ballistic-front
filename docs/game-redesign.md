@@ -1,5 +1,10 @@
 # Solvyr Prime: Siege Protocol - játék redesign terv
 
+Státusz: a vizuális alapok megvalósultak; a dokumentum designelveket, lezárt iterációkat
+és külön jelölt nyitott feladatokat tartalmaz. Aktuális működés: [README](../README.md);
+központi státuszok: [ROADMAP](../ROADMAP.md); új gameplay-rendszerek:
+[fejlődési elemzés](./gameplay-progression.md).
+
 ## Cél
 
 A játék vizuális rendszere egységes, rétegezett és később bővíthető legyen:
@@ -8,12 +13,13 @@ A játék vizuális rendszere egységes, rétegezett és később bővíthető l
 - sötétkék, sci-fi katonai hangulat;
 - jól elkülönülő játéktér-rétegek;
 - skálázható desktop és mobil fallback megjelenítés;
-- tank, űrharcos, drón és más egységtípusok támogatása közös presentation API-val.
+- közös presentation API a tankhoz és jövőbeli egységekhez; jelenleg tank és asset
+  nélküli space prezentációs contract létezik, nem többféle játszható egység.
 
 ## Dokumentációs felépítés
 
-Ez a dokumentum a teljes játék redesign fő terve. A ResultScreen részletes, már elkészült
-specifikációi továbbra is külön dokumentumokban maradnak:
+Ez a vizuális/UX redesign részletes terve, nem az összes gameplay-fejlesztés ütemterve.
+A ResultScreen megvalósított szerződése és lezárt vizuális iterációi:
 
 - [ResultScreen UI rendszer](./todos/result-screen-ui-system.md)
 - [ResultScreen redesign TODO](./todos/result-screen-redesign.md)
@@ -134,7 +140,8 @@ Az asset ne tartalmazzon játékosnevet, státuszt vagy szöveget. Ezeket a UI r
 
 ### Asset API
 
-A `UnitPresentation` marad az egységtípus absztrakciója:
+A `UnitPresentation` az egység megjelenítésének absztrakciója, nem gameplay-modell.
+A jelenlegi szerződés forrása a [result.types.ts](../src/ui/result/result.types.ts):
 
 ```ts
 interface UnitPresentation {
@@ -142,6 +149,8 @@ interface UnitPresentation {
   displayName: string;
   silhouetteAsset?: string;
   secondaryAsset?: string;
+  detailAsset?: string;
+  accentAsset?: string;
   primaryColor: number;
   secondaryColor: number;
   iconSet: string;
@@ -238,25 +247,24 @@ Játéktér-szabályok:
 
 Ez marad a játékmenet elsődleges geometriai rétege.
 
-- a fizikai heightmap és a vizuális terrain ugyanabból az állapotból származzon;
+- a kezdeti heightmapből származó collision mask és a vizuális terrain ugyanazokat
+  a rombolási műveleteket kövesse; a heightmap nem a rombolt terep élő állapota;
 - a terep sziluettje maradjon jól olvasható;
 - a felső kontúr kapjon finom cyan vagy meleg földszínű kiemelést;
-- robbanási nyomok és sérülések külön effekt-rétegen jelenjenek meg;
+- a perzselési nyomok a terrain RenderTexture-be rajzolódnak; a robbanás részecskéi
+  külön effektrétegen jelennek meg;
 - ne kerüljön a terrain assetbe statikus tank vagy szöveg.
 
 ### 2.7 Tereptárgyak
 
-A `BattlefieldProps` első változata collision nélküli, seed alapján elhelyezett dekorációkat
-rajzol a terrain mögé:
+A `BattlefieldProps` jelenleg collision nélküli, seed alapján elhelyezett sziklákat
+rajzol a terrain mögé. A korábbi fa-, antenna- és jelzőfény-iteráció nem aktív;
+a fa- és antenna-SVG assetek megmaradtak.
 
-- távoli és közeli fa-sziluettek;
-- sziklák és földközeli kövek;
-- katonai antennák;
-- kis narancs jelzőfények.
-
-Az első iterációban ezek nem módosítják a mozgást vagy a ballisztikát. A tereptárgyak
-vizuális prioritása a tank, lövedék és terrain kontúrja alatt marad. Később egyenként
-bekapcsolható sérülési, remegési vagy collision viselkedésük.
+A dekorációk nem módosítják a mozgást vagy a ballisztikát. Elhelyezésük vizuális
+magassági sávból származik, nem a tényleges rombolt talajfelszínhez tapadó fizikai kapcsolat.
+A remegési helper megmaradt; az aktív SVG sprite-ok becsapódási animációja nem teljes,
+mert a jelenlegi eltolás csak a vektoros graphics fallbackre hat.
 
 **Aktuális döntés:** a tereptárgyak dekoratívak maradnak; nem kapnak collisiont, nem
 rombolhatók, és nem módosítják a lövedékek vagy a tankok mozgását.
@@ -271,11 +279,15 @@ rombolhatók, és nem módosítják a lövedékek vagy a tankok mozgását.
 - A rétegek z-indexe legyen explicit és dokumentált.
 - A dekoratív tereptárgyak ne keltsenek collision-érzetet, amíg nincs hozzájuk fizikai modell.
 
-## 4. Megvalósítási fázisok
+## 4. Megvalósítási fázisok és korábbi iterációk
+
+A fa-/antenna-/jelzőfény-feladatok és a terrainhez igazítás korábbi iterációkat jelölnek;
+a jelenlegi aktív dekorációt a 2.7. pont írja le. A viewport-ellenőrzések böngészős/
+emulált ellenőrzések, nem valós telefonos validációk.
 
 - [x] ResultScreen HUD és egységfüggetlen presentation rendszer.
 - [x] Pixi UI primitive-ok és háttéreffektek.
-- [x] Tank/space presentation contract tesztek.
+- [x] Tank/space presentation contract tesztek (space asset nélkül, nem játszható űregység).
 - [x] Referenciahű, kontúros combat-dossier tank SVG újratervezése.
 - [x] `UnitIllustration` több rétegű asset-renderelésének kialakítása.
 - [x] A tank rétegek neutral/accent színezésének szétválasztása.
@@ -309,7 +321,9 @@ rombolhatók, és nem módosítják a lövedékek vagy a tankok mozgását.
 - [Solvyr Prime: Siege Protocol – eredményképernyő](../plans/solvyr-prime_siege_protocol_result.png)
 - [Játékmenet és főmenü vizuális terve](../plans/visual_plan_game.png)
 - [Meccs utáni fejlesztőbolt terve](../plans/ballistic-front_shop.png)
-- [Parancsnoki konzol terve](../plans/solvyr-prime_siege_protocol_command_concolse.png) – megvalósítva (`CommandConsole`); a képen szereplő „AI ONLINE" / „VOICE ACTIVE" állapotjelzők még nincsenek meg, az AI-ellenfél későbbi feladat.
+- [Parancsnoki konzol terve](../plans/solvyr-prime_siege_protocol_command_concolse.png) –
+  a konzol és az offline AI megvalósult; a képen szereplő „AI ONLINE” / „VOICE ACTIVE”
+  állapotjelzők még nincsenek meg.
 
 A képek vizuális irányt és elrendezési ötletet adnak, nem kész, közvetlenül beépíthető UI-k:
 a feliratokat, vezérlőket és állapotokat a meglévő React/Pixi felülettel kell újrarajzolni.
@@ -342,7 +356,8 @@ A megjelenített vezérlők és értékek nem mind egyeznek a mostani játékkal
   képességek nem részei ennek a UI-implementációnak.
 - **Eredményképernyő:** a győztes, játékosonkénti fejlesztések, meccsstatisztikák, XP és
   meccs utáni műveletek már léteznek. A képen látható tartós összesített XP, szint/rang,
-  XP-küszöb, eliminációs és pontszámstatisztika viszont nem mind része a jelenlegi adatmodellnek;
+  XP-küszöb, eliminációs és pontszámstatisztika nem része a jelenlegi adatmodellnek.
+  A HUD meglévő csillagrangja az embernél fejlesztési arány, AI-nál tapasztalat;
   ezeket nem szabad statikus képszövegből vagy ideiglenes UI-értékből megjeleníteni.
 
 Az első implementációs kör célja a meglévő állapotok új, egységes megjelenítése, nem új
@@ -372,6 +387,10 @@ termékdöntés, adatmodell/protokoll-elemzés és saját TODO után kerülhet b
 
 ### Mobil játszhatóság felmérése
 
+**Korábbi, javítás előtti mérés és javaslat.** Az alábbi hiánylista nem a jelenlegi
+implementáció állapota; a megvalósult javítások és a még nyitott valós eszközös próba
+a táblázat utáni ellenőrzőlistában szerepelnek.
+
 Mérés (emulált telefon, a játéktér fix 1280×720-as világ, `layout()` arányt tartva illeszti az ablakba):
 
 | Nézet         | Mért állapot                                                                                  | Következmény                                                      |
@@ -380,9 +399,10 @@ Mérés (emulált telefon, a játéktér fix 1280×720-as világ, `layout()` ar�
 | Fekvő 844×390 | a pálya 0,54× méretű; a HUD felül 65 px, alul 91 px, vagyis a 390 px magasból kb. 60% foglalt | a terep alsó része és a tankok takarásba kerülhetnek              |
 | Vezérlők      | a gombok 48 px magasak, a csúszkák 18–20 px magasak                                           | a gombok jók; a csúszkával pontos szög/erő beállítása ujjal nehéz |
 
-Ami már megvan: a HUD-gombok (mozgás, tűz, Smart Aim, hang) érintéssel működnek, a HUD nem csordul túl 320 px-en, a viewport meta rendben van.
+Ami a méréskor már megvolt: a HUD-gombok (mozgás, tűz, Smart Aim, hang) érintéssel működtek,
+a HUD nem csordult túl 320 px-en, a viewport meta rendben volt.
 
-Ami hiányzik vagy gond:
+A méréskor hiányzó vagy problémás elemek:
 
 - **Méretezés (a legnagyobb gond):** álló módban a játéktér használhatatlanul kicsi. A megoldás fekvő tájolás ösztönzése, nem a világ átméretezése.
 - **Pontos célzás:** nincs ±1° / ±10 erő léptetés érintésre (a billentyűzet lépései elérhetők, a gombok nincsenek), és nincs húzásos célzás a tankon.
@@ -400,6 +420,9 @@ Javasolt lépések, a kockázat szerint növekvő sorrendben:
 6. Nagyítás a tankra / követő kamera mobilon. Nagyobb; a render és a multiplayer megjelenítést is érinti, külön döntés.
 
 Döntés: az 1–5. lépés megvalósult, a 6. (követő kamera) nem része a hatókörnek.
+Indításkor támogatott érintőböngészőben a `requestLandscape()` teljes képernyőt és
+fekvő tájolást is kér. Ez nem garantált böngészőfunkció; hiba vagy hiányzó támogatás
+esetén a játék és a bezárható tipp marad.
 
 Megvalósítás:
 
@@ -412,9 +435,9 @@ Megvalósítás:
 
 ### Tipográfia / fontkészlet TODO
 
-Javaslat: **Oxanium** (UI és címek), **Orbitron** (logó), **Rajdhani** (HUD adatok). Mind
-SIL OFL 1.1 licencű. Ellenőrzött tény: az Orbitron csak `latin` subsetet tartalmaz, ezért az
-ő/ű karaktereket nem tudja megjeleníteni; csak ékezetmentes logófeliratra használható.
+Megvalósított fontkészlet: **Oxanium** (UI és címek), **Rajdhani** (HUD adatok), SIL OFL 1.1
+alatt. Az **Orbitron** korábbi opcionális logójavaslat, nincs a jelenlegi buildben;
+bevezetése esetén a választott csomag glyph/subset támogatását külön ellenőrizni kell.
 
 - [x] Döntés: Oxanium + Rajdhani; az Orbitron egyelőre nem kerül be (logó később, ha kell).
 - [x] Önálló hosztolás `@fontsource` csomagokkal (`latin` + `latin-ext`, csak a használt súlyok).
@@ -424,8 +447,9 @@ SIL OFL 1.1 licencű. Ellenőrzött tény: az Orbitron csak `latin` subsetet tar
 
 ### Meglévő technikai alap
 
-- A játékteret a Pixi engine rajzolja, a HUD-ot és a képernyőket React kezeli; a renderernek
-  már egyetlen, központi lifecycle-ja van.
+- A játékteret a Pixi engine rajzolja, a HUD-ot és a képernyőket React kezeli.
+  A Game rendererének és a ResultScreen külön dekorációs rendererének önálló lifecycle-ja
+  van; a dekoráció cleanupja nem pusztíthatja a Game megosztott erőforrásait.
 - A játéktér 1280×720 logikai méretben fut, és az ablakhoz aránytartóan skálázódik.
 - A környezet rétegzett, a mozgás reduced-motion módban kikapcsolható, a HUD és az eredmény
   képernyő mobil elrendezése is létezik.
@@ -433,7 +457,7 @@ SIL OFL 1.1 licencű. Ellenőrzött tény: az Orbitron csak `latin` subsetet tar
   fejlesztésvásárlás, visszavágó és főmenü művelet. A fejlesztések adatvezéreltek, a profilok
   offline mentése és az online vásárlások szinkronizálása is megvan.
 
-Ezért a terv megvalósítása **közepes ráfordítással, motor- és játékszabály-átalakítás nélkül
+Ezért a meglévő funkciók vizuális átrendezése **közepes ráfordítással, motor- és játékszabály-átalakítás nélkül
 megvalósítható**. A shop esetében főként vizuális illesztés és egy tartalmi pontosítás
 szükséges; a főmenü és az aktív játékképernyő komolyabb React/CSS elrendezési munkát igényel.
 
@@ -447,10 +471,10 @@ szükséges; a főmenü és az aktív játékképernyő komolyabb React/CSS elre
   jelenleg nyílbillentyűkkel történik, a célzási szög Ctrl+nyíllal állítható). Az új gombok és
   feliratok nem változtathatják meg észrevétlenül a meglévő vezérlést; a kiosztásról és az
   esetleges újrakötésről külön döntés és célzott teszt kell.
-- A főmenü most egyszerű overlay, benne offline/online indítással, nyelvváltással és
-  haladástörléssel. A redesign első implementációja ezeket sci-fi katonai panelbe rendezi;
-  a Beállítások nézet a nyelvváltót, a hangkapcsolót és a játékosnevek mezőit tartalmazza. Új profilfunkció
-  nem készül.
+- A főmenü sci-fi katonai overlay panel, offline/online indítással, Beállításokkal és
+  haladástörléssel. A Beállítások nyelvet, globális hangot, három hangcsatornát,
+  offline ellenfelet/AI-tapasztalattörlést és játékosneveket kezelnek.
+  Új profilképernyő nem készült.
 - A böngészős „Kilépés” nem zárható megbízhatóan programból; a menüpont jelenleg nincs
   implementálva, és egyelőre nem része a fejlesztési hatókörnek.
 - A kép a menüt és a játékmenetet egy kompozícióban mutatja. Megvalósítási alapfeltevésként
@@ -460,7 +484,11 @@ szükséges; a főmenü és az aktív játékképernyő komolyabb React/CSS elre
   Pixiben vannak, így az új grafika oda illeszthető anélkül, hogy az assetbe égetett szöveg
   vagy vezérlő kerülne.
 
-### Javasolt ütemterv
+### Korábbi vizuális implementációs becslés
+
+Az alábbi táblázat a már megvalósult menü/HUD-iteráció eredeti becslése, nem a következő
+fejlesztések aktív ütemezése. Az eredeti beállítási hatókör azóta játékosnevekkel,
+hangcsatornákkal és offline AI-választással bővült.
 
 Az alábbi becslések egy fejlesztővel, a meglévő komponensek és játékmenet megtartásával
 számolnak. Fejlesztői munkanapok, nem naptári idő; képi asset készítése és a döntési
@@ -484,7 +512,7 @@ Az első négy lépés a meglévő funkcionalitásra támaszkodva, új menüpont
 nélkül megvalósítható. Más billentyűzet-kiosztás csak külön kérésre készül. Az egyedi háttér
 jelenleg nincs a megvalósítás hatókörében; a meglévő játéktér marad a menü háttere.
 
-### Megvalósítási TODO
+### Lezárt menü/HUD-iteráció ellenőrzőlistája
 
 Az ellenőrzőlista az ütemterv sorrendjét követi. A `[!]` jelölés döntésre vagy külső assetre
 váró megállási pontot jelent; az ilyen feladatot jóváhagyás előtt nem implementáljuk.
@@ -497,7 +525,8 @@ váró megállási pontot jelent; az ilyen feladatot jóváhagyás előtt nem im
 - [x] Aktív HUD és vezérlők újraelrendezése a meglévő műveletekkel, fizika és vezérlési kiosztás módosítása nélkül.
 - [x] Döntés: a jelenlegi billentyűzet-kiosztás marad; a redesign nem változtatja meg.
 - [x] Döntés: egyelőre nem készül plusz főmenü-háttérkép; a meglévő játéktér marad a háttér.
-- [x] Záróellenőrzés desktopon, mobilon és nagyított nézetben; lokalizáció, fókusz, görgetés és reduced-motion.
+- [x] Korábbi záróellenőrzés desktopon, emulált mobilon és nagyított nézetben;
+  lokalizáció, fókusz, görgetés és reduced-motion.
 
 ### A meccs utáni bolt terve
 
@@ -518,30 +547,30 @@ váró megállási pontot jelent; az ilyen feladatot jóváhagyás előtt nem im
 - A terv képernyőjén a fejlesztéssorok sűrűbbek, ezért a meglévő mobil töréspont és a
   kis kijelzőn történő görgethetőség ellenőrzése szükséges.
 
-### Javasolt megvalósítási sorrend és elfogadási feltételek
+### Vizuális regressziós ellenőrzési sorrend és feltételek
 
 1. **Vizuális alapok és képernyőfolyam:** közös színek, tipográfia, panelek és gombállapotok;
-   a főmenü külön menü-, beállítás- és profilnézeteinek, valamint a menüpontok pontos
-   funkcióinak rögzítése. A meglévő offline/online indítás maradjon elérhető.
+   a meglévő menü-, beállítás- és lobby-nézetek megtartása. Profil- és Exit képernyő
+   nincs a hatókörben. A meglévő offline/online indítás maradjon elérhető.
 2. **Aktív játékképernyő:** a HUD és vezérlők újraelrendezése Reactben, a Pixi játéktér és
    fizikai koordináták módosítása nélkül. A jelenlegi műveletek, billentyűzetes vezérlés,
    lokalizáció és reduced-motion viselkedés maradjon működőképes.
 3. **Eredmény és bolt:** a meglévő komponensek referencia szerinti vizuális finomítása,
    az XP-felirat/jelentés tisztázása, az online jogosultság és szinkron megtartásával.
-4. **Ellenőrzés:** desktop, keskeny mobil és nagyított nézet; magyar és angol szöveg;
+4. **Ellenőrzés:** desktop, keskeny mobil és nagyított nézet; magyar, angol és német szöveg;
    offline és online meccs; egérrel és billentyűzettel végrehajtott vásárlás/vezérlés;
    eredményképernyőn hosszú lista és túlfutó tartalom.
 
-Új backend, külső UI-keretrendszer vagy játékszabály-módosítás a képek megvalósításához nem
-szükséges. A legfontosabb nyitott termékdöntés a menüben ígért profil/beállítás funkciók
-pontos tartalma; az XP-felirat eltérése pedig a shop fejlesztésének megkezdése előtt
-eldöntendő.
+A meglévő állapotok vizuális átrendezéséhez nem kell új backend vagy játékszabály.
+A referenciák új profil-/képességfunkciói viszont nem részei ennek a hatókörnek.
+A menüfunkciók alapvető hatóköre lezárt; a shop XP-feliratának eltérése nyitott szöveghiba.
 
 ## 6. Következő javasolt lépés
 
 A főmenü alapvető sci-fi megjelenése, a meglévő nyelv-/hangbeállítások külön nézete és az
 aktív HUD újraelrendezése elkészült. A fizika és a billentyűzet-kiosztás változatlan maradt.
-A desktop, mobil és nagyított nézet záróellenőrzése megtörtént; új háttérasset nem készült.
+A korábbi desktop, emulált mobil és nagyított nézet záróellenőrzése megtörtént;
+valós telefonos próba továbbra is nyitott. Külön főmenü-háttérasset nem készült.
 Egyedi háttér később, opcionálisan vehető fel a tervbe.
 
 A shop vizuális finomítása külön lépésként végezhető el, miután eldőlt, hogy az XP-felirat
@@ -549,3 +578,7 @@ elkölthető egyenleget vagy életút alatt szerzett összes XP-t mutasson.
 
 A collision- és rombolhatósági modell külön döntési fázis marad, mert az már a pálya
 stratégiáját és a ballisztikai szabályokat is megváltoztatná.
+
+A gameplay-fejlődési plafonra javasolt szektorok és modifikátorok nem ennek a tisztán
+vizuális iterációnak a részei; elemzésük a [gameplay-dokumentumban](./gameplay-progression.md),
+jóváhagyási státuszuk a [ROADMAP-ben](../ROADMAP.md) szerepel.

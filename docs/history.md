@@ -1,5 +1,22 @@
 # Fejlődési napló
 
+A dátumozott bejegyzések az adott iteráció történetét őrzik; egy korábbi tervet vagy
+hiányt későbbi bejegyzés felülírhat. Nem aktuális backlog és nem folyamatos tesztjelentés.
+Jelenlegi működés: [README](../README.md); aktív státuszok: [ROADMAP](../ROADMAP.md).
+
+## 2026-11-04
+
+- Kódbázis-alapú [gameplay- és fejlődési elemzés](./gameplay-progression.md) készült
+  a fejlődési plafonról; a szektor/modifikátor MVP ajánlás, nem implementált funkció.
+- A dokumentáció aktuális állításai egységesítve: hu/en/de nyelvek, fejleszthető
+  előnézet-töltetek, meglévő offline AI és érintésvezérlés, seedelt multiplayer-szél.
+- A helyi profilverzió és az online snapshot különválasztva; online szabályverziózás még nyitott.
+- A README párhuzamos checklistje helyett dokumentációs térkép készült; a lezárt vizuális
+  listák történeti státuszt kaptak, a valós telefonos próba továbbra is nyitott.
+- A városfények kész JPG-rétegei felülírják a korábbi új PNG-re váró tervet.
+- A shop összes XP-re utaló felirata továbbra is ismert UI-hiba; a dokumentáció
+  pontosítása nem módosította a játékkódot.
+
 ## 2026-11-03
 
 - Elkészült a parancsnoki konzol (`plans/solvyr-prime_siege_protocol_command_concolse.png` alapján): időbélyeges napló gépelési effekttel a HUD jobb oldalán.

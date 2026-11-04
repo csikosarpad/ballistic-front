@@ -1,22 +1,51 @@
 # Solvyr Prime: Siege Protocol – ütemterv
 
-Hosszú távú cél: sci-fi, Galaxy Tactics-hoz hasonló látvány (több karakter csapatonként, lebegő szigetek, képességek, erőterek, neon effektek). Ez több hónap, akár 1–2 év. A milestone-ok egymásra épülnek; mindegyik külön branchen és PR-ban készül.
+Hosszú távú cél: sci-fi, Galaxy Tactics-hoz hasonló látvány (több karakter csapatonként,
+lebegő szigetek, képességek, erőterek, neon effektek). A korábbi több hónapos, akár
+1–2 éves becslés tájékoztató nagyságrend, nem vállalt ütemezés.
+
+Ez a központi fejlesztési státusz- és döntési dokumentum. A milestone-azonosítók
+tematikus csoportok, nem kötelező végrehajtási sorrend; az M7 vizuális munkái például
+részben elkészültek az M2–M6 új játékmenete előtt. A tényleges függőségeket az adott
+implementáció előtt kell rögzíteni. A fejlesztések külön branchen és PR-ban készülnek.
+
+A jelenlegi használatot a [README](./README.md), a technikai korlátokat a
+[fejlesztői kontextus](./dev-notes.md), a történetet a [napló](./docs/history.md) írja le.
+A részletes designlisták saját részterületük leírásai, nem párhuzamos prioritási listák.
+Jelölések: `[x]` megvalósított vagy dokumentált korábbi ellenőrzés; `[ ]` nyitott feladat.
+A „javaslat” külön jóváhagyást igényel, és nem kész funkció.
+
+A fejlődési plafon kódbázis-alapú elemzése és a szektorok, környezeti modifikátorok,
+orbitális képességek, egységosztályok és kampány rangsora:
+[Játékmenet és hosszú távú fejlődés](./docs/gameplay-progression.md).
 
 ## Aktuális állapot (2026-11)
 
 - A ResultScreen, a HUD és a játéktér sci-fi katonai vizuális rendszere működik.
 - A játéktér rétegezett hátteret használ: csillagos ég, hegyek, atmoszféra, terrain és visszafogott szikla-dekorációk.
 - A terrain fizikája, a ballisztika, a szél és a multiplayer determinisztikus működése megmaradt.
-- A tank és a terep részletes SVG assetjei bekerültek; a fák és antennatornyok jelenleg nincsenek aktív pályadekorációként használva.
+- A ResultScreen részletes, rétegezett tank-SVG-t, a játéktér külön body/barrel asseteket használ.
+  A terep RenderTexture és pixelmaszk, nem SVG; aktív dekorációként szikla-SVG-k vannak,
+  a fa- és antennaassetek megmaradtak, de nincsenek a pályán.
 - A hangassetek OGG formátumra lettek optimalizálva; a hangrendszer jelenleg lövés-, robbanás- és tankmozgás-hangot kezel.
 - A röppálya-előnézet most játékosonként és meccsenként fejleszthető töltetekkel működik; a fejlesztés neve magyarul **Célzástámogatás**, angolul **Smart Aim**.
-- Elkészült a parancsnoki konzol: gépelési effektes taktikai napló, a közlések felolvasása Web Speech API-val (magyar/angol), győzelmi fanfár (egyelőre szintetizált) és a győztes bemondása. Offline módban a játékosnevek a Beállításokban állíthatók.
+- Elkészült a parancsnoki konzol: gépelési effektes taktikai napló, a közlések felolvasása
+  Web Speech API-val (hu/en/de, elérhető böngészőhangtól függően), szintetizált győzelmi
+  fanfár és a győztes bemondása. Offline a játékosnevek a Beállításokban állíthatók.
+- Offline AI és érintésbarát célzás működik; valódi telefonos ellenőrzés még hátravan.
+- Egy seedelt terepcsalád, két tank és hét összeadódó statfejlesztés van. Szektor,
+  modifikátor, orbitális képesség, egységosztály-választás és kampány még nincs.
 - A részletes UX- és hang-redesign következő lépései külön checklistként szerepelnek alább.
 
 ## Alapelvek
 
-- A játéklogika Reacttől független és determinisztikus; az online mód a közös seedre és az eseménynaplóra épül, ezért minden új mechanikának fix időlépésűnek és sorrendfüggetlennek kell lennie.
-- Új mező a mentésben vagy az upgrade snapshotban csak verziózott migrációval kerülhet be.
+- A fizikai logika Reacttől független; a Game koordinátor store-okhoz is kapcsolódik.
+  Az online szimuláció közös seedre és revision szerinti eseménysorrendre épül.
+  A fizika fix időlépésű, a körhatások logikai körhatárokhoz kötöttek; az eredmény
+  nem függhet renderidőtől vagy pollingütemtől. Az események nem sorrendfüggetlenek.
+- Új mező a mentésben csak migrációval kerülhet be. Online setup-/snapshotbővítéshez
+  külön verziózás és kompatibilitáskezelés szükséges; a jelenlegi profilboríték
+  `STORAGE_VERSION = 2` értéke csak helyi mentésverzió.
 - Az átnevezések külön, tisztán mechanikus commitban készülnek.
 - A hot-seat mód megmarad.
 
@@ -39,12 +68,13 @@ páncélzatú vagy akár más működési tartományú platformok is tartozhatna
 
 ## Designirány – Tipográfia
 
-Javasolt, ingyenes (SIL OFL 1.1) fontkészlet a modern military sci-fi hangulathoz:
+Megvalósított döntés: önállóan hosztolt **Oxanium + Rajdhani** (SIL OFL 1.1).
+Az Orbitron korábbi logójavaslat, jelenleg nincs telepítve vagy használva.
 
 | Szerep                   | Font         | Használat                        | Megjegyzés                                                     |
 | ------------------------ | ------------ | -------------------------------- | -------------------------------------------------------------- |
 | Elsődleges UI / címek    | **Oxanium**  | menü, panelcímek, gombok, shop   | `latin-ext` van: ő/ű támogatott                                |
-| Logó / nagy cím akcentus | **Orbitron** | „SOLVYR PRIME”, „SIEGE PROTOCOL” | csak `latin`: **nincs ő/ű**, ezért csak ékezetmentes feliratra |
+| Logó / nagy cím akcentus | **Orbitron (opcionális terv)** | Ékezetmentes logó, ha később indokolt | Nem része a jelenlegi fontkészletnek |
 | HUD adatok / kis méret   | **Rajdhani** | HP, pajzs, páncél, XP, szél      | `latin-ext` van; kis méretben jól olvasható                    |
 
 - Önálló hosztolás (pl. `@fontsource`) a Google Fonts CDN helyett: nincs külső kérés/GDPR-kockázat, offline is működik.
@@ -57,6 +87,20 @@ Javasolt, ingyenes (SIL OFL 1.1) fontkészlet a modern military sci-fi hangulath
 - A meglévő „páncél” fejlesztés (`armor`) a páncélpontokat adja; az azonosító megmarad, így a mentett szintek érvényesek.
 - A pajzsregeneráció (kezdeti érték: a maximum 20%-a körönként, `shieldRegen`) a statokban konfigurálható; külön fejlesztés még nincs rá. Ha az egységet a két köre között találat érte, abban a körben nem töltődik.
 - A T röppálya-előnézet alapból 1, a **Célzástámogatás / Smart Aim** szintenként +1 meccsenkénti töltetet ad; korlátlan előnézet nincs.
+- A profil XP-je elkölthető egyenleg. A shop „ÖSSZESEN SZERZETT XP” felirata nem ezt
+  tükrözi; ez ismert, nyitott UI-szöveghiba, nem létező életút-XP adat.
+- A vizuális Siege Platform-irány nem jelent új egységosztályt vagy fizikát.
+
+## Javasolt gameplay-prioritás – jóváhagyás előtt
+
+A [gameplay-elemzés](./docs/gameplay-progression.md) ajánlása: szektorok → egyszerű
+modifikátorok → korlátozott slotos orbitális támogatás → szárazföldi osztályok →
+single player szektorfoglalás, később roguelite kampány.
+
+A javasolt Sector Operations MVP három szektort és két modifikátort céloz, de a
+szektorfeloldás, XP-felhasználás és konkrét környezeti hatások még nyitott döntések.
+Ez nem előfeltételezi az M2 többegységes csapatait vagy az M5 lebegő szigeteit,
+és nem változtatja elfogadott specifikációvá a korábbi koncepciókat.
 
 ## Milestone-ok
 
@@ -67,9 +111,10 @@ Javasolt, ingyenes (SIL OFL 1.1) fontkészlet a modern military sci-fi hangulath
 - [x] Prettier konfiguráció (`.prettierrc.json`); a meglévő fájlok egységesítése még hátravan (`pnpm fmt`)
 - [x] Éles telepítés és smoke test új mappanevekkel
 - [x] Fejlesztések életszerűbb elnevezése és méterben megadott értékei
-- [x] Többnyelvűség (magyar/angol), `src/i18n`
+- [x] Többnyelvűség (magyar/angol/német), beépített katalógusok és helyőrzőtesztek
 - [x] UI skin alapja: a `ui.css` színei CSS változókban (`--bf-*`)
-- [x] Pixi `Theme` objektum (`src/game/theme.ts`): terep, égbolt, játékosok, HUD-sáv, lövedék és effektek színei
+- [x] Pixi `Theme` objektum (`src/game/theme.ts`): a terep, játékosok, tank fölötti sávok,
+  lövedék és effektek színeinek közös alapja; nem teljes háttér-/SVG-skinrendszer
 - [ ] Külső nyelvfájlok (`locales/<kód>.json`, `locales/index.json`): beépített katalógus a tartalék, kulcsonkénti felülírás, helyőrző-validáció, gyorsítótár, dinamikus nyelvlista
 - [ ] Külső skin JSON (csak színek és textúra-útvonalak, kódvégrehajtás nélkül)
 - [ ] Admin felület a fordításokhoz (API-ból; jogosultságkezeléssel), új nyelvek felvétele
@@ -77,11 +122,14 @@ Javasolt, ingyenes (SIL OFL 1.1) fontkészlet a modern military sci-fi hangulath
 ### M1 – Védelmi modell
 
 - [x] Sebzésfüggvény (pajzs, páncél) tesztekkel
-- [x] Pajzsregeneráció a turn managerben (a `beginTurn`-ben, a Game és a visszajátszási teszt is ugyanazt hívja)
+- [x] Pajzsregeneráció közös `regenTankShield` helperrel a Game és a headless replay
+  saját `beginTurn` folyamatában; nem a TurnManager belső funkciója
 - [x] Meglévő páncél-fejlesztés összevonása (az `armor` azonosító marad, mostantól fogyó páncélpont; új `shield` fejlesztés)
-- [x] HUD és tank fölötti kijelzés: külön HP-, pajzs- és páncélcsík (csak ha van), jelmagyarázat, letiltott T gomb használat után
+- [x] HUD gyűrűmérők és tank fölötti HP-/pajzs-/páncélcsíkok; pajzs/páncél csak
+  pozitív maximumnál. T gomb letiltása elfogyott töltet vagy zárolt vezérlés esetén
 - [x] Találat utáni kör: nincs pajzsvisszatöltés
-- [x] Profil- és snapshot-migráció verziószámmal (`STORAGE_VERSION`)
+- [x] Helyi profilmigráció verziózott borítékkal (`STORAGE_VERSION = 2`)
+- [ ] Online setup-/profilsnapshot szabály- és sémaverziózás; eltérő build kezelése
 - [ ] Értékek hangolása játékpróbával (pajzs/páncél +20 szintenként, 20% regeneráció); döntés az alap pajzsról/páncélról (most 0)
 
 ### M2 – Egységmodell
@@ -102,11 +150,14 @@ Javasolt, ingyenes (SIL OFL 1.1) fontkészlet a modern military sci-fi hangulath
 
 - [ ] Energia / akciópont körönként
 - [ ] Körszámláló és időkorlát
-- [ ] Képességek (3 slot)
+- [ ] Képességek korlátozott slotokkal; a korábbi 3 slot javaslat, a szám és az
+  akcióköltség a gameplay-specifikáció előtt eldöntendő
 - [ ] Környezeti veszély (meteorok, seedből generálva)
 - [x] **Célzástámogatás / Smart Aim** fejlesztés: alap 1, szintenként +1 előnézet-töltet
-- [x] Célzástámogatás-töltetek HUD-kijelzése magyar és angol nyelven
-- [x] Célzástámogatás-töltetek multiplayer- és visszajátszás-szinkronizációja
+- [x] Célzástámogatás-töltetek HUD-kijelzése magyar, angol és német nyelven
+- [x] Célzástámogatás szintje az online profilsnapshotban; meccskezdéskor ebből
+  inicializált töltetszám. Az előnézet aktiválása/fogyasztása helyi UI-állapot,
+  nem külön multiplayer-esemény és nem része a headless replay tesztnek
 
 ### M5 – Terep v2
 
@@ -114,10 +165,14 @@ Javasolt, ingyenes (SIL OFL 1.1) fontkészlet a modern military sci-fi hangulath
 - [ ] Egységek leesése, esési sebzés
 - [ ] Seedelt pályagenerátor-változatok
 
+Az egyszerű szektorprofilok nem igénylik a lebegő szigeteket vagy az esési sebzést;
+azok külön, későbbi terepmechanikák.
+
 ### M6 – Multiplayer v2
 
 - [ ] 3–4 játékos vagy csapatok
-- [ ] Újracsatlakozás
+- [x] Helyi session visszatöltése és eseménynapló újralekérése oldalfrissítés után (v1)
+- [ ] Újracsatlakozás továbbfejlesztése: fizikai checkpoint, lejárt/elhagyott session UX
 - [ ] Szerveroldali szabályellenőrzés, rate limit
 - [ ] Lejárt szobák automatikus takarítása
 
@@ -131,22 +186,22 @@ Javasolt, ingyenes (SIL OFL 1.1) fontkészlet a modern military sci-fi hangulath
 - [ ] Neon, additív blend (erőtér-villanás, pajzsbuborék)
 - [x] Parallax világűr-háttér: csillagköd-kép (`src/game/assets/backgrounds/siege-sky.jpg`, 126 KB), lassan sodródó köd- és csillagréteg, három halványodó hegyréteg légköri homállyal; reduced-motion esetén mozdulatlan
 - [ ] Sötét cyberpunk UI továbbfejlesztése
-- [ ] Hang-redesign: angle/power visszajelző hangok
-- [ ] Hang-redesign: target hit, terrain impact és missed hangesemények
-- [ ] Tank motorhang lazy loading és további mobil optimalizálása
+- [ ] Hang-redesign következő fázisai: eseményhangok, lazy loading, zeneválasztó,
+  hangerő, fanfár és beszédbeállítások; részletes státuszlista: [hangterv](./docs/sound-redesign.md)
 - [x] Parancsnoki konzol a HUD-ban (`CommandConsole`, `commandStore`): időbélyeges napló, gépelési effekt, reduced-motion esetén azonnali kiírás
 - [x] Parancsnoki felolvasás (`speech.ts`): `speechSynthesis`, nyelvenként férfi hang előnyben, mélyebb hangmagasság; némítás követi
 - [x] Győzelmi fanfár (szintetizált helyettesítő) és „A csatát {név} nyerte!" bemondás
 - [x] Játékosnevek a Beállításokban (offline), online a lobbynév az erősebb
 - [x] Háttérzene (alap: energysound „Cyberpunk Neon City"); zene, parancsnok és effektek külön ki/be kapcsolható a Beállításokban
-- [ ] Zeneválasztó és hangerőszabályzók a Beállításokban
-- [ ] Zene- és hangeffekt-licencek ellenőrzése publikálás előtt (Pixabay Content License, Freesound források fájlonként), „Kreditek" nézet
-- [ ] Valódi győzelmi fanfár hangfájl (OGG) bekötése, a bemondás késleltetésének igazítása
-- [ ] Parancsnoki beszéd beállításai: hang kiválasztása, sebesség és mélység (`VoiceSettings` már támogatja), közlések gyakorisága / felülírható szövegek, „Tűzparancs!" visszakötése (késleltetett lövéssel, online szinkron mellett)
+- [ ] Assetlicencek és fájlonkénti források ellenőrzése következő publikálás előtt,
+  „Kreditek” nézet; a korábbi telepítés nem helyettesíti ezt az ellenőrzést
 - [ ] Eredményképernyőn is látszó győzelmi közlés
+- [ ] Shop XP-feliratának javítása az elkölthető egyenleghez; életút-XP csak külön adatmodelldöntéssel
 - [x] Offline AI-ellenfél (tank): beállítás szerint a P2-t gép vezérli (szimulációval célzó, hibázó, tanuló, fejlesztéseit maga választó); lásd `src/game/systems/ai.ts`
 - [x] Rendfokozat külön skálán, csillagokkal (0–5) a HUD-on mindkét játékosnál (a tankon nem fér el)
-- [ ] AI finomhangolás: nehézségi szint választása, az AI közléseinek (`announce`) megjelenítése, fegyverváltás, ha lesz több fegyver
+- [ ] AI finomhangolás: nehézségi szint választása, új képességek/osztályok értékelése,
+  fegyverváltás, ha lesz több fegyver. Az AI harci közlései már megjelennek a konzolon;
+  külön „AI ONLINE” / „VOICE ACTIVE” állapotjelző még nincs
 
 ### M7b – Látványugrás: „orbitális sci-fi hadviselés" (PixiJS 8)
 
@@ -175,17 +230,22 @@ Alapelv: nem új UI-elemek, hanem a meglévő képernyők „megélénkítése".
 - [ ] Orbitális csata a háttérben: flottaágyúk, védelmi állomások, pályán kívüli tüzek villanása (csak atmoszféra, nem játékelem)
 
 Döntések (rögzítve):
-- `pixi-filters`: **igen**. Első körben csak BloomFilter, GlowFilter, szükség esetén AdjustmentFilter (terepvonal, lövedéknyom, HUD-panelek, aktív gomb).
+- `pixi-filters`: **igen**. Jelenleg `AdvancedBloomFilter` a terrainen; a HUD glow CSS,
+  a lövedéknyom additív rajzolás. GlowFilter/AdjustmentFilter használata nem kész funkció.
 - GSAP: **nem**. Menü fade-in, panel slide-in, XP számláló, győzelmi banner CSS-sel vagy Pixi tickerrel megoldható; akkor kerül elő, ha kameramozgás, cinematic intro vagy komplex cutscene lesz.
 - Bloom: asztalon erősség 1.2 / blur 8; mobilon 0.4 / blur 2, vagy teljesen ki „Alacsony minőség" módban (új beállítás).
 - Külön bolygó-grafika: **nem**, a háttérkép bolygója marad.
-- Városfény-réteg: **igen**, egyetlen új asset: `city_lights_overlay.png` (arany fények, várospöttyök, ipari zónák; átlátszó háttér), alpha 0,85↔1,0 lassú pulzálással (reduced-motion esetén fix). **Kép kell hozzá.**
+- Városfény-réteg: **kész**, `siege-city-glow.jpg` és `siege-city-lights.jpg` additív
+  rétegekkel. A korábbi `city_lights_overlay.png` javaslatot ezek váltották fel;
+  további PNG-re nincs várakozás.
 - Hatás szerinti sorrend: 1. gameplay háttér (kész), 2. bloom a terepre, 3. bloom a HUD-ra, 4. lövedéknyom, 5. screen shake találatkor.
 
-Döntési pontok: nincs nyitott; a városfény-PNG-re várunk.
+Nyitott feladatok: alacsony minőség kapcsoló, további shader-/hologram-effektek.
+A városfény-asset kérdése lezárt. Az orbitális háttérlátvány nem orbitális gameplay-képesség.
 
 ### M8 – Galaxy Tactics-szintű látvány (hosszú táv)
 
 - [ ] Animált karakterek (skeleton alapú)
 - [ ] Shaderek, kamera, hangdizájn
-- [ ] Gamepad és érintésvezérlés
+- [x] Érintésvezérlés alapja (M7); valós telefonos próba még nyitott
+- [ ] Gamepad és további kameravezérlés
