@@ -1,19 +1,20 @@
 import { useCallback } from "react";
 import { create } from "zustand";
+import { de } from "./messages.de";
 import { en } from "./messages.en";
 import { hu, type MessageKey } from "./messages.hu";
 
-export type Locale = "hu" | "en";
+export type Locale = "hu" | "en" | "de";
 export type { MessageKey };
 export type Params = Record<string, string | number>;
 
-export const LOCALES: readonly Locale[] = ["hu", "en"];
-export const LOCALE_LABELS: Record<Locale, string> = { hu: "Magyar", en: "English" };
+export const LOCALES: readonly Locale[] = ["hu", "en", "de"];
+export const LOCALE_LABELS: Record<Locale, string> = { hu: "Magyar", en: "English", de: "Deutsch" };
 
 const STORAGE_KEY = "ballistic-front:locale";
-const catalogs: Record<Locale, Record<MessageKey, string>> = { hu, en };
+const catalogs: Record<Locale, Record<MessageKey, string>> = { hu, en, de };
 
-const isLocale = (value: unknown): value is Locale => value === "hu" || value === "en";
+const isLocale = (value: unknown): value is Locale => value === "hu" || value === "en" || value === "de";
 
 /** Mentett nyelv, különben a böngésző nyelve (magyar vagy angol). */
 function detectLocale(): Locale {
@@ -23,7 +24,11 @@ function detectLocale(): Locale {
   } catch {
     // A localStorage nélkül a böngésző nyelve dönt.
   }
-  return typeof navigator !== "undefined" && navigator.language?.toLowerCase().startsWith("hu") ? "hu" : "en";
+  if (typeof navigator === "undefined") return "en";
+  const browserLocale = navigator.language?.toLowerCase();
+  if (browserLocale?.startsWith("hu")) return "hu";
+  if (browserLocale?.startsWith("de")) return "de";
+  return "en";
 }
 
 function applyDocumentLanguage(locale: Locale): void {

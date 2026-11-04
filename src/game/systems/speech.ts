@@ -1,6 +1,6 @@
-export type SpeechLocale = "hu" | "en";
+export type SpeechLocale = "hu" | "en" | "de";
 
-const LANG_TAG: Record<SpeechLocale, string> = { hu: "hu-HU", en: "en-US" };
+const LANG_TAG: Record<SpeechLocale, string> = { hu: "hu-HU", en: "en-US", de: "de-DE" };
 
 export function speechSupported(): boolean {
   return (
