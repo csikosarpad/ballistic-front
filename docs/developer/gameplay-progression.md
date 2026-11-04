@@ -32,6 +32,11 @@ felszerelési összeállítás. A játékosok végül ugyanahhoz a maximális st
 modifikátor közös MVP-je. Ehhez horizontális feloldásokat érdemes kapcsolni:
 a változatosabb pályák önmagukban nem oldják meg az elkölthetetlen XP problémáját.
 
+**Campaign Map kiegészítés:** könnyű, helyileg mentett útvonaltérkép már a szektor-MVP
+körül bevezethető, orbitális képességek és új osztályok nélkül. Ez nem azonos a későbbi
+stratégiai szektorfoglalással. Megvalósíthatósága és fokozatos hatóköre a
+[10. fejezetben](#10-campaign-map--sector-progression-megvalósíthatóság) szerepel.
+
 ## 2. A jelenlegi fejlődési rendszer
 
 A [fejlesztési definíciók](../../src/game/data/upgrades.ts) alapján:
@@ -216,6 +221,11 @@ osztályok közötti érvényességét és a profilban tárolt osztályválaszt�
 
 ### 5.5. Kampány és szektorfoglalás
 
+Két külön méretű fejlesztésről van szó: a Campaign Map egy csatákat összekötő,
+mentett útvonalréteg; a stratégiai szektorfoglalás ennél több, tartós hadjáratszabály.
+Az egyszerű térképnek nem előfeltétele az orbitális támogatás vagy az egységosztályok.
+A korábbi 20–40 napos becslés a tágabb hadjáratra vonatkozik, nem egy statikus térképre.
+
 Először könnyű single player stratégiai réteg:
 
 - következő célpont kiválasztása;
@@ -338,3 +348,216 @@ tartós célt biztosíthat a már változatos csatáknak.
 
 További statok helyett olyan rendszerekbe érdemes befektetni, amelyekben a játékos
 nem mindent megszerezve ér célba, hanem új helyzetekhez új összeállítást választ.
+
+## 10. Campaign Map / Sector Progression megvalósíthatóság
+
+### 10.1. Értékelés: jó irány, de a térkép és a kampány nem ugyanaz
+
+A javaslat erős: láthatóvá teszi a játékos útját, célt ad a következő csatának,
+és a már bevezetett szektoridentitást használja. Új fegyverrendszer nem szükséges.
+Egy statikus, elágazó térkép kevés assettel, a jelenlegi React/Pixi környezetben
+megvalósítható; a jelentős költség a mögöttes állapot-, csata- és jutalomszabály.
+
+| Szempont | Értékelés |
+| --- | --- |
+| Implementációs költség | Kis–közepes a térkép és helyi haladás; nagyobb az eltérő szektorfizika, jutalmazás és stratégiai hadjárat |
+| Kódbázisra gyakorolt hatás | Új képernyő, kampányállapot és meccskontextus; nem szükséges engine-újraírás |
+| Újrajátszhatóság | Az útvonalválasztás és eltérő csaták növelik; az egyszer kipipált térkép újabb véges plafon |
+| Fenntarthatóság | Jó, ha statikus definíció, mentett haladás és csataeredmény különül el, közös szabályfeloldással |
+| Multiplayer | Offline MVP a legolcsóbb; a szektoros PvP újrahasználható, a közös kampány külön termékhatókör |
+| AI | Meglévő harci AI használható; stabil kampánynehézséghez külön policy kell, stratégiai AI később |
+| Solvyr Prime identitás | Nagyon erős: műveletek, útvonalak, fenyegetés és fővárosi célpont; a lore-t a játékszabályok támasszák alá |
+
+**Javasolt MVP:** öt csomópontos, enyhén elágazó offline hadművelet P1 vs AI,
+helyi mentéssel, egyszerű feloldási szabályokkal. A térkép öt célpontja használhat
+három terepprofilt; öt csomópont nem jelent automatikusan öt egyedi pályát.
+Az eltérő tartalmat és az ismétlődő profilt a leírás jelezze.
+
+Ez módjavaslat, nem elfogadott viselkedésváltozás. A hot-seat és online játék
+maradjon külön **Skirmish / gyors csata** útvonalon; ne kelljen minden játékosnak
+kampányt teljesítenie egy egyszerű mérkőzéshez.
+
+### 10.2. Fejlesztési lépcsők: egyszerűtől a bonyolultabbig
+
+A napok nettó fejlesztői becslések célzott tesztekkel, nem vállalt határidők.
+A C1–C4 sorok az előző lépcsőre épülő többletmunkát jelölik, nem teljes projektköltséget.
+A szektorok/modifikátorok elkészítése a 4. és 6. fejezet külön munkája, nem számolandó
+kétszer. Végleges assetek és hosszabb balansziteráció nincsenek a becslésben.
+
+| Lépcső | Hatókör | Függőség | Többletköltség | Mit ad / mit nem ad? |
+| --- | --- | --- | ---: | --- |
+| C1 – Térkép-prototípus | 5 statikus pont, kapcsolatok, kijelölés, kártya, vissza a menübe; React + SVG | Stabil szektorkatalógus és navigáció | 2–4 nap | UX és világérzet; nincs valódi teljesítés, feloldás vagy kampányjutalom |
+| C2 – Helyi haladás | P1 vs AI csatakontextus, mentés, győzelem utáni teljesítés, következő célpont; először egyszerű lánc | C1, meccsindítás/-lezárás bekötése | 4–7 nap | Működő kampányváz, meglévő harci XP-vel; új fizika és bónuszjutalom nélkül |
+| C3 – Elágazó művelet | Statikus irányított gráf, útvonalválasztás, első teljesítéshez kötött feloldás/jutalom | C2, feloldás- és jutalomszabályok | 2–4 nap | Érdemi célválasztás; még nincs erőforrás-háború vagy ellenfél-területfoglalás |
+| C4 – Eltérő szektorcsaták | Közös szabálykonfig, kontrollált AI-nehézség, valós kártyaadatok, TTS és opcionális térkép-VFX | C3 és Sector Operations alapok | 5–10 nap | Taktikailag eltérő csaták; nem szükséges új fegyver vagy osztály |
+| C5 – Stratégiai hadjárat | Küldetések, ellenséges ellenlépések, erőforrások, tartós veszteségek | C4 és külön design | 20–40 napos teljes hadjárat-nagyságrend, a meglévő részek beszámítandók | Új stratégiai játék, nem térkép-polish |
+| C6 – Közös online kampány | Közös tulajdon, tartós szerverállapot, konfliktuskezelés, hitelesített eredmény/jutalom | Külön backend- és termékspecifikáció | Jelen adatokból nem becsülhető megbízhatóan | Nem következik a jelenlegi kétfős lobbyból |
+
+**Javasolt végrehajtás:** szektorkatalógus → C1 → C2 → C3, a valóban eltérő
+pályák/modifikátorok fejlesztésével összehangolva → C4. A végleges elrendezés már C1-ben
+lehet ágas, miközben a feloldási logika C2-ben még lineáris. Az „ágas” térképhez
+nem kell procedurális generátor, stratégiai AI vagy teljes kampányrendszer.
+
+### 10.3. Konkrét architekturális kapcsolódások
+
+- Az [App](../../src/App.tsx) most menüt és játékot jelenít meg; az eredmény a játék
+  `gameOver` fázisa. A [store](../../src/game/state/gameStore.ts) `Screen` típusa csak
+  `menu | playing`. Új `campaignMap` képernyő és külön kampány-/gyorscsata-mód kell.
+- A [MainMenu](../../src/ui/MainMenu.tsx) most közvetlenül indít offline/online meccset.
+  A kampánygomb térképre menjen, a gyorscsata meglévő folyamatát ne cserélje le.
+- A [GameCanvas](../../src/ui/GameCanvas.tsx) az App alatt folyamatosan él.
+  A térkép megnyitása önmagában nem állítja le a
+  [Game](../../src/game/engine/Game.ts) AI-időzítőit. Térképre visszatéréskor csatazárás
+  vagy explicit elhagyási szabály kell, ne csak egy takaró overlay.
+- Az [alap szektor](../../src/game/data/sectors.ts) közös névdefiníció, de nincs
+  kiválasztott pálya a meccsben. A menü, briefing és HUD jelenleg ezt az állandót használja.
+  Kampányban mindháromnak a tényleges művelet/meccs szektorából kell olvasnia.
+- A [ResultScreen](../../src/ui/ResultScreen.tsx) bemutatja az eredményt és boltot,
+  de ne itt, rendereléskor történjen jutalmazás. A meccs lezárása adjon egyszer
+  feldolgozott eredményt a kampánylogikának; a képernyő ezt csak megjelenítse.
+- A [profil](../../src/game/systems/upgrades.ts) XP-t és szinteket tárol.
+  A [verziózott mentés](../../src/game/systems/profileStorage.ts) újrahasználható minta,
+  de nincs kampányadat és több tároló közti tranzakció. A „Mentés törlése” kampányra
+  gyakorolt hatását is specifikálni kell.
+- A [MatchSetup](../../src/game/systems/seededRandom.ts) csak seed/starterIndex.
+  Az offline kampányhoz helyi meccskontextus szükséges; online pályaválasztás csak
+  verziózott, közösen ellenőrzött setupbővítéssel kerülhet be.
+
+### 10.4. Adatmodell és feloldás
+
+A javasolt `Sector { completed, unlocked, connections }` prototípushoz elég,
+de a tartalomdefiníciót és a játékos haladását összekeveri. Célszerű három rész:
+
+| Réteg | Javasolt adatok |
+| --- | --- |
+| Statikus definíció | Kampány-ID/verzió, szektor-ID, megjelenített kód/név, helyzet a térképen, irányított kapcsolatok, belépési feltétel, csataszabály-hivatkozás |
+| Mentett haladás | Sémaverzió, kampány-/tartalomverzió, teljesített szektorok, kiválasztott célpont, elszámolt meccs-/jutalomazonosítók |
+| Aktív csata | Stabil meccs-ID, mód, szektor, seed, szabálykonfig, játékosi oldal és lezárási státusz |
+
+A `completed` a mentett teljesítésből, az `available/locked` a gráfból és
+előfeltételekből legyen levezetve, ne három egymástól független mentett boolean.
+Az „aktuális” csak kijelölés: egy teljesített szektor is lehet újra kiválasztva.
+A kártya státusza és a kijelölés vizuális kiemelése ne írja felül egymást.
+
+Elágazáskor két külön döntés:
+
+- **OR/AND:** a főváros megnyílik egy bevezető ág vagy minden szükséges ág teljesítésével?
+- **Szabad választás/ágkizárás:** a másik ág később bejárható, vagy a választás végleges?
+
+Elsőként statikus, körmentes gráf és szabad ágbejárás ajánlott, egyértelmű OR/AND
+feltételekkel. Gráfellenőrzés: egyedi ID, létező célpontok, elérhető végpont,
+nincs véletlen ciklus vagy feloldhatatlan csomópont.
+Visszavágó legyen új meccs-ID ugyanazon szektoron; vereség/döntetlen ne foglaljon területet.
+
+### 10.5. Haladás és jutalmak: nem csak feliratok
+
+- A `Progress: 1 / 12` jelentése tisztázandó. Ajánlott külön **teljesített N / összes**
+  és **kiválasztott művelet**. Az ALPHA kijelölése még nem teljesítés; induláskor 0/N.
+  A nevező a kampánydefinícióból jöjjön, ne kézzel rögzített 12 legyen.
+- `PROTOCOL COMPLETE / SECTOR ... SECURED` csak kampánygyőzelemkor jelenjen meg.
+  Az első teljesítést és az ismételt győzelmet különítse el a rendszer.
+- `NEW ROUTE DISCOVERED` csak akkor igaz, ha a lezárás új elérhető útvonalat nyitott.
+  Vereségnél legyen újrapróbálás/térkép; a végső szektor után kampányzáró állapot.
+- A minták `+350 XP` és `+150 XP` értékei nem balanszdöntések. Most a
+  [Game](../../src/game/engine/Game.ts) már harc közben ad sebzés-XP-t és +50 győzelmi XP-t.
+  A kampánybónuszt külön kell megjeleníteni és elszámolni, nem újra kiosztani a meccs-XP-t.
+- **C2-ben ne legyen új bónusz.** C3-ban első teljesítéshez kötött egyszeri jutalom ajánlott,
+  külön szabállyal arra, mit ad a replay és a kampányreset; XP-grind és dupla jutalom nélkül.
+- `+1 Smart Aim` jelenthet állandó szintet, következő csatás töltetet vagy feloldást.
+  Ezek eltérő rendszerek. Állandó szintnél a 3-as plafon, maxos profil kompenzációja
+  és AI-vásárlás; ideiglenes töltetnél külön csatakonfig és élettartam szükséges.
+  Döntésig a kártya ne ígérjen ilyen jutalmat.
+
+Frissítés, ResultScreen-remount, ismételt eredménykézbesítés és mentés közbeni hiba
+nem adhat másodszor jutalmat. Ha XP és kampányhaladás külön localStorage-kulcsban él,
+az „XP elmentve, teljesítés még nem” megszakítás duplázást okozhat.
+Az érintett adatokat egy verziózott elszámolási egységben vagy helyreállítható
+eredményrekorddal kell kezelni; sima két egymás utáni `setItem` nem tranzakció.
+Meglévő profilokhoz kezdeti üres kampányhaladás tartozzon, korábbi XP elvesztése nélkül.
+Ez helyi megbízhatóság, nem csalásbiztos online gazdaság.
+
+### 10.6. Szektorcsaták és AI: olcsóbbtól a drágábbig
+
+| Eltérés | Megvalósíthatóság | Korlát / kötelező bekötés |
+| --- | --- | --- |
+| Leírás, háttérpaletta, rétegek | Olcsó | Látvány, nem taktikai különbség; új assetek gyártása külön költség |
+| Terepprofil | Kis–közepes | Biztonságos spawn, collision/rombolás, járhatóság és találati lehetőség |
+| Állandó vagy korlátozott szélprofil | Közepes | Körkezdet és közös seed; a HUD/előnézet/AI a valós szabályt használja |
+| Egyszerű AI-nehézség | Közepes | Beállított skill és ellenfélprofil; ne pusztán a helyi AI-memória rejtett növekedése |
+| 85%-os gravitáció | Közepes | 600 × 0,85 = 510 px/s² az alaphoz képest; lövedék, előnézet, Smart Aim, AI-lövés és mozgástervezés együtt |
+| Új AI-viselkedés | Közepes–nagy | Agresszív/defenzív/helyezkedő policy új döntési logika, nem csak pontossági csúszka |
+| Stratégiai ellenfél a térképen | Nagy | Célpontválasztás, ellenlépések és hadjáratszabályok; a harci AI nem oldja meg |
+
+Az [AI](../../src/game/systems/ai.ts) már fogad gravitációt, de a Game az alapértéket adja.
+Az alacsonyabb gravitáció hosszabb röppályát okozhat: a keresés időhorizontja,
+pályaelhagyás és önveszélyes lövések is tesztelendők, nem elég az érték átírása.
+A csillagos nehézség csak valódi, tesztelt konfigurációból legyen képezve.
+A kampány AI-memóriájának megosztása vagy leválasztása külön döntés: különben ugyanaz
+a szektor korábbi gyorscsaták miatt észrevétlenül nehezebb lehet.
+
+### 10.7. Térkép-UX, mobil, animáció és TTS
+
+Elsőként **React gombok + statikus SVG kapcsolatok** ajánlott: öt–tíz pontnál
+nincs szükség külön Pixi rendererre, pan/zoom motorra vagy új könyvtárra.
+A holografikus cyan/arany stílus a meglévő fontokkal és CSS-tokenekkel kialakítható.
+Pixi fényimpulzusok későbbi dekorációként készülhetnek; ne érintsék a feloldási szabályokat.
+
+- Teljesített: cyan jelölés; kijelölt: arany keret/csillag; elérhető: halvány cyan;
+  zárolt: tompa kék. Felirat/ikon is különböztesse meg őket, ne csak szín vagy pulzálás.
+- A zárolt pont részletei megtekinthetők, de a csataindító legyen tiltott,
+  kiírt feloldási feltétellel. Billentyűzetes fókusz és képernyőolvasós státusz szükséges.
+- Mobilon a térkép ne üljön rá a csatatér HUD-jára: saját képernyő, kompakt részletkártya,
+  látható indító/vissza gomb, megfelelő érintési célméret. Álló módban lista vagy
+  tördelhető térkép is elfogadható; a harc tájolási tippje ne fedje le ezt a nézetet.
+- Reduced-motion esetén se csomópont-pulzálás, se futó útvonalimpulzus.
+  A befejezettség animáció nélkül is felismerhető maradjon.
+- A Sector Card csak alkalmazott adatot mutasson: név, státusz, fenyegetés,
+  tereptípus, gravitáció/szél és tényleges jutalom. Ne legyen kitalált atmoszféraérték.
+- A főmenü `CURRENT OPERATION` adata a kampány kiválasztott művelete, míg
+  gyorscsatában a kiválasztott harctér. A két fogalom ne keveredjen.
+
+A [speech](../../src/game/systems/speech.ts) és
+[commandStore](../../src/game/state/commandStore.ts) újrahasználható, de a térkép
+közléseit nem szükséges a harci naplóban tárolni. Hu/en/de szöveg, globális mute,
+voice kapcsoló és támogatás nélküli szöveges működés kell.
+TTS csak tényleges belépés/kijelöléskor, nem renderenként vagy hoverenként;
+gyors választásoknál az elavult bemondás törlendő. A térkép elhagyásakor ne lógjon
+bele a csata beszédébe. A „Delta Zero Three” kiejtés nem garantált a kód automatikus
+felolvasásával; külön beszédszöveg indokolt. A TTS nem előfeltétele C1–C3-nak.
+
+### 10.8. A tanács pontosítandó részei
+
+- Az eddigi **DELTA-08 / Crystal Basin** helyett a mintában DELTA-03 szerepel.
+  **VANGUARD-12 / Defense Grid** helyett GRID-09 / Defense Network.
+  Jelenleg egyik jelölt sem játszható; a katalógus véglegesítésekor kell dönteni.
+  Addig a TODO korábbi nevei maradnak, új ID nem kerül a kódba.
+- Az eddigi lista 10 nevet ad, a főmenüminta 12-t jelez, a lineáris példa 6 szektort,
+  az MVP 5–10-et. Ezek nem azonos vállalások. Az ötcsomópontos kezdés javaslat;
+  a végleges darabszámot és gráfot implementáció előtt kell elfogadni.
+- A „galaktikus kampány” Solvyr Prime bolygószektoraihoz képest nagyobb lépték.
+  Elsőként planetáris/orbitális **műveleti hálózat** ajánlott csillagtérképes esztétikával,
+  tényleges többbolygós utazás és új világkánon nélkül.
+- A gravitációkülönbség ugyanazon bolygón lore-indoklást igényel.
+  A képernyőpéldák nem igazolják, hogy ilyen szabály már működik.
+
+### 10.9. Elfogadási kapuk és ajánlás
+
+Mielőtt a következő lépcső késznek minősül:
+
+- C1: minden pont és feltétel olvasható, mobilon/billentyűzettel használható;
+  a prototípus nem állít nem létező teljesítést vagy jutalmat.
+- C2: győzelem, vereség, döntetlen, visszavágó, menübe visszalépés és refresh
+  következetes; a régi XP/szintek megmaradnak; a háttérben nem fut elhagyott AI-csata.
+- C3: OR/AND, ágbejárás és végpont tesztelt; első teljesítés/replay/reset szabály
+  explicit; ismételt eredmény és félbeszakadt mentés nem dupláz jutalmat.
+- C4: kártya és tényleges csataszabály egyezik; AI/előnézet/találat ugyanazt a fizikát
+  használja; a szektoros PvP-bővítéshez a meglévő replay-/szinkrontesztek is bővülnek.
+- Online kampány: külön jóváhagyott szerveroldali tulajdon- és eredménykezelés nélkül
+  helyi kampányadat ne váljon hitelesített multiplayer-jutalommá.
+
+**Legjobb ár-érték arány:** kis, ágas helyi műveleti térkép valódi csatakapcsolattal,
+majd a Sector Operations eltérő terepeivel és szabályaival. Ezt érdemes előrébb hozni
+a teljes hadjárathoz képest, de nem egyből 12 szektorral, Pixi térképmotorral,
+Smart Aim-jutalmakkal és közös online kampánnyal indítani.
+Az XP-plafont a térkép önmagában nem szünteti meg; látható célt ad, amelyet később
+horizontális feloldások és valóban különböző taktikai helyzetek tesznek tartóssá.

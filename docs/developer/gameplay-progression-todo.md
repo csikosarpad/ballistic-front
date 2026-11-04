@@ -28,7 +28,72 @@ fordítást kapnak. Az alap pálya fizikája, terepgenerálása és assetjei nem
 Ez még nem többpályás rendszer és nem oldja meg az XP-plafont.
 Pályaválasztás, új fizikai szabályok és feloldások nincsenek az első iterációban.
 
-## 2. Sector Operations MVP – következő csomag
+## 2. Campaign Map – fokozatos, még nem jóváhagyott bővítés
+
+A [megvalósíthatósági elemzés](./gameplay-progression.md#10-campaign-map--sector-progression-megvalósíthatóság)
+C1–C4 lépcsői. A térképváz korábban elkészülhet, mint az orbitális képességek vagy
+osztályok; nem azonos a 6. pont teljes stratégiai hadjáratával.
+A szektorkatalógus és közös konfiguráció a 3. ponttal megosztott munka, nem új párhuzamos rendszer.
+
+### Döntési kapuk – implementáció előtt
+
+- [ ] Offline P1 vs AI kampány és külön megmaradó hot-seat/online gyorscsata jóváhagyása.
+- [ ] Első csomópontok száma és nevei: javasolt 5; a példák 6/10/12 darabja nem vállalás.
+- [ ] DELTA-08 vs DELTA-03, VANGUARD-12 vs GRID-09 elnevezések véglegesítése.
+- [ ] Planetáris/orbitális műveleti hálózat vagy tényleges többbolygós kampány?
+- [ ] Statikus irányított gráf; OR/AND feloldás és szabad vagy végleges ágkizárás.
+- [ ] Kampány tulajdonosa, AI-memória/ellenfélprofil, vereség/döntetlen, elhagyás és újrapróbálás.
+- [ ] Progress jelentése: teljesített/összes; kijelölés ne számítson teljesítésnek.
+- [ ] Kampányreset és meglévő „Mentés törlése” hatása XP-re, haladásra és jutalmakra.
+
+### C1 – Térkép-prototípus
+
+Függőség: végleges katalógus és navigációs döntés. Nem ad kampányjutalmat.
+
+- [ ] Új térképképernyő és menübelépés; meglévő gyorscsata indítása változatlan.
+- [ ] React gombok + SVG útvonalak, cyan/arany stílus; külön Pixi térképmotor nélkül.
+- [ ] Kijelölés, valós részletkártya, zárolási feltétel, vissza gomb.
+- [ ] Billentyűzet, képernyőolvasó, érintési méretek, álló/fekvő mobil és reduced-motion próba.
+
+### C2 – Mentett kampányváz
+
+Függőség: C1 és offline csatakontekstus. Nincs új fizika vagy extra XP-jutalom.
+
+- [ ] Definíció, haladás és aktív csata külön adatai; séma-/tartalomverzió, stabil meccs-ID.
+- [ ] Meccsindítás a térképről, kampányhoz rendelt szektor és P1/AI szerepek.
+- [ ] Menü/current operation, briefing és HUD a tényleges kontextusból.
+- [ ] Egyszer feldolgozott csataeredmény; render/remount ne módosítsa a haladást.
+- [ ] Győzelem utáni teljesítés, vereség/döntetlen utáni újrapróbálás; térképre visszatérés.
+- [ ] ResultScreen kampánygomb és valós secured/new route jelzések.
+- [ ] Mentés, kezdeti üres kampány a régi profil mellé, kompatibilitási és tárolási hibajelzés.
+- [ ] Térképre/menübe visszatérés lezárja az elhagyott csatát és AI-időzítőit.
+- [ ] Tesztek: mentés-visszatöltés, duplikált eredmény, vereség, döntetlen, visszavágó, reset.
+
+### C3 – Elágazó művelet és jutalmazás
+
+Függőség: C2 és elfogadott gráf-/jutalomszabályok.
+
+- [ ] Körmentes gráf validálása, OR/AND feltételek, elérhető végpont és ágbejárás.
+- [ ] Teljesített/elérhető/zárolt állapot levezetése; aktuális kijelölés külön kiemelés.
+- [ ] Kampányvége, korábbi csaták replay-e és ténylegesen új útvonal jelzése.
+- [ ] Egyszeri kampánybónusz döntése, elkülönítve a meglévő sebzés- és győzelmi XP-től.
+- [ ] „+1 Smart Aim” pontos jelentése, szintplafon és maxos profil kezelése, vagy elhagyása.
+- [ ] XP + haladás ismétlésbiztos mentési egysége/helyreállítása; félbeszakadt írás tesztje.
+- [ ] Játékpróba: az útvonalválasztás érdemi, nem csak ágas rajz?
+
+### C4 – Változatos csaták és opcionális polish
+
+Függőség: C3 és a 3. pont szektor-/szabályalapjai.
+
+- [ ] Öt csomópont / három terepprofil összerendelése vagy más elfogadott tartalomcsomag.
+- [ ] Valós nehézség, gravitáció/szél, tereptípus és jutalom a kártyán.
+- [ ] Kontrollált kampány-AI policy; a nehézség ne függjön észrevétlenül korábbi gyorscsatáktól.
+- [ ] Közös fizika ellenőrzése lövedék/előnézet/Smart Aim/AI célzás és mozgástervezés esetén.
+- [ ] Opcionális hu/en/de TTS: mute/voice kapcsoló, kijelölési bemondás, elavult beszéd törlése.
+- [ ] Opcionális útvonalimpulzus/Pixi dekoráció a szabályoktól függetlenül, reduced-motionnel.
+- [ ] Mobilon ne térjen vissza a harcteret takaró nagy konzol/részletpanel.
+
+## 3. Sector Operations MVP – közös pálya- és szabályalap
 
 Függőség: az 1. iteráció, majd a konfigurációs döntések. Cél: összesen három
 valóban eltérő szektor és két egyszerű modifikátor, legfeljebb egy aktív hatással.
@@ -58,7 +123,7 @@ valóban eltérő szektor és két egyszerű modifikátor, legfeljebb egy aktív
   alap- és maximális fejlesztésekkel, emberrel és AI-val.
 - [ ] Játékpróba: három pálya ténylegesen eltérő döntésekre ösztönöz-e?
 
-## 3. Orbitális támogatás – az MVP után, tervezési kapuval
+## 4. Orbitális támogatás – az MVP után, tervezési kapuval
 
 Függőség: a közös meccskonfiguráció és környezeti szabályok.
 
@@ -70,7 +135,7 @@ Függőség: a közös meccskonfiguráció és környezeti szabályok.
 - [ ] HUD/célzás/visszajelzés és AI képességválasztás.
 - [ ] Balansz-, mentési és multiplayer-regressziótesztek.
 
-## 4. Egységosztályok – a taktikai alapok után
+## 5. Egységosztályok – a taktikai alapok után
 
 - [ ] Két első szárazföldi variáns erőssége/gyengesége, nem egyértelműen jobb utód.
 - [ ] Stat-, fegyver- és prezentációs konfiguráció, meglévő fejlesztések érvényessége.
@@ -78,14 +143,16 @@ Függőség: a közös meccskonfiguráció és környezeti szabályok.
 - [ ] Minden szektor/osztály/modifikátor kombináció játékpróbája.
 - [ ] Hover/orbitális mozgás csak külön fizikai és ütközési specifikáció után.
 
-## 5. Hosszú távú single player
+## 6. Hosszú távú single player
 
-Függőség: változatos szektorok és taktikai összeállítások.
+Függőség: változatos szektorok és taktikai összeállítások. A 2. pont egyszerű
+útvonaltérképe ennél korábban készülhet el.
 
 - [ ] Szektorfoglalás: célpontok, küldetésfeltételek, jutalmak, menthető hadjárat.
 - [ ] Stratégiai AI-követelmények elkülönítése a meglévő harci AI-tól.
 - [ ] Roguelite: elágazó útvonalak, kockázat/jutalom, külön run- és tartós profilállapot.
 - [ ] Prestige csak opcionális kihívásként, külön döntés után.
+- [ ] Közös online kampány csak külön backend-/tulajdon-/eredményhitelesítési specifikáció után.
 
 ## Szektornév-jelöltek
 

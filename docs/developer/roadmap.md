@@ -109,6 +109,14 @@ szektorfeloldás, XP-felhasználás és konkrét környezeti hatások még nyito
 Ez nem előfeltételezi az M2 többegységes csapatait vagy az M5 lebegő szigeteit,
 és nem változtatja elfogadott specifikációvá a korábbi koncepciókat.
 
+Campaign Map kiegészítés: egyszerű helyi műveleti térkép a szektor-MVP körül,
+az orbitális képességek/osztályok előtt is készülhet. Javasolt lépcsők:
+statikus térkép → mentett offline haladás → ágas feloldás és egyszeri jutalom →
+eltérő szektorcsaták. Ez még nem elfogadott kampányspecifikáció, és nem helyettesíti
+a hot-seat/online gyorscsatát. A [megvalósíthatósági elemzés](./gameplay-progression.md#10-campaign-map--sector-progression-megvalósíthatóság)
+elválasztja ezt a teljes stratégiai hadjárattól és a külön backendű közös online kampánytól.
+A részletes döntési kapuk a [progressziós TODO](./gameplay-progression-todo.md) 2. pontjában vannak.
+
 ## Milestone-ok
 
 ### M0 – Stabilizálás
