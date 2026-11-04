@@ -1,9 +1,11 @@
 import { create } from "zustand";
+import { TRAINING_SECTOR } from "../data/sectors";
 import type { MatchStats } from "../systems/matchStats";
 import type { Phase } from "../systems/turnManager";
 import type { Profile } from "../systems/upgrades";
 
-export type Screen = "menu" | "playing";
+export type Screen = "menu" | "playing" | "campaignMap";
+export type MatchMode = "skirmish" | "campaign";
 export const MIN_POWER = 100;
 export const MIN_ANGLE = 0;
 export const MAX_ANGLE = 180;
@@ -49,6 +51,10 @@ export interface GameState {
   previewRemaining: number;
   previewActive: boolean;
   screen: Screen;
+  matchMode: MatchMode;
+  matchId: string | null;
+  sector: typeof TRAINING_SECTOR;
+  aiActive: boolean;
   /** Helyi prezentációs sorszám; új csatánál változik, nem online protokollmező. */
   matchSequence: number;
   muted: boolean;
@@ -82,6 +88,10 @@ export const useGameStore = create<GameState>((set) => ({
   previewRemaining: 0,
   previewActive: false,
   screen: "menu",
+  matchMode: "skirmish",
+  matchId: null,
+  sector: TRAINING_SECTOR,
+  aiActive: false,
   matchSequence: 0,
   muted: readMuted(),
   setAim: (angle, power) => set({ angle, power }),

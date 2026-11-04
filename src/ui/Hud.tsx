@@ -1,5 +1,4 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import { TRAINING_SECTOR } from "@/game/data/sectors";
 import { SectorBriefing } from "./SectorBriefing";
 import { PowerDial, UnitGauge } from "./gauges";
 import { MAX_ANGLE, MIN_ANGLE, MIN_POWER, useGameStore } from "@/game/state/gameStore";
@@ -36,10 +35,12 @@ export function Hud() {
     setAim,
     profiles,
     matchSequence,
+    matchMode,
+    aiActive,
+    sector,
   } = useGameStore();
   const online = useMultiplayerStore((state) => state.credentials !== null);
   const multiplayerError = useMultiplayerStore((state) => state.error);
-  const aiActive = useAiSettings((state) => state.enabled) && !online;
   const aiMemory = useAiSettings((state) => state.memory);
   const starsFor = (id: string) =>
     id === "P2" && aiActive ? rankStars(aiMemory) : profileStars(profiles[id] ?? newProfile(), MAX_RANK);
@@ -143,8 +144,8 @@ export function Hud() {
         ))}
         <div className="hud-top-center">
           <div className="hud-sector" aria-label={t("sector.battlefield")}>
-            <span className="sector-code">{TRAINING_SECTOR.code}</span>
-            <strong>{TRAINING_SECTOR.name}</strong>
+            <span className="sector-code">{sector.code}</span>
+            <strong>{sector.name}</strong>
           </div>
           <WindIndicator wind={wind} />
           <div className="hud-readout">
@@ -232,7 +233,7 @@ export function Hud() {
             </div>
           </div>
         </div>
-        <div className="hud-actions">
+        <div className={`hud-actions${matchMode === "campaign" ? " hud-campaign-actions" : ""}`}>
           <RepeatButton
             aria-label={t("hud.moveLeft")}
             title={t("hud.moveLeft")}
@@ -285,6 +286,22 @@ export function Hud() {
             </span>
             <span>{soundLabel}</span>
           </button>
+          {matchMode === "campaign" && (
+            <button
+              title={t("campaign.return")}
+              onClick={() => {
+                if (window.confirm(t("campaign.abandonConfirm"))) {
+                  gameRef.current?.leaveBattle();
+                  useGameStore.getState().setScreen("campaignMap");
+                }
+              }}
+            >
+              <span className="hud-action-icon" aria-hidden="true">
+                ⌂
+              </span>
+              <span>{t("campaign.return")}</span>
+            </button>
+          )}
         </div>
       </div>
       {!hintDismissed && (

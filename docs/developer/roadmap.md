@@ -24,6 +24,8 @@ orbitális képességek, egységosztályok és kampány rangsora:
 - A ResultScreen, a HUD és a játéktér sci-fi katonai vizuális rendszere működik.
 - A játéktér rétegezett hátteret használ: csillagos ég, hegyek, atmoszféra, terrain és visszafogott szikla-dekorációk.
 - A terrain fizikája, a ballisztika, a szél és a multiplayer determinisztikus működése megmaradt.
+- A robbanással leválasztott talajdarabok azonnal eltűnnek a maszkból és a látványból;
+  porladás, lehullás és omlási sebzés még nincs. A külön dekorációs réteg nem érintett.
 - A ResultScreen részletes, rétegezett tank-SVG-t, a játéktér külön body/barrel asseteket használ.
   A terep RenderTexture és pixelmaszk, nem SVG; aktív dekorációként szikla-SVG-k vannak,
   a fa- és antennaassetek megmaradtak, de nincsenek a pályán.
@@ -36,7 +38,10 @@ orbitális képességek, egységosztályok és kampány rangsora:
 - Egy seedelt terepcsalád, két tank és hét összeadódó statfejlesztés van. A harctér
   **SECTOR ALPHA-01 / Training Grounds** néven megjelenik a főmenüben és HUD-ban,
   meccskezdéskor 2,5 másodperces briefinggel. Többpályás választás,
-  modifikátor, orbitális képesség, egységosztály-választás és kampány még nincs.
+  modifikátor, orbitális képesség, egységosztály-választás és stratégiai hadjárat még nincs.
+- Campaign Map Foundation működik: külön térképképernyő, ALPHA-01 indítása mindig
+  P1 vs AI módban, eredmény utáni visszatérés, helyileg mentett 0/1 → 1/1 teljesítés.
+  Külön kampányreset és teljes mentéstörlés; extra kampányjutalom nincs.
 - A részletes UX- és hang-redesign következő lépései külön checklistként szerepelnek alább.
 
 ## Alapelvek
@@ -105,11 +110,13 @@ A [gameplay-elemzés](./gameplay-progression.md) végrehajtási sorrendje:
 **térkép + ALPHA-01 csatakör → mentett haladás → új szektorok és elágazások →
 modifikátorok → horizontális feloldások/képességek/osztályok → stratégiai hadjárat**.
 
-**Következő szállítható csomag: Campaign Map Foundation (C1+C2).**
+**Elkészült csomag: Campaign Map Foundation (C1+C2).**
 Főmenü → térkép → meglévő ALPHA-01 csata → eredmény → térkép, helyi teljesítésmentéssel.
-A képernyő/navigáció/meccskontextus hiányzó alapjait ebben a csomagban alakítjuk ki.
+A képernyő/navigáció/meccskontextus alapjai elkészültek.
 Csak egy pálya szükséges; nincs új fizika vagy extra kampányjutalom. A hot-seat/online
-gyorscsata megmarad; a kampány szereposztása és resetje implementáció előtt véglegesítendő.
+gyorscsata megmarad; a kampány mindig P1 vs AI. Kampányreset csak teljesítést,
+a teljes mentéstörlés XP-t/szinteket/teljesítést töröl. Valós telefonos próba hátravan.
+Következő fejlesztés: új csatadefiníciók és térképes útvonalak a nyitott döntések után.
 
 A három terepprofil/két modifikátor Sector Operations csomag ezt később bővíti,
 nem előfeltétele a térképmódnak. Tervezett szektor nem játszható célpont és nem
@@ -202,7 +209,7 @@ azok külön, későbbi terepmechanikák.
 - [x] Parallax világűr-háttér: csillagköd-kép (`src/game/assets/backgrounds/siege-sky.jpg`, 126 KB), lassan sodródó köd- és csillagréteg, három halványodó hegyréteg légköri homállyal; reduced-motion esetén mozdulatlan
 - [ ] Sötét cyberpunk UI továbbfejlesztése
 - [ ] Hang-redesign következő fázisai: eseményhangok, lazy loading, zeneválasztó,
-  hangerő, fanfár és beszédbeállítások; részletes státuszlista: [hangterv](./sound-redesign.md)
+  csatornánkénti hangerő, fanfár és beszédbeállítások; részletes státuszlista: [hangterv](./sound-redesign.md)
 - [x] Parancsnoki konzol a HUD-ban (`CommandConsole`, `commandStore`): időbélyeges napló, gépelési effekt, reduced-motion esetén azonnali kiírás
 - [x] Kompakt mobil HUD: 42 px védelmi műszerek, kisebb térközök; a konzol
   legfrissebb közlése egysoros sávként a felső HUD alatt, a csatatérre lógó napló helyett.
@@ -210,6 +217,7 @@ azok külön, későbbi terepmechanikák.
 - [x] Győzelmi fanfár (szintetizált helyettesítő) és „A csatát {név} nyerte!" bemondás
 - [x] Játékosnevek a Beállításokban (offline), online a lobbynév az erősebb
 - [x] Háttérzene (alap: energysound „Cyberpunk Neon City"); zene, parancsnok és effektek külön ki/be kapcsolható a Beállításokban
+- [x] Mentett játék-hangerőcsúszka a Beállításokban (0–100%): zene, effektek és parancsnoki felolvasás; a némítás megőrzi a hangerőt
 - [ ] Assetlicencek és fájlonkénti források ellenőrzése következő publikálás előtt,
   „Kreditek” nézet; a korábbi telepítés nem helyettesíti ezt az ellenőrzést
 - [ ] Eredményképernyőn is látszó győzelmi közlés

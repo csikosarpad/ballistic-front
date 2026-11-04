@@ -1,6 +1,6 @@
 import { Container, Graphics, RenderTexture, Sprite, type Renderer } from "pixi.js";
 import { generateHeightmap, mirrorHeightmap } from "./heightmap";
-import { TerrainMask } from "./mask";
+import { TerrainMask, type TerrainSpan } from "./mask";
 import { scorchDots } from "./scorch";
 import { DEFAULT_THEME, type Theme } from "../theme";
 
@@ -69,8 +69,33 @@ export class Terrain {
     this.renderer.render({ container: this.scorch, target: this.texture, clear: false });
 
     this.mask.carveCircle(x, y, radius);
+    const detached = this.mask.removeDetachedGround();
     this.eraser.clear().circle(x, y, radius).fill(0xffffff);
+    this.eraseDetached(detached);
     this.renderer.render({ container: this.eraseLayer, target: this.texture, clear: false });
+  }
+
+  private eraseDetached(spans: readonly TerrainSpan[]): void {
+    // A felszíni vonal a solid pixeleken kívülre is kilóg; ezt is töröljük, de élő talajpixelhez nem nyúlunk.
+    const fringe = 2;
+    for (const span of spans) {
+      const x0 = Math.max(0, span.x - fringe);
+      const x1 = Math.min(this.mask.width, span.x + span.width + fringe);
+      const y0 = Math.max(0, span.y - fringe);
+      const y1 = Math.min(this.mask.height - 1, span.y + fringe);
+      for (let y = y0; y <= y1; y++) {
+        let start = -1;
+        for (let x = x0; x <= x1; x++) {
+          if (x < x1 && !this.mask.isSolid(x, y)) {
+            if (start < 0) start = x;
+          } else if (start >= 0) {
+            this.eraser.rect(start, y, x - start, 1);
+            start = -1;
+          }
+        }
+      }
+    }
+    if (spans.length) this.eraser.fill(0xffffff);
   }
 
   destroy(): void {

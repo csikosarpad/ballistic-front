@@ -5,8 +5,9 @@ Kódbázis-alapú helyzetértékelés, 2026-11-04; térképközpontú irány pon
 **Rögzített fejlesztési irány: a Campaign Map legyen a fejlődés központi felülete.**
 Ez a prioritás elfogadott; a részletes mód-, feloldás-, jutalom- és balanszszabályok
 továbbra is döntést igényelnek. A dokumentum nem minden elemében kész implementációs specifikáció.
-A javasolt új mechanikák még nem részei a játéknak. Az alap szektor elnevezése,
-menü-/HUD-kijelzése és briefingje már elkészült; ez nem többpályás rendszer.
+A Campaign Map Foundation már működik egy ALPHA-01 célponttal, helyi teljesítésmentéssel
+és mindig P1 vs AI csatával. A további mechanikák még tervek. Az alap szektor elnevezése,
+menü-/HUD-kijelzése és briefingje elkészült; ez nem többpályás rendszer.
 Az elfogadott első lépést és a további döntési kapukat a
 [végrehajtási TODO](./gameplay-progression-todo.md) követi. A meglévő technikai milestone-okat
 a [roadmap](./roadmap.md), a vizuális irányt a [játék redesign terve](./game-redesign.md) rögzíti.
@@ -31,7 +32,7 @@ felszerelési összeállítás. A játékosok végül ugyanahhoz a maximális st
 5. Horizontális feloldások, korlátozott slotos orbitális képességek és egységosztályok.
 6. Teljes stratégiai szektorfoglalás, később roguelite kampány.
 
-**Következő szállítható csomag: Campaign Map Foundation.** Egyetlen játszható célponttal,
+**Elkészült első csomag: Campaign Map Foundation.** Egyetlen játszható célponttal,
 a meglévő **SECTOR ALPHA-01 / Training Grounds** pályával induljon. A térkép ne puszta
 designbemutató legyen: innen induljon a csata, ide lehessen visszatérni, és itt látszódjon
 a mentett teljesítés. A szükséges képernyő-, meccskontextus- és mentési alapokat most
@@ -90,7 +91,7 @@ Következmények:
 | Egységek | Két konkrét tank, talajhoz kötött mozgás és rögzített találati geometria | Szárazföldi variáns egyszerűbb; hover és orbitális egység jelentősen drágább |
 | Megjelenítés | Rétegezett Pixi háttér, külön egységprezentáció | Vizuálisan bővíthető; a prezentáció nem általános gameplay-egységmodell |
 | Mentés | Verziózott helyi profiltárolás | Új feloldásokhoz migráció kell; tartós online hadjáratállapot nincs |
-| Kampány | Nincs küldetés-, útvonal- vagy területfoglalási rendszer | Új stratégiai réteg szükséges a meglévő csaták fölé |
+| Kampány | Egy ALPHA-01 ponttal működő térkép és helyi teljesítésmentés | Új célpontok, útvonalak és stratégiai szabályok még szükségesek |
 
 ### Fontos konkrét kapcsolódások
 
@@ -273,7 +274,7 @@ játékmeneti fogyasztója. Fordítás, UI-prezentáció, AI-vásárlás és bal
 
 ## 6. Végrehajtási csomagok: először térkép, utána szektortartalom
 
-### 6.1. Következő csomag: Campaign Map Foundation
+### 6.1. Elkészült alap: Campaign Map Foundation
 
 **Célfolyamat:**
 
@@ -281,8 +282,10 @@ játékmeneti fogyasztója. Fordítás, UI-prezentáció, AI-vásárlás és bal
 Main Menu → Campaign Map → ALPHA-01 Battlefield → Result Screen → Campaign Map
 ```
 
-Ez külön térképmód-útvonal legyen. A hot-seat és online gyorscsata megőrzendő;
-a kampány kezdeti P1 vs AI szereposztása javaslat, implementáció előtt véglegesítendő.
+Ez külön térképmód-útvonal. A hot-seat és online gyorscsata megmaradt;
+a kampány P1 ember vs P2 AI, a gyorscsata-beállítás megváltoztatása nélkül.
+Külön kampányreset csak teljesítést töröl; a teljes mentéstörlés XP-t, szinteket és kampányt.
+Az alábbi hatókör a megvalósított Foundation szerződése; többpályás bővítés még nincs.
 
 Hatókör:
 
@@ -305,7 +308,7 @@ kezdetben 0/1, az ALPHA teljesítése után 1/1; tervezett szektorok ne növelj�
 Elfogadás: menü → térkép → valódi ALPHA-csata → eredmény → térkép végigjárható;
 győzelem/vereség/döntetlen következetes; teljesítés refresh után megmarad;
 ugyanazon eredmény nem dolgozódik fel kétszer; gyorscsata/online működés változatlan.
-A mentett haladás a C2 részlépésben készül el, de a Foundation csomag csak ezzel együtt kész.
+A mentett haladás a C2 részlépésben elkészült; a Foundation a C1+C2 közös eredménye.
 
 ### 6.2. Következő tartalmi csomag: Sector Operations MVP
 
@@ -421,11 +424,12 @@ megvalósítható; a jelentős költség a mögöttes állapot-, csata- és juta
 
 **Első szállítás:** Campaign Map Foundation egy játszható ALPHA-01 célponttal.
 **Későbbi tartalmi cél:** öt csomópontos, enyhén elágazó offline hadművelet P1 vs AI,
-helyi mentéssel és egyszerű feloldási szabályokkal. Az ötös darabszám és szereposztás
-még javaslat. Öt célpont használhat három terepprofilt, de minden célpontnak valódi
+helyi mentéssel és egyszerű feloldási szabályokkal. Az ötös darabszám még javaslat;
+a Foundation P1 vs AI szereposztása működik. Öt célpont használhat három terepprofilt, de minden célpontnak valódi
 csatadefiníció kell; a puszta átnevezés nem új pálya.
 
-Ez módjavaslat, nem elfogadott viselkedésváltozás. A hot-seat és online játék
+Az egy célpontos P1 vs AI Foundation működik; az ötcsomópontos bővítés még módjavaslat.
+A hot-seat és online játék
 maradjon külön **Skirmish / gyors csata** útvonalon; ne kelljen minden játékosnak
 kampányt teljesítenie egy egyszerű mérkőzéshez.
 
@@ -453,27 +457,29 @@ Az „ágas” térképhez később sem kell procedurális generátor vagy strat
 
 ### 10.3. Konkrét architekturális kapcsolódások
 
-- Az [App](../../src/App.tsx) most menüt és játékot jelenít meg; az eredmény a játék
-  `gameOver` fázisa. A [store](../../src/game/state/gameStore.ts) `Screen` típusa csak
-  `menu | playing`. Új `campaignMap` képernyő és külön kampány-/gyorscsata-mód kell.
+- Az [App](../../src/App.tsx) menüt, játékot és `campaignMap` képernyőt jelenít meg;
+  az eredmény továbbra is a játék `gameOver` fázisa. A
+  [store](../../src/game/state/gameStore.ts) külön `matchMode`, helyi UUID `matchId`
+  és szektoradatokat tartalmaz; ezek nem új online protokollmezők.
 - A [MainMenu](../../src/ui/MainMenu.tsx) most közvetlenül indít offline/online meccset.
-  A kampánygomb térképre menjen, a gyorscsata meglévő folyamatát ne cserélje le.
+  A kampánygomb külön térképre megy, a gyorscsata meglévő folyamatát nem cseréli le.
 - A [GameCanvas](../../src/ui/GameCanvas.tsx) az App alatt folyamatosan él.
   A térkép megnyitása önmagában nem állítja le a
-  [Game](../../src/game/engine/Game.ts) AI-időzítőit. Térképre visszatéréskor csatazárás
-  vagy explicit elhagyási szabály kell, ne csak egy takaró overlay.
-- Az [alap szektor](../../src/game/data/sectors.ts) közös névdefiníció, de nincs
-  kiválasztott pálya a meccsben. A menü, briefing és HUD jelenleg ezt az állandót használja.
-  Kampányban mindháromnak a tényleges művelet/meccs szektorából kell olvasnia.
+  [Game](../../src/game/engine/Game.ts) AI-időzítőit, ezért a bekötött `leaveBattle`
+  csatazárást végez. Rejtett csata nem fut tovább a térkép alatt.
+- Az [alap szektor](../../src/game/data/sectors.ts) a közös ALPHA-definíció.
+  A Game ezt teszi a meccsnézetbe, a briefing/HUD/eredmény ezt olvassa;
+  a menü/térkép ugyanazt az egyetlen műveletet mutatja.
 - A [ResultScreen](../../src/ui/ResultScreen.tsx) bemutatja az eredményt és boltot,
   de ne itt, rendereléskor történjen jutalmazás. A meccs lezárása adjon egyszer
   feldolgozott eredményt a kampánylogikának; a képernyő ezt csak megjelenítse.
 - A [profil](../../src/game/systems/upgrades.ts) XP-t és szinteket tárol.
   A [verziózott mentés](../../src/game/systems/profileStorage.ts) újrahasználható minta,
-  de nincs kampányadat és több tároló közti tranzakció. A „Mentés törlése” kampányra
-  gyakorolt hatását is specifikálni kell.
+  mellett külön [kampánymentés](../../src/game/state/campaignStore.ts) v1 tárolja az
+  egyetlen teljesítés booleanját. Ez idempotens, nem jutalomledger; több tároló közti
+  tranzakció nincs. Extra kampány-XP előtt továbbra is kell az ismétlésbiztos elszámolás.
 - A [MatchSetup](../../src/game/systems/seededRandom.ts) csak seed/starterIndex.
-  Az offline kampányhoz helyi meccskontextus szükséges; online pályaválasztás csak
+  Az offline kampány helyi meccskontextusa már külön működik; online pályaválasztás csak
   verziózott, közösen ellenőrzött setupbővítéssel kerülhet be.
 
 ### 10.4. Adatmodell és feloldás

@@ -16,37 +16,63 @@ export const AUDIO_CHANNELS: readonly AudioChannel[] = ["music", "voice", "effec
 
 const DEFAULTS: AudioChannels = { music: true, voice: true, effects: true };
 
-function load(): AudioChannels {
+type AudioSettingsError = "audio.loadError" | "audio.saveError";
+interface SavedAudioSettings {
+  channels: AudioChannels;
+  volume: number;
+  error: AudioSettingsError | null;
+}
+
+function load(): SavedAudioSettings {
   try {
     const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
-    if (typeof parsed !== "object" || parsed === null) return { ...DEFAULTS };
-    const saved = parsed as Partial<Record<AudioChannel, unknown>>;
-    return Object.fromEntries(
-      AUDIO_CHANNELS.map((channel) => [
-        channel,
-        typeof saved[channel] === "boolean" ? saved[channel] : DEFAULTS[channel],
-      ]),
-    ) as unknown as AudioChannels;
-  } catch {
-    return { ...DEFAULTS };
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      throw new Error("Invalid audio settings");
+    }
+    const channels = { ...DEFAULTS };
+    for (const channel of AUDIO_CHANNELS) {
+      if (channel in parsed) {
+        const enabled: unknown = Reflect.get(parsed, channel);
+        if (typeof enabled !== "boolean") throw new Error(`Invalid audio channel: ${channel}`);
+        channels[channel] = enabled;
+      }
+    }
+    const volume: unknown = "volume" in parsed ? parsed.volume : 1;
+    if (typeof volume !== "number" || !Number.isFinite(volume) || volume < 0 || volume > 1) {
+      throw new Error("Invalid audio volume");
+    }
+    return { channels, volume, error: null };
+  } catch (error) {
+    console.error("Audio settings could not be loaded", error);
+    return { channels: { ...DEFAULTS }, volume: 1, error: "audio.loadError" };
   }
 }
 
-interface AudioSettingsState {
-  channels: AudioChannels;
+function save(channels: AudioChannels, volume: number): AudioSettingsError | null {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...channels, volume }));
+    return null;
+  } catch (error) {
+    console.error("Audio settings could not be saved", error);
+    return "audio.saveError";
+  }
+}
+
+interface AudioSettingsState extends SavedAudioSettings {
   setChannel: (channel: AudioChannel, enabled: boolean) => void;
+  setVolume: (volume: number) => void;
 }
 
 export const useAudioSettings = create<AudioSettingsState>((set) => ({
-  channels: load(),
+  ...load(),
   setChannel: (channel, enabled) =>
     set((state) => {
       const channels = { ...state.channels, [channel]: enabled };
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(channels));
-      } catch {
-        // Mentés nélkül is érvényes az aktuális munkamenetben.
-      }
-      return { channels };
+      return { channels, error: save(channels, state.volume) };
     }),
+  setVolume: (value) => {
+    if (!Number.isFinite(value)) throw new RangeError("Audio volume must be finite");
+    const volume = Math.max(0, Math.min(1, value));
+    set((state) => ({ volume, error: save(state.channels, volume) }));
+  },
 }));

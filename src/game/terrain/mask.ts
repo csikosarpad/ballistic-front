@@ -1,6 +1,14 @@
-/** Bitmaszk a terep ütközéséhez; a vizuális RenderTexture-rel párhuzamosan kopik. */
+export interface TerrainSpan {
+  x: number;
+  y: number;
+  width: number;
+}
+
+/** Talajhoz kötött terep bitmaszkja; külön lebegő objektumok nem ebben a maszkban élnek. */
 export class TerrainMask {
   private data: Uint8Array;
+  private connected: Uint8Array | null = null;
+  private queue: Uint32Array | null = null;
 
   private constructor(
     readonly width: number,
@@ -46,5 +54,47 @@ export class TerrainMask {
         if (dx * dx + dy * dy <= r2) this.data[y * this.width + x] = 0;
       }
     }
+  }
+
+  /** Az alsó pályaszélhez négy szomszédon keresztül nem kapcsolódó talaj törlése, soronkénti szakaszokkal. */
+  removeDetachedGround(): TerrainSpan[] {
+    const { width, height, data } = this;
+    if (!width || !height) return [];
+    const connected = (this.connected ??= new Uint8Array(data.length));
+    const queue = (this.queue ??= new Uint32Array(data.length));
+    connected.fill(0);
+    let head = 0;
+    let tail = 0;
+    const visit = (index: number) => {
+      if (data[index] === 1 && connected[index] === 0) {
+        connected[index] = 1;
+        queue[tail++] = index;
+      }
+    };
+    for (let x = 0; x < width; x++) visit((height - 1) * width + x);
+    while (head < tail) {
+      const index = queue[head++]!;
+      const x = index % width;
+      if (x > 0) visit(index - 1);
+      if (x < width - 1) visit(index + 1);
+      if (index >= width) visit(index - width);
+      if (index < data.length - width) visit(index + width);
+    }
+
+    const removed: TerrainSpan[] = [];
+    for (let y = 0; y < height; y++) {
+      let start = -1;
+      for (let x = 0; x <= width; x++) {
+        const index = y * width + x;
+        if (x < width && data[index] === 1 && connected[index] === 0) {
+          data[index] = 0;
+          if (start < 0) start = x;
+        } else if (start >= 0) {
+          removed.push({ x: start, y, width: x - start });
+          start = -1;
+        }
+      }
+    }
+    return removed;
   }
 }

@@ -14,7 +14,22 @@ A dokumentumok szerepeit a [fejlesztői index](./README.md) rögzíti.
 - Fix 1280×720 világ, aránytartó megjelenítési skálázás; resize nem új meccs.
 - Fix időlépésű ballisztika, seedelt, tükrözött value-noise terep.
   Ütközés: pixelmaszk; látvány: RenderTexture; rombolás mindkettőt módosítja.
+- Robbanás után a talajmaszk az alsó pályaszélről négy szomszédos pixel mentén
+  kapcsolatvizsgálatot végez. A levált darabok azonnal törlődnek a maszkból és a
+  textúrából, a tankok talajra igazítása előtt; nincs omlási sebzés vagy zuhanási fizika.
+  Ez csak a talajhoz kötött terepre vonatkozik, nem a külön dekorációs rétegre.
+  Jövőbeli járható lebegő sziget külön maszkot/rögzítési szabályt igényel; nem tehető
+  változtatás nélkül ebbe az alsó pályaszélhez kötött maszkba. Online azonos build kell.
+- A terep bloom effektje a `TerrainBloomFilter` adaptert használja: rajzolás után
+  leválasztja az ideiglenes bloom textúrát és a globális filter-input forrás/sampler
+  kötéseit. Így a Pixi képernyőméret-váltáskor biztonságosan törölheti a pool textúráit
+  `BindGroup` figyelmeztetések nélkül; az effekt beállításai változatlanok.
 - Két szárazföldi tank, hot-seat vagy offline P2 AI; online két emberi játékos.
+- A Campaign Map Foundation külön `campaignMap` képernyő és `campaign` meccsmód,
+  mindig P1 ember vs P2 AI. ALPHA-01 az egyetlen célpont; P1 győzelmekor a Game
+  idempotens teljesítést ment a külön `ballistic-front:campaign` v1 borítékba.
+  XP/profil és AI-memória közös a gyorscsatával; extra jutalom nincs.
+  A `leaveBattle` lezárja az elhagyott csatát/AI-időzítőket, a renderer megmarad.
 - Hét adatvezérelt statfejlesztés; helyi profil `{ xp, levels }`,
   verziózott tárolási borítékban (`STORAGE_VERSION = 2`).
 - A Célzástámogatás alapból 1, szintenként +1 meccsenkénti előnézet-töltetet ad.
@@ -50,5 +65,5 @@ Részletes végpontok és telepítés: [backend README](../../server/README.md).
 - A UnitPresentation megjelenítési szerződés, nem általános egység- vagy mozgásmodell.
 - A Game jelenleg nagy koordinátor; bővítéskor célzott közös modulok használata indokolt,
   nem egy előzetes teljes engine-újraírás.
-- Szektor, modifikátor, orbitális képesség és kampány jelenleg javaslat:
+- Több szektor, modifikátor, orbitális képesség és stratégiai hadjárat jelenleg javaslat:
   [gameplay és fejlődés](./gameplay-progression.md).

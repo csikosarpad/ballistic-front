@@ -9,12 +9,34 @@ A jelenleg elérhető funkciók leírása. Fejlesztési tervek és technikai ré
 - **Offline AI:** a Beállításokban a „Gép (AI)” ellenfél választható; P1 az ember, P2 a gép.
   Az ellenfélválasztás a következő meccstől érvényes.
 - **Online:** két ember külön böngészőből, szobakódos lobbyval.
+- **Műveleti térkép:** külön menügomb, mindig P1 ember vs P2 AI, a gyorscsata
+  ellenfélbeállításától függetlenül. Egyelőre csak ALPHA-01 játszható.
 
 Jelenleg egy seed alapján változó, tükrözött terepcsalád és egy tanktípus van.
 Az alap harctér **SECTOR ALPHA-01 / Training Grounds**: neve a főmenüben a játékcím
 alatt és a felső középső HUD-ban látható. Új csata és visszavágó elején 2,5 másodperces
 **SECTOR BRIEFING** mutatja be; ez nem szünetelteti és nem zárolja a játékot.
-Szektorválasztás, orbitális képességek, prestige és kampány még nincsenek.
+Többpályás szektorválasztás, orbitális képességek, prestige és stratégiai hadjárat még nincsenek.
+
+### A műveleti térkép használata
+
+Főmenü → Műveleti térkép → Művelet indítása → Csata → Eredmény → Műveleti térkép.
+P1 győzelme teljesíti az ALPHA-01 szektort; vereség és döntetlen nem.
+A teljesítés helyileg mentett, újratöltés után is 1/1 marad; a szektor újrajátszható.
+Nincs külön kampányjutalom, a megszokott harci XP és +50 győzelmi XP jár.
+A gyorscsata győzelme nem teljesít térképes szektort.
+
+Harc közben a „Vissza a térképre” megerősítés után elhagyja a csatát.
+Az addig szerzett XP megmarad, de a szektor nem teljesül. Meccsvégi boltban
+csak P1 fejleszthető; P2 AI maga vásárol. A profilok és az AI-tapasztalat a
+gyorscsatával közösek, külön kampánynehézség még nincs.
+
+A térképen a „Kampányhaladás törlése” csak a teljesítést törli.
+A főmenü „Mentés törlése” az XP-t, fejlesztéseket és kampányhaladást is törli.
+Tárolási hibánál figyelmeztetés jelenik meg; sikertelen mentés után a kijelzett
+haladás csak az aktuális munkamenetben érvényes. Hibás/nem támogatott kampánymentés
+esetén az indítás tiltott; a kampányreset új mentést hozhat létre, a régi XP megtartásával.
+Félbehagyott offline csata refresh után nem folytatható, a művelet újra indítható.
 
 ## A csata menete
 
@@ -23,6 +45,9 @@ beállíthatja a löveg szögét és erejét, majd tüzelhet. A szél minden kö
 és eltéríti a lövedéket. A lövés lezárása után a következő élő játékos jön.
 
 A terep rombolható; egy robbanás a későbbi mozgást és lövési lehetőségeket is módosítja.
+A talajról teljesen leszakadt terepdarabok azonnal eltűnnek. Az oldalról még
+megtámasztott túlnyúlások megmaradnak; nincs külön omlási sebzés vagy lehulló törmelék.
+A külön háttér-/szikladekorációkat ez nem törli.
 A játék a győztest, a lövéseket, az okozott sebzést és a meccsen szerzett XP-t
 az eredményképernyőn összesíti.
 
@@ -107,7 +132,11 @@ session és a szoba érvényes. Ez nem fiókalapú, eszközök közötti felhőm
 - **Játékosnevek:** P1/P2 neve legfeljebb 16 karakter. Üres névnél az azonosító marad;
   online a lobbyban megadott név az elsődleges.
 - **Hang:** Zene, Parancsnok és Effektek külön kapcsolhatók; az M némítás mindet felülírja.
-  A háttérzene energysound „Cyberpunk Neon City”; zeneválasztó és hangerőcsúszkák még nincsenek.
+  A Beállítások **Játék hangereje** csúszkája 0–100% között szabályozza mindhárom hangcsoportot,
+  és a választás megmarad újratöltés után. A 100% az eddigi hangkeverésnek felel meg;
+  a némítás nem törli a beállított hangerőt. A hangerő módosítása megszakítja az aktuális
+  felolvasást; a következő közlés már az új hangerőn szól. Mentési hiba esetén figyelmeztetés jelenik meg.
+  A háttérzene energysound „Cyberpunk Neon City”; zeneválasztó és külön csatornahangerők még nincsenek.
 - **Parancsnoki konzol:** időbélyeges taktikai közlések és böngészős felolvasás.
   A hangok a böngészőtől/operációs rendszertől függnek; P2 magasabban és gyorsabban szól.
   Győzelemkor szintetizált fanfár és győzelmi bemondás hallható.

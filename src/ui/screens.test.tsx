@@ -3,18 +3,20 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Game } from "@/game/engine/Game";
 import { useGameStore } from "@/game/state/gameStore";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
+import { useAudioSettings } from "@/game/state/audioSettings";
 import { gameRef } from "./gameRef";
 import { MainMenu } from "./MainMenu";
 import { ResultScreen } from "./ResultScreen";
 
 const mockGame = (overrides: Partial<Record<keyof Game, unknown>>) => {
-  gameRef.current = overrides as unknown as Game;
+  gameRef.current = { leaveBattle: vi.fn(), ...overrides } as unknown as Game;
 };
 
 describe("MainMenu", () => {
   beforeEach(() => {
-    useGameStore.setState({ screen: "menu", muted: false });
+    useGameStore.setState({ screen: "menu", muted: false, matchMode: "skirmish", aiActive: false });
     useMultiplayerStore.getState().leave();
+    useAudioSettings.setState({ channels: { music: true, voice: true, effects: true }, volume: 1, error: null });
   });
 
   it("a játékcím alatt a jelenlegi harctér azonosítója és neve szerepel", () => {
@@ -56,6 +58,31 @@ describe("MainMenu", () => {
     fireEvent.click(screen.getByRole("button", { name: "Online játék" }));
     expect(screen.getByRole("heading", { name: "Online multiplayer" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Szoba létrehozása" })).toBeInTheDocument();
+  });
+
+  it("a hangerőcsúszka ment és némítva is állítható a némítás feloldása nélkül", () => {
+    render(<MainMenu />);
+    fireEvent.click(screen.getByRole("button", { name: "Beállítások" }));
+    const slider = screen.getByRole("slider", { name: "Játék hangereje" });
+    expect(slider).toHaveValue("100");
+    fireEvent.change(slider, { target: { value: "35" } });
+    expect(slider).toHaveAttribute("aria-valuetext", "35%");
+    expect(screen.getByText("35%")).toBeInTheDocument();
+    expect(useAudioSettings.getState().volume).toBe(0.35);
+    expect(JSON.parse(localStorage.getItem("ballistic-front:audio-settings")!).volume).toBe(0.35);
+    fireEvent.click(screen.getByRole("button", { name: "Hang: be (M)" }));
+    fireEvent.change(slider, { target: { value: "0" } });
+    expect(useGameStore.getState().muted).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Hang: ki (M)" }));
+    expect(slider).toHaveValue("0");
+    expect(useAudioSettings.getState().volume).toBe(0);
+  });
+
+  it("megjeleníti a hangbeállítások mentési hibáját", () => {
+    useAudioSettings.setState({ error: "audio.saveError" });
+    render(<MainMenu />);
+    fireEvent.click(screen.getByRole("button", { name: "Beállítások" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("A hangbeállítások mentése sikertelen");
   });
 
   it("a match_started esemény mindkét klienst a közös meccsbe lépteti", () => {
@@ -122,6 +149,8 @@ describe("ResultScreen", () => {
     useMultiplayerStore.getState().leave();
     useGameStore.setState({
       screen: "playing",
+      matchMode: "skirmish",
+      aiActive: false,
       phase: "gameOver",
       winner: "P1",
       matchStats: { P1: { shots: 3, damage: 100, xp: 150 }, P2: { shots: 2, damage: 40, xp: 40 } },

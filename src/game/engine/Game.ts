@@ -1,5 +1,5 @@
 import { Application, Assets, Container, Graphics, Sprite, type Texture } from "pixi.js";
-import { AdvancedBloomFilter } from "pixi-filters";
+import { TerrainBloomFilter } from "./TerrainBloomFilter";
 import { bloomSettings } from "./bloomQuality";
 import tankBodyUrl from "../assets/tank-body.svg?url";
 import tankBarrelUrl from "../assets/tank-barrel.svg?url";
@@ -45,8 +45,11 @@ import { useMultiplayerStore } from "../state/multiplayerStore";
 import { useCommandStore } from "../state/commandStore";
 import { playerName } from "../state/playerNames";
 import { useAiSettings } from "../state/aiSettings";
+import { useCampaignStore } from "../state/campaignStore";
+import type { MatchMode } from "../state/gameStore";
 import { AiBrain, chooseUpgrades, simulateImpact, skillFromMemory } from "../systems/ai";
 import type { RoomEvent } from "../multiplayer/protocol";
+import { TRAINING_SECTOR } from "../data/sectors";
 
 /** Ennyi HP-arány alatt kritikus a tank állapota. */
 const CRITICAL_HP_FRACTION = 0.3;
@@ -120,6 +123,8 @@ export class Game {
   private nextStarter = Math.floor(Math.random() * 2);
   private matchRandom = Math.random;
   private multiplayer = false;
+  private matchMode: MatchMode = "skirmish";
+  private matchActive = true;
   private matchProfiles: Record<string, Profile> | null = null;
   private lastMultiplayerRevision = 0;
   private pendingMultiplayerEvents: RoomEvent[] = [];
@@ -173,7 +178,7 @@ export class Game {
     this.terrain = new Terrain(this.app.renderer, this.theme.terrain);
     const bloom = bloomSettings(window.matchMedia("(pointer: coarse)").matches);
     this.terrain.sprite.filters = [
-      new AdvancedBloomFilter({
+      new TerrainBloomFilter({
         threshold: 0.45,
         bloomScale: bloom.strength,
         blur: bloom.blur,
@@ -199,6 +204,7 @@ export class Game {
     const pendingStart = this.pendingMultiplayerStart;
     if (pendingStart) this.startMultiplayer(pendingStart.setup, pendingStart.profiles, pendingStart.revision);
     else this.restart();
+    if (useGameStore.getState().screen !== "playing") this.leaveBattle();
     this.app.renderer.on("resize", () => this.layout());
     this.app.ticker.add((t) => this.update(t.deltaMS / 1000));
   }
@@ -267,7 +273,8 @@ export class Game {
     window.clearTimeout(this.victoryTimer);
     this.clearAiTimers();
     const aiSettings = useAiSettings.getState();
-    this.aiActive = !this.multiplayer && aiSettings.enabled;
+    this.matchActive = true;
+    this.aiActive = !this.multiplayer && (this.matchMode === "campaign" || aiSettings.enabled);
     this.aiBrain = this.aiActive ? new AiBrain({ skill: skillFromMemory(aiSettings.memory) }) : null;
     this.aiHits = 0;
     const width = WORLD_WIDTH;
@@ -291,11 +298,16 @@ export class Game {
     this.matchStats = newMatchStats(this.tanks.map((t) => t.id));
     this.previewAllowance.reset(Object.fromEntries(this.tanks.map((tank) => [tank.id, tank.stats.previewCharges])));
     this.shell = null;
-    useGameStore.getState().sync({ matchSequence: useGameStore.getState().matchSequence + 1 });
+    useGameStore.getState().sync({
+      matchSequence: useGameStore.getState().matchSequence + 1,
+      matchId: crypto.randomUUID(),
+      sector: TRAINING_SECTOR,
+    });
     this.beginTurn();
   }
 
   startMultiplayer(setup: MatchSetup, profiles: Record<string, Profile>, revision: number): void {
+    this.matchMode = "skirmish";
     if (!this.terrain) {
       this.pendingMultiplayerStart = { setup, profiles, revision };
       return;
@@ -315,7 +327,8 @@ export class Game {
     this.receiveMultiplayerEvents(useMultiplayerStore.getState().events);
   }
 
-  startOffline(): void {
+  startOffline(mode: MatchMode = "skirmish"): void {
+    this.matchMode = mode;
     this.pendingMultiplayerStart = null;
     this.unsubscribeMultiplayer?.();
     this.unsubscribeMultiplayer = null;
@@ -323,7 +336,27 @@ export class Game {
     this.matchProfiles = null;
     this.pendingMultiplayerEvents = [];
     this.lastMultiplayerRevision = 0;
+    useGameStore.getState().sync({ matchMode: mode, phase: "aiming", winner: null });
     this.restart();
+  }
+
+  startCampaign(): void {
+    this.startOffline("campaign");
+  }
+
+  leaveBattle(): void {
+    this.matchActive = false;
+    this.clearAiTimers();
+    window.clearTimeout(this.victoryTimer);
+    this.pendingMultiplayerStart = null;
+    this.unsubscribeMultiplayer?.();
+    this.unsubscribeMultiplayer = null;
+    this.pendingMultiplayerEvents = [];
+    this.shell = null;
+    this.acc = 0;
+    this.dragPointerId = null;
+    useCommandStore.getState().clear();
+    useGameStore.getState().sync({ canControl: false });
   }
 
   private statsFor(id: string) {
@@ -358,6 +391,7 @@ export class Game {
   resetProgress(): void {
     this.profiles = Object.fromEntries(Object.keys(this.profiles).map((id) => [id, newProfile()]));
     saveProfiles(this.profiles);
+    useCampaignStore.getState().reset();
     this.syncStore();
   }
 
@@ -445,7 +479,13 @@ export class Game {
   }
 
   private isAiTurn(): boolean {
-    return this.aiActive && !this.multiplayer && this.turns.current === "P2" && this.turns.phase === "aiming";
+    return (
+      this.matchActive &&
+      this.aiActive &&
+      !this.multiplayer &&
+      this.turns.current === "P2" &&
+      this.turns.phase === "aiming"
+    );
   }
 
   private clearAiTimers(): void {
@@ -523,9 +563,12 @@ export class Game {
 
   private syncStore(): void {
     useGameStore.getState().sync({
+      matchMode: this.matchMode,
+      aiActive: this.aiActive,
       phase: this.turns.phase,
       currentId: this.turns.current,
       canControl:
+        this.matchActive &&
         !this.isAiTurn() &&
         (!this.multiplayer || useMultiplayerStore.getState().credentials?.playerId === this.turns.current) &&
         this.pendingMultiplayerEvents.length === 0,
@@ -585,7 +628,7 @@ export class Game {
 
   /** Mozgás a jelenlegi tankkal; zárolt bemenetnél nem csinál semmit. */
   move(dir: -1 | 1): void {
-    if (this.turns.inputLocked || !this.terrain || this.isAiTurn()) return;
+    if (!this.matchActive || this.turns.inputLocked || !this.terrain || this.isAiTurn()) return;
     if (this.multiplayer) {
       if (this.canControlCurrentTurn()) void useMultiplayerStore.getState().publish("move", { direction: dir });
       return;
@@ -599,7 +642,7 @@ export class Game {
 
   /** Lövés a store-ban beállított szöggel és erővel. */
   fire(): void {
-    if (this.turns.inputLocked || this.isAiTurn()) return;
+    if (!this.matchActive || this.turns.inputLocked || this.isAiTurn()) return;
     if (this.multiplayer) {
       if (!this.canControlCurrentTurn()) return;
       const { angle, power } = useGameStore.getState();
@@ -629,7 +672,7 @@ export class Game {
   }
 
   private canControlCurrentTurn(): boolean {
-    if (this.isAiTurn()) return false;
+    if (!this.matchActive || this.isAiTurn()) return false;
     return !this.multiplayer || useMultiplayerStore.getState().credentials?.playerId === this.turns.current;
   }
 
@@ -759,6 +802,9 @@ export class Game {
     this.turns.endShot(this.tanks.filter(isAlive).map((t) => t.id));
     if (this.turns.phase === "aiming") this.beginTurn();
     else {
+      if (this.matchMode === "campaign" && this.turns.winner === "P1") {
+        useCampaignStore.getState().complete();
+      }
       if (this.turns.winner) {
         this.award(this.turns.winner, WIN_BONUS_XP);
         this.finishAiMatch();
@@ -793,6 +839,8 @@ export class Game {
   }
 
   private update(frameDt: number): void {
+    this.audio?.update();
+    if (!this.matchActive) return;
     // Fix időlépés: a fizika független a képfrissítéstől.
     this.acc += Math.min(frameDt, 0.1);
     while (this.acc >= FIXED_DT) {
@@ -802,7 +850,6 @@ export class Game {
     this.processPendingMultiplayerEvents();
     this.battlefieldLayers.update(frameDt);
     this.particles.update(frameDt);
-    this.audio?.update();
     this.draw(frameDt);
   }
 

@@ -13,9 +13,15 @@ A „Következő fázisok” nem kész funkciók.
 - A HUD némítása a master gain értékét vezérli, és a parancsnoki felolvasást is elnémítja.
 - A háttérzenét az `AudioManager` egy loopolt `HTMLAudioElement`-tel játssza (hangerő 0,25, a ~4 MB-os MP3 streamelődik, nem dekódolódik memóriába); az első felhasználói gesztus után indul. A számok az `src/game/data/music.ts`-ben vannak (alap: `neon-city`).
 - Három külön kapcsolható hangcsoport van (`src/game/state/audioSettings.ts`, `localStorage`): `music`, `voice` (parancsnoki felolvasás), `effects` (lövés, robbanás, tankmozgás, fanfár). A globális némítás mindhármat felülírja.
+- A Beállításokban mentett 0–100%-os játék-hangerőcsúszka van. A `volume` (0..1) a
+  meglévő effekt-master gaint (0,6), zenehangerőt (0,25) és a beszéd hangerőértékét
+  szorozza; 100%-on az eddigi keverés marad. A régi, csak csatornakapcsolókat tartalmazó
+  mentések 100%-os hangerővel töltődnek be. Betöltési/mentési hiba naplózott és látható.
+  A zene és az effektek azonnal követik a változtatást; a futó/függő beszéd megszakad,
+  mert a Web Speech API nem támogat megbízható élő hangerőállítást.
 - A győzelmi fanfárt jelenleg az `AudioManager.playFanfare()` szintetizálja oszcillátorokkal (helyettesítő); valódi OGG esetén a `SoundName`/`URLS` bővítendő, a bemondás késleltetése (`VICTORY_ANNOUNCE_DELAY_MS` a `Game.ts`-ben) a fanfár hosszához igazítandó.
 - A parancsnoki beszédet a `src/game/systems/speech.ts` adja a böngésző `speechSynthesis`
-  API-jával (nem előre felvett hang). A `speak(text, locale, settings, slot)` hu/en/de
+  API-jával (nem előre felvett hang). A `speak(text, locale, settings, slot, volume)` hu/en/de
   nyelv szerint választ hangot (férfi név előnyben, `voiceName` felülírhatja);
   alapértelmezett hangmagasság 0,55, tempó 0,95. P2 külön hangot kap, ha van megfelelő,
   és minden esetben magasabb hangmagassággal/gyorsabb tempóval szól, nem csak egyhangos fallbacknél.

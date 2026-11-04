@@ -37,8 +37,9 @@ export const useCommandStore = create<CommandState>((set) => ({
       messages: [...s.messages, { id: nextId++, key, params, tone, time: clock() }].slice(-MAX_COMMAND_MESSAGES),
     }));
     const { muted } = useGameStore.getState();
-    if (!muted && useAudioSettings.getState().channels.voice) {
-      speak(t(key, params), useLocaleStore.getState().locale, undefined, speaker === "P2" ? 1 : 0);
+    const { channels, volume } = useAudioSettings.getState();
+    if (!muted && channels.voice && volume > 0) {
+      speak(t(key, params), useLocaleStore.getState().locale, undefined, speaker === "P2" ? 1 : 0, volume);
     }
   },
   clear: () => {

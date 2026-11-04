@@ -5,7 +5,7 @@ A [roadmap](./roadmap.md) marad a központi státuszforrás; ez annak progresszi
 részterületét bontja ellenőrizhető lépésekre. Nem új, párhuzamos projekt-roadmap.
 
 Jelölés: `[x]` elkészült, `[ ]` hátravan. **2026-11-05: elfogadott prioritás a térképmód.**
-Következő csomag: C1+C2 **Campaign Map Foundation**, a meglévő ALPHA-01 csatakörével.
+Elkészült: C1+C2 **Campaign Map Foundation**, a meglévő ALPHA-01 csatakörével.
 A további mód-, feloldás- és jutalomszabályok döntési kapui megmaradnak.
 
 ## 1. Szektoridentitás – első iteráció
@@ -29,7 +29,7 @@ fordítást kapnak. Az alap pálya fizikája, terepgenerálása és assetjei nem
 Ez még nem többpályás rendszer és nem oldja meg az XP-plafont.
 Pályaválasztás, új fizikai szabályok és feloldások nincsenek az első iterációban.
 
-## 2. Campaign Map – elsődleges következő fejlesztés
+## 2. Campaign Map – Foundation elkészült, tartalmi bővítés következik
 
 A [megvalósíthatósági elemzés](./gameplay-progression.md#10-campaign-map--sector-progression-megvalósíthatóság)
 C1–C4 lépcsői. Először C1+C2: **menü → térkép → ALPHA-01 → eredmény → térkép**,
@@ -40,39 +40,45 @@ A 3. pont később ezt bővíti, nem új párhuzamos rendszert készít.
 
 ### Döntési kapuk – implementáció előtt
 
-- [ ] Offline P1 vs AI kampány és külön megmaradó hot-seat/online gyorscsata jóváhagyása.
-- [ ] Foundation mód-/szereposztása; elsőként egy játszható ALPHA-01 pont, új pálya nélkül.
-- [ ] Kampány tulajdonosa, AI-memória/ellenfélprofil, vereség/döntetlen, elhagyás és újrapróbálás.
-- [ ] Progress jelentése: teljesített/összes; kijelölés ne számítson teljesítésnek.
-- [ ] Kampányreset és meglévő „Mentés törlése” hatása XP-re, haladásra és jutalmakra.
+- [x] Mindig P1 ember vs P2 AI; a gyorscsata ellenfélválasztása változatlan.
+- [x] Egy játszható ALPHA-01 pont, új pálya nélkül.
+- [x] Helyi böngészőhaladás; meglévő P1/P2 profilok és AI-memória megosztása.
+  Vereség/döntetlen/elhagyás nem teljesítés; eddigi harci XP megmarad, újrapróbálás lehetséges.
+- [x] Progress: teljesített/összes, kezdetben 0/1; kijelölés nem teljesítés.
+- [x] Külön kampányreset csak teljesítést töröl; teljes mentéstörlés XP-t, szinteket és kampányt.
 
 ### C1 – Térkép és valódi ALPHA-01 csatabelépés
 
 Függőség: minimális ALPHA-katalógus és mód-/navigációs döntés. Nem ad kampánybónuszt.
 Ez önmagában még nem a kész Foundation csomag; a C2-vel együtt szállítandó.
 
-- [ ] Minimális szektordefiníció és térképes meccskontextus kialakítása.
-- [ ] Új térképképernyő és menübelépés; meglévő gyorscsata indítása változatlan.
-- [ ] ALPHA-01 kiválasztása és indítása a meglévő tereppel/fizikával.
-- [ ] React gombok + SVG útvonalak, cyan/arany stílus; külön Pixi térképmotor nélkül.
-- [ ] Kijelölés, valós részletkártya, zárolási feltétel, vissza gomb.
-- [ ] Tervezett pont csak „még nem telepített” jelzéssel; ne indítson átnevezett ALPHA-csatát.
-- [ ] Billentyűzet, képernyőolvasó, érintési méretek, álló/fekvő mobil és reduced-motion próba.
+- [x] Minimális szektordefiníció és térképes meccskontextus kialakítása.
+- [x] Új térképképernyő és menübelépés; meglévő gyorscsata indítása változatlan.
+- [x] ALPHA-01 kiválasztása és indítása a meglévő tereppel/fizikával.
+- [x] React gomb + SVG műveleti háló, cyan/arany stílus; külön Pixi térképmotor nélkül.
+- [x] Kijelölt ALPHA, valós részletkártya, státusz és vissza gomb.
+- [x] Tervezett pontokat az első verzió nem rajzol; nincs átnevezett ALPHA-csata.
+- [x] Natív fókuszolható gombok és státuszfeliratok; emulált álló/fekvő mobil,
+  legalább 44 px térképgombok. A térkép nem animált.
+- [ ] Valós telefonos és képernyőolvasós használati próba.
 
 ### C2 – Mentett kampányváz
 
 Függőség: C1 és offline csatakontekstus. Nincs új fizika vagy extra XP-jutalom.
 
-- [ ] Definíció, haladás és aktív csata külön adatai; séma-/tartalomverzió, stabil meccs-ID.
-- [ ] Térképes csata elkülönítése a gyorscsatától; csak a saját mód eredménye ad teljesítést.
-- [ ] Menü/current operation, briefing és HUD a tényleges kontextusból.
-- [ ] Egyszer feldolgozott csataeredmény; render/remount ne módosítsa a haladást.
-- [ ] Győzelem utáni teljesítés, vereség/döntetlen utáni újrapróbálás; térképre visszatérés.
-- [ ] ResultScreen kampánygomb és valós secured/new route jelzések.
-- [ ] Mentés, kezdeti üres kampány a régi profil mellé, kompatibilitási és tárolási hibajelzés.
-- [ ] Térképre/menübe visszatérés lezárja az elhagyott csatát és AI-időzítőit.
-- [ ] Tesztek: mentés-visszatöltés, duplikált eredmény, vereség, döntetlen, visszavágó, reset.
-- [ ] Foundation elfogadás: teljes navigációs kör, egy pálya, kezdetben 0/1 majd 1/1;
+- [x] Definíció, haladás és aktív csata külön adatai; kampánymentés v1, helyi UUID meccs-ID.
+  Tartalomverzió/gráf csak több szektornál szükséges.
+- [x] Térképes csata elkülönítése a gyorscsatától; csak a saját mód eredménye ad teljesítést.
+- [x] Menü/current operation, briefing és HUD közös ALPHA-definícióból/meccskontextusból.
+- [x] A Game lezáráskor teljesít; render/remount nem módosít haladást.
+  Az egyetlen szektor boolean teljesítése idempotens, jutalomledger még nem szükséges.
+- [x] Győzelem utáni teljesítés, vereség/döntetlen utáni újrapróbálás; térképre visszatérés.
+- [x] ResultScreen kampánygomb és secured jelzés; new route nincs, mert nincs további útvonal.
+- [x] Mentés, kezdeti üres kampány a régi profil mellé, kompatibilitási és tárolási hibajelzés.
+  Hibás/ismeretlen mentésnél indítás tiltott, a mentést csak explicit reset írja felül.
+- [x] Térképre/menübe visszatérés lezárja az elhagyott csatát és AI-időzítőit.
+- [x] Tesztek: mentés-visszatöltés, duplikált teljesítés, vereség, döntetlen, visszavágó, reset.
+- [x] Foundation elfogadás: teljes navigációs kör, egy pálya, kezdetben 0/1 majd 1/1;
   refresh után megmaradó teljesítés, változatlan gyorscsata/online játék.
 
 ### C3 – Elágazó művelet és jutalmazás
