@@ -4,8 +4,9 @@ A [gameplay-elemzés](./gameplay-progression.md) mellé rendelt részletes munka
 A [roadmap](./roadmap.md) marad a központi státuszforrás; ez annak progressziós
 részterületét bontja ellenőrizhető lépésekre. Nem új, párhuzamos projekt-roadmap.
 
-Jelölés: `[x]` elkészült, `[ ]` hátravan. Az első iteráció elfogadott hatókör;
-a további mechanikák az elemzés ajánlásai, a jelzett döntések előtt nem implementálandók.
+Jelölés: `[x]` elkészült, `[ ]` hátravan. **2026-11-05: elfogadott prioritás a térképmód.**
+Következő csomag: C1+C2 **Campaign Map Foundation**, a meglévő ALPHA-01 csatakörével.
+A további mód-, feloldás- és jutalomszabályok döntési kapui megmaradnak.
 
 ## 1. Szektoridentitás – első iteráció
 
@@ -28,31 +29,34 @@ fordítást kapnak. Az alap pálya fizikája, terepgenerálása és assetjei nem
 Ez még nem többpályás rendszer és nem oldja meg az XP-plafont.
 Pályaválasztás, új fizikai szabályok és feloldások nincsenek az első iterációban.
 
-## 2. Campaign Map – fokozatos, még nem jóváhagyott bővítés
+## 2. Campaign Map – elsődleges következő fejlesztés
 
 A [megvalósíthatósági elemzés](./gameplay-progression.md#10-campaign-map--sector-progression-megvalósíthatóság)
-C1–C4 lépcsői. A térképváz korábban elkészülhet, mint az orbitális képességek vagy
-osztályok; nem azonos a 6. pont teljes stratégiai hadjáratával.
-A szektorkatalógus és közös konfiguráció a 3. ponttal megosztott munka, nem új párhuzamos rendszer.
+C1–C4 lépcsői. Először C1+C2: **menü → térkép → ALPHA-01 → eredmény → térkép**,
+helyileg mentett teljesítéssel. Új pályák, modifikátorok, orbitális képességek és
+osztályok nem előfeltételek. Az első katalógus csak ALPHA-01-et igényli; az új
+képernyő/meccskontextus megteremtése a feladat része, nem már késznek feltételezett alap.
+A 3. pont később ezt bővíti, nem új párhuzamos rendszert készít.
 
 ### Döntési kapuk – implementáció előtt
 
 - [ ] Offline P1 vs AI kampány és külön megmaradó hot-seat/online gyorscsata jóváhagyása.
-- [ ] Első csomópontok száma és nevei: javasolt 5; a példák 6/10/12 darabja nem vállalás.
-- [ ] DELTA-08 vs DELTA-03, VANGUARD-12 vs GRID-09 elnevezések véglegesítése.
-- [ ] Planetáris/orbitális műveleti hálózat vagy tényleges többbolygós kampány?
-- [ ] Statikus irányított gráf; OR/AND feloldás és szabad vagy végleges ágkizárás.
+- [ ] Foundation mód-/szereposztása; elsőként egy játszható ALPHA-01 pont, új pálya nélkül.
 - [ ] Kampány tulajdonosa, AI-memória/ellenfélprofil, vereség/döntetlen, elhagyás és újrapróbálás.
 - [ ] Progress jelentése: teljesített/összes; kijelölés ne számítson teljesítésnek.
 - [ ] Kampányreset és meglévő „Mentés törlése” hatása XP-re, haladásra és jutalmakra.
 
-### C1 – Térkép-prototípus
+### C1 – Térkép és valódi ALPHA-01 csatabelépés
 
-Függőség: végleges katalógus és navigációs döntés. Nem ad kampányjutalmat.
+Függőség: minimális ALPHA-katalógus és mód-/navigációs döntés. Nem ad kampánybónuszt.
+Ez önmagában még nem a kész Foundation csomag; a C2-vel együtt szállítandó.
 
+- [ ] Minimális szektordefiníció és térképes meccskontextus kialakítása.
 - [ ] Új térképképernyő és menübelépés; meglévő gyorscsata indítása változatlan.
+- [ ] ALPHA-01 kiválasztása és indítása a meglévő tereppel/fizikával.
 - [ ] React gombok + SVG útvonalak, cyan/arany stílus; külön Pixi térképmotor nélkül.
 - [ ] Kijelölés, valós részletkártya, zárolási feltétel, vissza gomb.
+- [ ] Tervezett pont csak „még nem telepített” jelzéssel; ne indítson átnevezett ALPHA-csatát.
 - [ ] Billentyűzet, képernyőolvasó, érintési méretek, álló/fekvő mobil és reduced-motion próba.
 
 ### C2 – Mentett kampányváz
@@ -60,7 +64,7 @@ Függőség: végleges katalógus és navigációs döntés. Nem ad kampányjuta
 Függőség: C1 és offline csatakontekstus. Nincs új fizika vagy extra XP-jutalom.
 
 - [ ] Definíció, haladás és aktív csata külön adatai; séma-/tartalomverzió, stabil meccs-ID.
-- [ ] Meccsindítás a térképről, kampányhoz rendelt szektor és P1/AI szerepek.
+- [ ] Térképes csata elkülönítése a gyorscsatától; csak a saját mód eredménye ad teljesítést.
 - [ ] Menü/current operation, briefing és HUD a tényleges kontextusból.
 - [ ] Egyszer feldolgozott csataeredmény; render/remount ne módosítsa a haladást.
 - [ ] Győzelem utáni teljesítés, vereség/döntetlen utáni újrapróbálás; térképre visszatérés.
@@ -68,11 +72,17 @@ Függőség: C1 és offline csatakontekstus. Nincs új fizika vagy extra XP-juta
 - [ ] Mentés, kezdeti üres kampány a régi profil mellé, kompatibilitási és tárolási hibajelzés.
 - [ ] Térképre/menübe visszatérés lezárja az elhagyott csatát és AI-időzítőit.
 - [ ] Tesztek: mentés-visszatöltés, duplikált eredmény, vereség, döntetlen, visszavágó, reset.
+- [ ] Foundation elfogadás: teljes navigációs kör, egy pálya, kezdetben 0/1 majd 1/1;
+  refresh után megmaradó teljesítés, változatlan gyorscsata/online játék.
 
 ### C3 – Elágazó művelet és jutalmazás
 
-Függőség: C2 és elfogadott gráf-/jutalomszabályok.
+Függőség: C2, legalább két további játszható csatadefiníció és elfogadott gráfszabályok.
+Új bónuszjutalom nem kötelező az elágazáshoz, csak külön döntés után kerül be.
 
+- [ ] Első bővítés darabszáma és nevei: javasolt későbbi cél az 5 játszható pont.
+- [ ] DELTA-08 vs DELTA-03, VANGUARD-12 vs GRID-09 elnevezések véglegesítése.
+- [ ] Planetáris/orbitális lépték; OR/AND feloldás, szabad vagy végleges ágkizárás.
 - [ ] Körmentes gráf validálása, OR/AND feltételek, elérhető végpont és ágbejárás.
 - [ ] Teljesített/elérhető/zárolt állapot levezetése; aktuális kijelölés külön kiemelés.
 - [ ] Kampányvége, korábbi csaták replay-e és ténylegesen új útvonal jelzése.
@@ -95,7 +105,8 @@ Függőség: C3 és a 3. pont szektor-/szabályalapjai.
 
 ## 3. Sector Operations MVP – közös pálya- és szabályalap
 
-Függőség: az 1. iteráció, majd a konfigurációs döntések. Cél: összesen három
+Függőség: C1+C2 Foundation és a konfigurációs döntések. A minimális katalógus és
+meccskontextus már a Foundation része. Tartalmi cél: összesen három
 valóban eltérő szektor és két egyszerű modifikátor, legfeljebb egy aktív hatással.
 
 ### Döntési kapuk

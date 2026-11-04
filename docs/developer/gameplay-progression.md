@@ -1,8 +1,10 @@
 # Solvyr Prime: Siege Protocol – játékmenet és hosszú távú fejlődés
 
-Kódbázis-alapú helyzetértékelés és fejlesztési javaslat, 2026-11-04.
+Kódbázis-alapú helyzetértékelés, 2026-11-04; térképközpontú irány pontosítva: 2026-11-05.
 
-Ez a dokumentum döntés-előkészítő elemzés, nem elfogadott implementációs specifikáció.
+**Rögzített fejlesztési irány: a Campaign Map legyen a fejlődés központi felülete.**
+Ez a prioritás elfogadott; a részletes mód-, feloldás-, jutalom- és balanszszabályok
+továbbra is döntést igényelnek. A dokumentum nem minden elemében kész implementációs specifikáció.
 A javasolt új mechanikák még nem részei a játéknak. Az alap szektor elnevezése,
 menü-/HUD-kijelzése és briefingje már elkészült; ez nem többpályás rendszer.
 Az elfogadott első lépést és a további döntési kapukat a
@@ -20,22 +22,26 @@ A probléma nem egyszerűen a rövid XP-görbe, hanem a tartós választási ké
 A meglévő fejlesztések összeadódnak; nincs egymást kizáró specializáció vagy korlátozott
 felszerelési összeállítás. A játékosok végül ugyanahhoz a maximális statcsomaghoz jutnak.
 
-**Ajánlott sorrend:**
+**Fejlesztési sorrend:**
 
-1. Pálya-/szektorrendszer.
-2. Egyszerű környezeti modifikátorok.
-3. Korlátozott slotos orbitális képességek.
-4. Eltérő erősségű és gyengeségű egységosztályok.
-5. Ezekre épülő single player szektorfoglalás, később roguelite kampány.
+1. **Campaign Map és a meglévő ALPHA-01 csata teljes navigációs köre.**
+2. **Mentett műveleti haladás**, eredményfeldolgozás és visszatérés a térképre.
+3. **A térkép tartalmi bővítése:** új játszható szektorok, majd elágazó útvonalak.
+4. Környezeti modifikátorok és kontrollált szektornehezítés.
+5. Horizontális feloldások, korlátozott slotos orbitális képességek és egységosztályok.
+6. Teljes stratégiai szektorfoglalás, később roguelite kampány.
 
-**A legjobb jelenlegi ár-érték arány:** három szektor és két egyszerű környezeti
-modifikátor közös MVP-je. Ehhez horizontális feloldásokat érdemes kapcsolni:
-a változatosabb pályák önmagukban nem oldják meg az elkölthetetlen XP problémáját.
+**Következő szállítható csomag: Campaign Map Foundation.** Egyetlen játszható célponttal,
+a meglévő **SECTOR ALPHA-01 / Training Grounds** pályával induljon. A térkép ne puszta
+designbemutató legyen: innen induljon a csata, ide lehessen visszatérni, és itt látszódjon
+a mentett teljesítés. A szükséges képernyő-, meccskontextus- és mentési alapokat most
+ehhez a folyamathoz kell kialakítani; hiányuk nem indok a térkép későbbre halasztására.
 
-**Campaign Map kiegészítés:** könnyű, helyileg mentett útvonaltérkép már a szektor-MVP
-körül bevezethető, orbitális képességek és új osztályok nélkül. Ez nem azonos a későbbi
-stratégiai szektorfoglalással. Megvalósíthatósága és fokozatos hatóköre a
-[10. fejezetben](#10-campaign-map--sector-progression-megvalósíthatóság) szerepel.
+Három terepprofil és két modifikátor továbbra is jó későbbi tartalomcsomag,
+de **nem előfeltétele a térképmódnak**. A térkép látható célt ad; az XP-plafont
+önmagában nem oldja meg. A tartós taktikai változatosság a későbbi tartalomból és
+összeállítási döntésekből jön. Részletes megvalósíthatóság:
+[10. fejezet](#10-campaign-map--sector-progression-megvalósíthatóság).
 
 ## 2. A jelenlegi fejlődési rendszer
 
@@ -114,6 +120,11 @@ Nem indokolt teljes engine-újraírással vagy általános ECS bevezetésével k
 A közös meccsszabályok célzott leválasztása elegendő első lépés lehet.
 
 ## 4. Rangsor és költségbecslés
+
+Az alábbi táblázat a különálló bővítések költség/érték összehasonlítása,
+nem a 2026-11-05-én rögzített végrehajtási sorrend. A térképközpontú fejlesztés
+első csomagja a 6.1. pont; költséglépcsői a 10.2. pontban szerepelnek.
+Az egyszerű térképmód nem azonos a táblázat tágabb kampány-/szektorfoglalási rendszerével.
 
 A becslések nettó fejlesztői napban értendő MVP-nagyságrendek, célzott UI-val,
 tesztekkel és multiplayer-bekötéssel. Nem tartalmaznak teljes tartalomcsomagot,
@@ -260,9 +271,48 @@ Kis kiegészítésként használhatók, de nem elsődleges megoldásként.
 Az adatvezérelt definícióhoz új sor csak akkor elég, ha a statnak már van működő
 játékmeneti fogyasztója. Fordítás, UI-prezentáció, AI-vásárlás és balansz így is érintett.
 
-## 6. Ajánlott következő csomag: Sector Operations MVP
+## 6. Végrehajtási csomagok: először térkép, utána szektortartalom
 
-### Hatókör
+### 6.1. Következő csomag: Campaign Map Foundation
+
+**Célfolyamat:**
+
+```text
+Main Menu → Campaign Map → ALPHA-01 Battlefield → Result Screen → Campaign Map
+```
+
+Ez külön térképmód-útvonal legyen. A hot-seat és online gyorscsata megőrzendő;
+a kampány kezdeti P1 vs AI szereposztása javaslat, implementáció előtt véglegesítendő.
+
+Hatókör:
+
+- Új, holografikus térképképernyő, központi ALPHA-01 csomóponttal és szektorkártyával.
+- ALPHA-01 indítása a meglévő tereppel, fizikával és harci fejlesztésekkel.
+- Explicit térképes meccskontextus: a gyorscsata eredménye ne teljesítsen kampányszektort.
+- Eredmény után térképre visszatérés, újrapróbálás és az alap szektor helyi teljesítésmentése.
+- Menüben aktuális művelet; térképen kijelölés és teljesítés; briefing/HUD ugyanazon
+  szektorkontextusból. A kijelölés nem teljesítés.
+- Meglévő XP-/profilszintek megtartása; elsőként nincs extra kampány-XP vagy Smart Aim-jutalom.
+- Az elhagyott csata és AI-időzítők lezárása; a térkép alatt ne fusson tovább rejtett csata.
+- Mobilon saját, kompakt képernyő, nem a harctérre tett nagy panel.
+
+Az első csomag végén **egy valódi térképes játékkör** működjön, ne öt fiktív célpont.
+További pontok megjelenhetnek „tervezett / még nem telepített” jelöléssel, de nem
+indíthatnak ALPHA-01-et más néven. A tartalmi készültség és a kampányfeltétel miatti
+zárolás külön fogalom. A haladás nevezője a játszható kampánytartalomból jöjjön:
+kezdetben 0/1, az ALPHA teljesítése után 1/1; tervezett szektorok ne növeljék.
+
+Elfogadás: menü → térkép → valódi ALPHA-csata → eredmény → térkép végigjárható;
+győzelem/vereség/döntetlen következetes; teljesítés refresh után megmarad;
+ugyanazon eredmény nem dolgozódik fel kétszer; gyorscsata/online működés változatlan.
+A mentett haladás a C2 részlépésben készül el, de a Foundation csomag csak ezzel együtt kész.
+
+### 6.2. Következő tartalmi csomag: Sector Operations MVP
+
+#### Hatókör
+
+Függőség: a Foundation működő térképes köre és a szektorszabályok véglegesítése.
+A katalógus/meccskontextus a Foundationnel közös alap, nem második pályarendszer.
 
 - Három eltérő terepprofilú szektor.
 - Két egyszerű környezeti modifikátor.
@@ -271,7 +321,7 @@ játékmeneti fogyasztója. Fordítás, UI-prezentáció, AI-vásárlás és bal
 - Szabályleírás a választáskor, aktív állapot jelzése a HUD-on.
 - Meglévő profilok és hot-seat működés megőrzése.
 
-### Technikai alap
+#### Technikai alap
 
 - Verziózott meccskonfiguráció: szektorazonosító, modifikátor és szabályverzió.
 - Közös szabályfeloldás a lövedékhez, előnézethez és AI-hoz.
@@ -281,7 +331,7 @@ játékmeneti fogyasztója. Fordítás, UI-prezentáció, AI-vásárlás és bal
 - Ismeretlen szektor, modifikátor vagy inkompatibilis szabályverzió explicit hibát adjon.
 - Új mentési adatok migrációval kerüljenek be; régi profilszintek ne vesszenek el.
 
-### Nem része az első csomagnak
+#### Nem része a Sector Operations csomagnak
 
 - Összeomló terep vagy rombolható épületrendszer.
 - Hover/orbitális egységfizika.
@@ -340,11 +390,12 @@ Az MVP elfogadásához:
 
 ## 9. Végső ajánlás
 
-**Most szektorok és egyszerű modifikátorok, utána korlátozott slotos orbitális támogatás.**
+**Most működő térképmód a meglévő ALPHA-01 pályával; utána mentett útvonalak és új szektorok.**
 
-Ez használja ki legjobban a meglévő terepet, fizikát, megjelenítést és multiplayer-modellt.
-Az új egységosztályok ezután valódi horizontális fejlődést adhatnak, a kampány pedig
-tartós célt biztosíthat a már változatos csatáknak.
+A térkép legyen a műveleti fejlődés gerince, amelyhez a későbbi pályák, modifikátorok
+és feloldások kapcsolódnak. Nem kell kész kampányrendszerre várni: az első implementáció
+feladata éppen a hiányzó navigáció, meccskontextus és helyi haladás megteremtése.
+Orbitális támogatás, osztályok és stratégiai hadjárat csak erre épüljenek.
 
 További statok helyett olyan rendszerekbe érdemes befektetni, amelyekben a játékos
 nem mindent megszerezve ér célba, hanem új helyzetekhez új összeállítást választ.
@@ -368,10 +419,11 @@ megvalósítható; a jelentős költség a mögöttes állapot-, csata- és juta
 | AI | Meglévő harci AI használható; stabil kampánynehézséghez külön policy kell, stratégiai AI később |
 | Solvyr Prime identitás | Nagyon erős: műveletek, útvonalak, fenyegetés és fővárosi célpont; a lore-t a játékszabályok támasszák alá |
 
-**Javasolt MVP:** öt csomópontos, enyhén elágazó offline hadművelet P1 vs AI,
-helyi mentéssel, egyszerű feloldási szabályokkal. A térkép öt célpontja használhat
-három terepprofilt; öt csomópont nem jelent automatikusan öt egyedi pályát.
-Az eltérő tartalmat és az ismétlődő profilt a leírás jelezze.
+**Első szállítás:** Campaign Map Foundation egy játszható ALPHA-01 célponttal.
+**Későbbi tartalmi cél:** öt csomópontos, enyhén elágazó offline hadművelet P1 vs AI,
+helyi mentéssel és egyszerű feloldási szabályokkal. Az ötös darabszám és szereposztás
+még javaslat. Öt célpont használhat három terepprofilt, de minden célpontnak valódi
+csatadefiníció kell; a puszta átnevezés nem új pálya.
 
 Ez módjavaslat, nem elfogadott viselkedésváltozás. A hot-seat és online játék
 maradjon külön **Skirmish / gyors csata** útvonalon; ne kelljen minden játékosnak
@@ -381,22 +433,23 @@ kampányt teljesítenie egy egyszerű mérkőzéshez.
 
 A napok nettó fejlesztői becslések célzott tesztekkel, nem vállalt határidők.
 A C1–C4 sorok az előző lépcsőre épülő többletmunkát jelölik, nem teljes projektköltséget.
-A szektorok/modifikátorok elkészítése a 4. és 6. fejezet külön munkája, nem számolandó
+A szektorok/modifikátorok elkészítése a 4. és 6.2. fejezet külön munkája, nem számolandó
 kétszer. Végleges assetek és hosszabb balansziteráció nincsenek a becslésben.
 
 | Lépcső | Hatókör | Függőség | Többletköltség | Mit ad / mit nem ad? |
 | --- | --- | --- | ---: | --- |
-| C1 – Térkép-prototípus | 5 statikus pont, kapcsolatok, kijelölés, kártya, vissza a menübe; React + SVG | Stabil szektorkatalógus és navigáció | 2–4 nap | UX és világérzet; nincs valódi teljesítés, feloldás vagy kampányjutalom |
-| C2 – Helyi haladás | P1 vs AI csatakontextus, mentés, győzelem utáni teljesítés, következő célpont; először egyszerű lánc | C1, meccsindítás/-lezárás bekötése | 4–7 nap | Működő kampányváz, meglévő harci XP-vel; új fizika és bónuszjutalom nélkül |
-| C3 – Elágazó művelet | Statikus irányított gráf, útvonalválasztás, első teljesítéshez kötött feloldás/jutalom | C2, feloldás- és jutalomszabályok | 2–4 nap | Érdemi célválasztás; még nincs erőforrás-háború vagy ellenfél-területfoglalás |
+| C1 – Térkép és csatabelépés | ALPHA-01 pont, kijelölés/kártya, navigáció és valódi csataindítás; React + SVG | ALPHA-katalógus és új képernyő/meccskontextus kialakítása | 2–4 nap | Működő belépési útvonal; a Foundation első részlépése, még nincs mentett teljesítés |
+| C2 – Helyi haladás | Csataeredmény, térképre visszatérés, ALPHA teljesítésmentése és újrapróbálás | C1, mód-/resetdöntések, meccslezárás | 4–7 nap | Kész Foundation egy pályával, meglévő harci XP-vel; új fizika és bónuszjutalom nélkül |
+| C3 – Elágazó művelet | Új játszható célpontok bekötése, statikus gráf, útvonalválasztás és feloldás; külön jóváhagyott jutalom | C2, legalább két további kész csatadefiníció és gráfszabályok | 2–4 nap, új pályák nélkül | Érdemi célválasztás; még nincs erőforrás-háború vagy ellenfél-területfoglalás |
 | C4 – Eltérő szektorcsaták | Közös szabálykonfig, kontrollált AI-nehézség, valós kártyaadatok, TTS és opcionális térkép-VFX | C3 és Sector Operations alapok | 5–10 nap | Taktikailag eltérő csaták; nem szükséges új fegyver vagy osztály |
 | C5 – Stratégiai hadjárat | Küldetések, ellenséges ellenlépések, erőforrások, tartós veszteségek | C4 és külön design | 20–40 napos teljes hadjárat-nagyságrend, a meglévő részek beszámítandók | Új stratégiai játék, nem térkép-polish |
 | C6 – Közös online kampány | Közös tulajdon, tartós szerverállapot, konfliktuskezelés, hitelesített eredmény/jutalom | Külön backend- és termékspecifikáció | Jelen adatokból nem becsülhető megbízhatóan | Nem következik a jelenlegi kétfős lobbyból |
 
-**Javasolt végrehajtás:** szektorkatalógus → C1 → C2 → C3, a valóban eltérő
-pályák/modifikátorok fejlesztésével összehangolva → C4. A végleges elrendezés már C1-ben
-lehet ágas, miközben a feloldási logika C2-ben még lineáris. Az „ágas” térképhez
-nem kell procedurális generátor, stratégiai AI vagy teljes kampányrendszer.
+**Végrehajtás:** minimális ALPHA-katalógus/meccskontextus → C1 → C2 →
+új csatadefiníciók és C3 → modifikátorok/C4. A C1+C2 együtt a következő,
+becslés szerint 6–11 nettó fejlesztői napos csomag, nem határidővállalás.
+Nem kell előre véglegesíteni mind a tíz szektort vagy megírni az online pályaprotokollt.
+Az „ágas” térképhez később sem kell procedurális generátor vagy stratégiai AI.
 
 ### 10.3. Konkrét architekturális kapcsolódások
 
@@ -532,8 +585,9 @@ felolvasásával; külön beszédszöveg indokolt. A TTS nem előfeltétele C1�
   Jelenleg egyik jelölt sem játszható; a katalógus véglegesítésekor kell dönteni.
   Addig a TODO korábbi nevei maradnak, új ID nem kerül a kódba.
 - Az eddigi lista 10 nevet ad, a főmenüminta 12-t jelez, a lineáris példa 6 szektort,
-  az MVP 5–10-et. Ezek nem azonos vállalások. Az ötcsomópontos kezdés javaslat;
-  a végleges darabszámot és gráfot implementáció előtt kell elfogadni.
+  az MVP 5–10-et. Ezek nem azonos vállalások. A Foundation egy játszható ALPHA-01 ponttal
+  indul; az ötcsomópontos bővítés javaslat. A további darabszámot és gráfot csak
+  a tartalmi bővítés előtt kell elfogadni, nem a Foundation előfeltételeként.
 - A „galaktikus kampány” Solvyr Prime bolygószektoraihoz képest nagyobb lépték.
   Elsőként planetáris/orbitális **műveleti hálózat** ajánlott csillagtérképes esztétikával,
   tényleges többbolygós utazás és új világkánon nélkül.
@@ -544,8 +598,8 @@ felolvasásával; külön beszédszöveg indokolt. A TTS nem előfeltétele C1�
 
 Mielőtt a következő lépcső késznek minősül:
 
-- C1: minden pont és feltétel olvasható, mobilon/billentyűzettel használható;
-  a prototípus nem állít nem létező teljesítést vagy jutalmat.
+- C1: ALPHA-01 a térképről indítható, minden pont olvasható, mobilon/billentyűzettel
+  használható; a tervezett pont nem játszható és nem ígér nem létező jutalmat.
 - C2: győzelem, vereség, döntetlen, visszavágó, menübe visszalépés és refresh
   következetes; a régi XP/szintek megmaradnak; a háttérben nem fut elhagyott AI-csata.
 - C3: OR/AND, ágbejárás és végpont tesztelt; első teljesítés/replay/reset szabály
@@ -555,9 +609,9 @@ Mielőtt a következő lépcső késznek minősül:
 - Online kampány: külön jóváhagyott szerveroldali tulajdon- és eredménykezelés nélkül
   helyi kampányadat ne váljon hitelesített multiplayer-jutalommá.
 
-**Legjobb ár-érték arány:** kis, ágas helyi műveleti térkép valódi csatakapcsolattal,
-majd a Sector Operations eltérő terepeivel és szabályaival. Ezt érdemes előrébb hozni
-a teljes hadjárathoz képest, de nem egyből 12 szektorral, Pixi térképmotorral,
-Smart Aim-jutalmakkal és közös online kampánnyal indítani.
+**Rögzített irány:** térkép először, ALPHA-01-re épített valódi csatakörrel és helyi
+haladással. Utána új szektorok és ágas művelet, majd modifikátorok és feloldások.
+Nem egyből 12 szektorral, Pixi térképmotorral, Smart Aim-jutalmakkal és közös online
+kampánnyal indulunk. A térképmód nem vár ezekre a rendszerekre.
 Az XP-plafont a térkép önmagában nem szünteti meg; látható célt ad, amelyet később
 horizontális feloldások és valóban különböző taktikai helyzetek tesznek tartóssá.

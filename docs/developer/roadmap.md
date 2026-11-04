@@ -93,29 +93,29 @@ Az Orbitron korábbi logójavaslat, jelenleg nincs telepítve vagy használva.
   tükrözi; ez ismert, nyitott UI-szöveghiba, nem létező életút-XP adat.
 - A vizuális Siege Platform-irány nem jelent új egységosztályt vagy fizikát.
 
-## Javasolt gameplay-prioritás – jóváhagyás előtt
+## Gameplay-prioritás – térképmód először (2026-11-05)
 
 Az elfogadott szektoridentitás-iteráció elkészült: közös alap pályanév,
 főmenü-/HUD-kijelzés és nem blokkoló briefing. A részletes
 [progressziós TODO](./gameplay-progression-todo.md) a következő csomagok döntési
-kapuit és ellenőrzéseit tartalmazza; a további mechanikák még javaslatok.
+kapuit és ellenőrzéseit tartalmazza. A térképközpontú irány elfogadott prioritás;
+a részletes mód-, jutalom- és balanszszabályok még döntést igényelnek.
 
-A [gameplay-elemzés](./gameplay-progression.md) ajánlása: szektorok → egyszerű
-modifikátorok → korlátozott slotos orbitális támogatás → szárazföldi osztályok →
-single player szektorfoglalás, később roguelite kampány.
+A [gameplay-elemzés](./gameplay-progression.md) végrehajtási sorrendje:
+**térkép + ALPHA-01 csatakör → mentett haladás → új szektorok és elágazások →
+modifikátorok → horizontális feloldások/képességek/osztályok → stratégiai hadjárat**.
 
-A javasolt Sector Operations MVP három szektort és két modifikátort céloz, de a
-szektorfeloldás, XP-felhasználás és konkrét környezeti hatások még nyitott döntések.
-Ez nem előfeltételezi az M2 többegységes csapatait vagy az M5 lebegő szigeteit,
-és nem változtatja elfogadott specifikációvá a korábbi koncepciókat.
+**Következő szállítható csomag: Campaign Map Foundation (C1+C2).**
+Főmenü → térkép → meglévő ALPHA-01 csata → eredmény → térkép, helyi teljesítésmentéssel.
+A képernyő/navigáció/meccskontextus hiányzó alapjait ebben a csomagban alakítjuk ki.
+Csak egy pálya szükséges; nincs új fizika vagy extra kampányjutalom. A hot-seat/online
+gyorscsata megmarad; a kampány szereposztása és resetje implementáció előtt véglegesítendő.
 
-Campaign Map kiegészítés: egyszerű helyi műveleti térkép a szektor-MVP körül,
-az orbitális képességek/osztályok előtt is készülhet. Javasolt lépcsők:
-statikus térkép → mentett offline haladás → ágas feloldás és egyszeri jutalom →
-eltérő szektorcsaták. Ez még nem elfogadott kampányspecifikáció, és nem helyettesíti
-a hot-seat/online gyorscsatát. A [megvalósíthatósági elemzés](./gameplay-progression.md#10-campaign-map--sector-progression-megvalósíthatóság)
-elválasztja ezt a teljes stratégiai hadjárattól és a külön backendű közös online kampánytól.
-A részletes döntési kapuk a [progressziós TODO](./gameplay-progression-todo.md) 2. pontjában vannak.
+A három terepprofil/két modifikátor Sector Operations csomag ezt később bővíti,
+nem előfeltétele a térképmódnak. Tervezett szektor nem játszható célpont és nem
+növeli a teljesítési nevezőt. A [megvalósíthatósági elemzés](./gameplay-progression.md#10-campaign-map--sector-progression-megvalósíthatóság)
+elválasztja a Foundationt a teljes stratégiai hadjárattól és a közös online kampánytól.
+A részletes feladatok a [progressziós TODO](./gameplay-progression-todo.md) 2. pontjában vannak.
 
 ## Milestone-ok
 
