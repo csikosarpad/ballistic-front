@@ -1,14 +1,15 @@
 # Solvyr Prime: Siege Protocol – fejlesztői kontextus
 
 A jelenlegi architektúra rövid összefoglalója, nem implementációs feladatlista.
-Indítás és funkcióleírás: [README](./README.md). Státuszok és további fejlesztések:
-[ROADMAP](./ROADMAP.md). A dokumentumok szerepeit a README dokumentációs táblája rögzíti.
+Fejlesztői indítás: [getting started](./getting-started.md); játékfunkciók:
+[játékosútmutató](../user/guide.md). Státuszok: [roadmap](./roadmap.md).
+A dokumentumok szerepeit a [fejlesztői index](./README.md) rögzíti.
 
 ## Meglévő architektúra
 
 - React 18 + TypeScript, Vite, PixiJS 8 és Zustand.
-- A [játékmag](./src/game/) koordinálja a loopot, fizikát, terepet és entitásokat;
-  a [React UI](./src/ui/) a HUD-ot, menüt, lobbyt, boltot és eredményképernyőt kezeli.
+- A [játékmag](../../src/game/) koordinálja a loopot, fizikát, terepet és entitásokat;
+  a [React UI](../../src/ui/) a HUD-ot, menüt, lobbyt, boltot és eredményképernyőt kezeli.
 - A fizikai állapot és pozíciók az engine-ben élnek; a gameStore a HUD számára ad nézetet.
 - Fix 1280×720 világ, aránytartó megjelenítési skálázás; resize nem új meccs.
 - Fix időlépésű ballisztika, seedelt, tükrözött value-noise terep.
@@ -37,7 +38,7 @@ Indítás és funkcióleírás: [README](./README.md). Státuszok és további f
 - A profilsnapshotnak nincs külön szabály-/sémaverziója; a helyi mentésverzió nem
   protokollverzió. Mindkét kliensnek azonos buildet kell futtatnia.
 
-Részletes végpontok és telepítés: [backend README](./server/README.md).
+Részletes végpontok és telepítés: [backend README](../../server/README.md).
 
 ## Bővítési korlátok
 
@@ -50,4 +51,4 @@ Részletes végpontok és telepítés: [backend README](./server/README.md).
 - A Game jelenleg nagy koordinátor; bővítéskor célzott közös modulok használata indokolt,
   nem egy előzetes teljes engine-újraírás.
 - Szektor, modifikátor, orbitális képesség és kampány jelenleg javaslat:
-  [gameplay és fejlődés](./docs/gameplay-progression.md).
+  [gameplay és fejlődés](./gameplay-progression.md).

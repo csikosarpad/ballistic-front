@@ -1,8 +1,8 @@
 # Solvyr Prime: Siege Protocol – neon eredményképernyő
 
 Státusz: lezárt vizuális iteráció. Jelenlegi szerződés:
-[ResultScreen UI rendszer](./result-screen-ui-system.md); további munka:
-[ROADMAP](../../ROADMAP.md). A mobil támogatás emulált viewporton ellenőrzött,
+[ResultScreen UI rendszer](../result-screen-ui-system.md); további munka:
+[roadmap](../roadmap.md). A mobil támogatás emulált viewporton ellenőrzött,
 valós telefonos próba még hátravan.
 
 - [x] A csatolt referencia sötét, cián/arany színvilágának követése.

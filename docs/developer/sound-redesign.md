@@ -1,7 +1,8 @@
 # Sound Redesign
 
 Aktuális hangarchitektúra és részletes hangfejlesztési lista. Központi ütemezés:
-[ROADMAP](../ROADMAP.md); használat és források: [README](../README.md).
+[roadmap](./roadmap.md); használat: [játékosútmutató](../user/guide.md);
+assetforrások: [fejlesztői útmutató](./getting-started.md#köszönet).
 A „Következő fázisok” nem kész funkciók.
 
 ## Aktuális állapot

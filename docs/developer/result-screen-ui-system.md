@@ -1,8 +1,8 @@
 # Solvyr Prime: Siege Protocol – Result screen UI asset rendszer
 
 Státusz: megvalósított prezentációs alap, nyitott ellenőrzési korlátokkal.
-Központi státusz: [ROADMAP](../../ROADMAP.md); vizuális kontextus:
-[játék redesign](../game-redesign.md). Ez nem általános gameplay-egységmodell.
+Központi státusz: [roadmap](./roadmap.md); vizuális kontextus:
+[játék redesign](./game-redesign.md). Ez nem általános gameplay-egységmodell.
 
 ## Cél
 

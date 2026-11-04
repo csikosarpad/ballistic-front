@@ -2,10 +2,13 @@
 
 A dátumozott bejegyzések az adott iteráció történetét őrzik; egy korábbi tervet vagy
 hiányt későbbi bejegyzés felülírhat. Nem aktuális backlog és nem folyamatos tesztjelentés.
-Jelenlegi működés: [README](../README.md); aktív státuszok: [ROADMAP](../ROADMAP.md).
+Jelenlegi működés: [játékosútmutató](../user/guide.md); aktív státuszok: [roadmap](./roadmap.md).
 
 ## 2026-11-04
 
+- A dokumentáció célközönség szerint szétválasztva: `docs/user/` a játékosoknak,
+  `docs/developer/` a fejlesztőknek, azon belül `archive/` a lezárt vizuális listáknak.
+  A gyökér README belépési pont; a roadmap és dev-notes a fejlesztői mappába költözött.
 - Kódbázis-alapú [gameplay- és fejlődési elemzés](./gameplay-progression.md) készült
   a fejlődési plafonról; a szektor/modifikátor MVP ajánlás, nem implementált funkció.
 - A dokumentáció aktuális állításai egységesítve: hu/en/de nyelvek, fejleszthető
@@ -67,6 +70,6 @@ Jelenlegi működés: [README](../README.md); aktív státuszok: [ROADMAP](../RO
 - Elkészültek a részletes SVG tereptárgy assetek: fa, szikla és katonai antenna. A Pixi réteg ezeket tölti be, hiba esetén pedig naplózott vektoros fallback rajzolást használ.
 - A tereptárgyak mélységi elhelyezése finomodott: kisebb, terrainhez kötött előtéri skálát és alacsonyabb alpha-t kaptak, így nem keverednek a távoli hegy- és atmoszférarétegekkel.
 - A szétszórt fák és antennatornyok kikerültek az aktív pályaképből; egyelőre csak a terrainhez jobban illeszkedő sziklaelemek maradtak. A fa- és antenna-SVG-k későbbi, sűrűbb környezeti rendszerhez megmaradtak.
-- A hangassetek OGG formátumra váltottak; az `AudioManager` már a `shot.ogg`, `explosion.ogg` és `tank-move.ogg` fájlokat tölti be. A konvertálás forrása a FreeConvert OGG Converter, a további hangterv külön `docs/sound-redesign.md` dokumentumba került.
+- A hangassetek OGG formátumra váltottak; az `AudioManager` már a `shot.ogg`, `explosion.ogg` és `tank-move.ogg` fájlokat tölti be. A konvertálás forrása a FreeConvert OGG Converter, a további hangterv a [hang-redesign](./sound-redesign.md) dokumentumba került.
 - A röppálya-előnézet jövőbeli fejleszthető erőforrásának neve rögzítve lett: magyarul „Célzástámogatás”, angolul „Smart Aim”. Az alap 1 meccsenkénti használat megmarad, később töltetekkel bővíthető.
 - A Célzástámogatás / Smart Aim tényleges upgrade-ként bekerült: alapból 1, szintenként +1 meccsenkénti töltetet ad, a HUD és a multiplayer profiladatok játékosonként kezelik a megmaradt tölteteket.

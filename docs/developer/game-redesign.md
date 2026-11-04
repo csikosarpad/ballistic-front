@@ -1,8 +1,8 @@
 # Solvyr Prime: Siege Protocol - játék redesign terv
 
 Státusz: a vizuális alapok megvalósultak; a dokumentum designelveket, lezárt iterációkat
-és külön jelölt nyitott feladatokat tartalmaz. Aktuális működés: [README](../README.md);
-központi státuszok: [ROADMAP](../ROADMAP.md); új gameplay-rendszerek:
+és külön jelölt nyitott feladatokat tartalmaz. Aktuális működés: [játékosútmutató](../user/guide.md);
+központi státuszok: [roadmap](./roadmap.md); új gameplay-rendszerek:
 [fejlődési elemzés](./gameplay-progression.md).
 
 ## Cél
@@ -21,9 +21,9 @@ A játék vizuális rendszere egységes, rétegezett és később bővíthető l
 Ez a vizuális/UX redesign részletes terve, nem az összes gameplay-fejlesztés ütemterve.
 A ResultScreen megvalósított szerződése és lezárt vizuális iterációi:
 
-- [ResultScreen UI rendszer](./todos/result-screen-ui-system.md)
-- [ResultScreen redesign TODO](./todos/result-screen-redesign.md)
-- [Neon ResultScreen polish](./todos/result-screen-neon-polish.md)
+- [ResultScreen UI rendszer](./result-screen-ui-system.md)
+- [Lezárt ResultScreen redesign](./archive/result-screen-redesign.md)
+- [Lezárt neon ResultScreen polish](./archive/result-screen-neon-polish.md)
 
 Az új játéktér- és asset-fejlesztések ebben a dokumentumban kapnak helyet.
 
@@ -141,7 +141,7 @@ Az asset ne tartalmazzon játékosnevet, státuszt vagy szöveget. Ezeket a UI r
 ### Asset API
 
 A `UnitPresentation` az egység megjelenítésének absztrakciója, nem gameplay-modell.
-A jelenlegi szerződés forrása a [result.types.ts](../src/ui/result/result.types.ts):
+A jelenlegi szerződés forrása a [result.types.ts](../../src/ui/result/result.types.ts):
 
 ```ts
 interface UnitPresentation {
@@ -315,13 +315,13 @@ emulált ellenőrzések, nem valós telefonos validációk.
 
 ### Referenciák
 
-- [Solvyr Prime: Siege Protocol – Steam Capsule / Store Header koncepció](../plans/solvyr-prime_siege_protocol_game.png)
-- [Solvyr Prime: Siege Protocol – nyitóképernyő](../plans/solvyr-prime_siege_protocol_open.png)
-- [Solvyr Prime: Siege Protocol – játékképernyő](../plans/solvyr-prime_siege_protocol_game_screen.png)
-- [Solvyr Prime: Siege Protocol – eredményképernyő](../plans/solvyr-prime_siege_protocol_result.png)
-- [Játékmenet és főmenü vizuális terve](../plans/visual_plan_game.png)
-- [Meccs utáni fejlesztőbolt terve](../plans/ballistic-front_shop.png)
-- [Parancsnoki konzol terve](../plans/solvyr-prime_siege_protocol_command_concolse.png) –
+- [Solvyr Prime: Siege Protocol – Steam Capsule / Store Header koncepció](../../plans/solvyr-prime_siege_protocol_game.png)
+- [Solvyr Prime: Siege Protocol – nyitóképernyő](../../plans/solvyr-prime_siege_protocol_open.png)
+- [Solvyr Prime: Siege Protocol – játékképernyő](../../plans/solvyr-prime_siege_protocol_game_screen.png)
+- [Solvyr Prime: Siege Protocol – eredményképernyő](../../plans/solvyr-prime_siege_protocol_result.png)
+- [Játékmenet és főmenü vizuális terve](../../plans/visual_plan_game.png)
+- [Meccs utáni fejlesztőbolt terve](../../plans/ballistic-front_shop.png)
+- [Parancsnoki konzol terve](../../plans/solvyr-prime_siege_protocol_command_concolse.png) –
   a konzol és az offline AI megvalósult; a képen szereplő „AI ONLINE” / „VOICE ACTIVE”
   állapotjelzők még nincsenek meg.
 
@@ -581,4 +581,4 @@ stratégiáját és a ballisztikai szabályokat is megváltoztatná.
 
 A gameplay-fejlődési plafonra javasolt szektorok és modifikátorok nem ennek a tisztán
 vizuális iterációnak a részei; elemzésük a [gameplay-dokumentumban](./gameplay-progression.md),
-jóváhagyási státuszuk a [ROADMAP-ben](../ROADMAP.md) szerepel.
+jóváhagyási státuszuk a [roadmapben](./roadmap.md) szerepel.

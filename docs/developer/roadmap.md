@@ -9,15 +9,15 @@ tematikus csoportok, nem kötelező végrehajtási sorrend; az M7 vizuális munk
 részben elkészültek az M2–M6 új játékmenete előtt. A tényleges függőségeket az adott
 implementáció előtt kell rögzíteni. A fejlesztések külön branchen és PR-ban készülnek.
 
-A jelenlegi használatot a [README](./README.md), a technikai korlátokat a
-[fejlesztői kontextus](./dev-notes.md), a történetet a [napló](./docs/history.md) írja le.
+A jelenlegi használatot a [játékosútmutató](../user/guide.md), a technikai korlátokat a
+[fejlesztői kontextus](./dev-notes.md), a történetet a [napló](./history.md) írja le.
 A részletes designlisták saját részterületük leírásai, nem párhuzamos prioritási listák.
 Jelölések: `[x]` megvalósított vagy dokumentált korábbi ellenőrzés; `[ ]` nyitott feladat.
 A „javaslat” külön jóváhagyást igényel, és nem kész funkció.
 
 A fejlődési plafon kódbázis-alapú elemzése és a szektorok, környezeti modifikátorok,
 orbitális képességek, egységosztályok és kampány rangsora:
-[Játékmenet és hosszú távú fejlődés](./docs/gameplay-progression.md).
+[Játékmenet és hosszú távú fejlődés](./gameplay-progression.md).
 
 ## Aktuális állapot (2026-11)
 
@@ -93,7 +93,7 @@ Az Orbitron korábbi logójavaslat, jelenleg nincs telepítve vagy használva.
 
 ## Javasolt gameplay-prioritás – jóváhagyás előtt
 
-A [gameplay-elemzés](./docs/gameplay-progression.md) ajánlása: szektorok → egyszerű
+A [gameplay-elemzés](./gameplay-progression.md) ajánlása: szektorok → egyszerű
 modifikátorok → korlátozott slotos orbitális támogatás → szárazföldi osztályok →
 single player szektorfoglalás, később roguelite kampány.
 
@@ -182,12 +182,12 @@ azok külön, későbbi terepmechanikák.
 - [x] Rétegezett csillagos ég-, hegy-, atmoszféra- és terrain-megjelenítés
 - [x] OGG hangassetek bevezetése és webes betöltésre optimalizálása
 - [ ] Siege Platform vizuális megvalósíthatósági vizsgálata: gameplay-képernyő, egységsziluett, SVG-rétegek és animációk; játékmeneti és multiplayer-viselkedés változatlanul hagyásával
-- [x] Mobil játszhatóság: fekvő tájolás ajánlása, érintésbarát HUD és célzás (±1°/±10 gombok, nyomva tartás, húzásos célzás); részletes felmérés: `docs/game-redesign.md` „Mobil játszhatóság felmérése". Valós eszközös próba hátravan.
+- [x] Mobil játszhatóság: fekvő tájolás ajánlása, érintésbarát HUD és célzás (±1°/±10 gombok, nyomva tartás, húzásos célzás); részletes felmérés: [játék redesign](./game-redesign.md), „Mobil játszhatóság felmérése”. Valós eszközös próba hátravan.
 - [ ] Neon, additív blend (erőtér-villanás, pajzsbuborék)
 - [x] Parallax világűr-háttér: csillagköd-kép (`src/game/assets/backgrounds/siege-sky.jpg`, 126 KB), lassan sodródó köd- és csillagréteg, három halványodó hegyréteg légköri homállyal; reduced-motion esetén mozdulatlan
 - [ ] Sötét cyberpunk UI továbbfejlesztése
 - [ ] Hang-redesign következő fázisai: eseményhangok, lazy loading, zeneválasztó,
-  hangerő, fanfár és beszédbeállítások; részletes státuszlista: [hangterv](./docs/sound-redesign.md)
+  hangerő, fanfár és beszédbeállítások; részletes státuszlista: [hangterv](./sound-redesign.md)
 - [x] Parancsnoki konzol a HUD-ban (`CommandConsole`, `commandStore`): időbélyeges napló, gépelési effekt, reduced-motion esetén azonnali kiírás
 - [x] Parancsnoki felolvasás (`speech.ts`): `speechSynthesis`, nyelvenként férfi hang előnyben, mélyebb hangmagasság; némítás követi
 - [x] Győzelmi fanfár (szintetizált helyettesítő) és „A csatát {név} nyerte!" bemondás

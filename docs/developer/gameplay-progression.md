@@ -4,9 +4,9 @@ Kódbázis-alapú helyzetértékelés és fejlesztési javaslat, 2026-11-04.
 
 Ez a dokumentum döntés-előkészítő elemzés, nem elfogadott implementációs specifikáció.
 A javasolt mechanikák még nem részei a játéknak. A meglévő technikai milestone-okat
-a [ROADMAP](../ROADMAP.md), a vizuális irányt a [játék redesign terve](./game-redesign.md) rögzíti.
+a [roadmap](./roadmap.md), a vizuális irányt a [játék redesign terve](./game-redesign.md) rögzíti.
 A ROADMAP milestone-jai tematikus csoportok, nem ennek az ajánlott prioritásnak az
-ellentétes végrehajtási sorrendje. A meglévő játékműködés belépési pontja a [README](../README.md).
+ellentétes végrehajtási sorrendje. A meglévő játékműködés leírása a [játékosútmutató](../user/guide.md).
 
 ## 1. Összefoglaló
 
@@ -31,7 +31,7 @@ a változatosabb pályák önmagukban nem oldják meg az elkölthetetlen XP prob
 
 ## 2. A jelenlegi fejlődési rendszer
 
-A [fejlesztési definíciók](../src/game/data/upgrades.ts) alapján:
+A [fejlesztési definíciók](../../src/game/data/upgrades.ts) alapján:
 
 | Fejlesztés | Maximális szint | Teljes XP-költség nulláról |
 | --- | ---: | ---: |
@@ -47,14 +47,14 @@ A [fejlesztési definíciók](../src/game/data/upgrades.ts) alapján:
 A költségek a szintenként kerekített `baseCost * costGrowth ** level` összegei.
 Ezek aktuális konfigurációs értékek, nem hosszú távú balanszcélok.
 
-A [profil és vásárlási logika](../src/game/systems/upgrades.ts) csak XP-egyenleget
+A [profil és vásárlási logika](../../src/game/systems/upgrades.ts) csak XP-egyenleget
 és fejlesztési szinteket tárol. Az XP elkölthető pénznem, nem az összes megszerzett
 tapasztalat nyilvántartása.
 
 A shop összes megszerzett XP-re utaló felirata ismert szöveghiba: jelenleg is ezt az
 egyenleget mutatja. Feliratjavítás és új életút-XP adat bevezetése két külön feladat.
 
-A [harci elszámolás](../src/game/engine/Game.ts) az ellenfél pajzsának, páncéljának
+A [harci elszámolás](../../src/game/engine/Game.ts) az ellenfél pajzsának, páncéljának
 és HP-jának okozott sebzésért ad XP-t, a győzelemért további 50-et. A regenerálódó
 pajzs miatt a meccsen szerezhető XP nem azonos az ellenfél kezdő védelmi pontjaival.
 
@@ -80,27 +80,27 @@ Következmények:
 
 ### Fontos konkrét kapcsolódások
 
-- A [terepgenerátor](../src/game/terrain/heightmap.ts) egyetlen terepcsaládot variál.
+- A [terepgenerátor](../../src/game/terrain/heightmap.ts) egyetlen terepcsaládot variál.
   Más seed nem jelent új pályatípust.
-- A [Terrain](../src/game/terrain/Terrain.ts) a fizikai maszkot és a látványt
+- A [Terrain](../../src/game/terrain/Terrain.ts) a fizikai maszkot és a látványt
   párhuzamosan rombolja. Új rombolási mechanika mindkettőt érinti.
-- A [ballisztika](../src/game/physics/ballistics.ts) már fogad gravitációt, de a
-  [Game](../src/game/engine/Game.ts) a lövedékhez, előnézethez és AI-hívásokhoz jelenleg
+- A [ballisztika](../../src/game/physics/ballistics.ts) már fogad gravitációt, de a
+  [Game](../../src/game/engine/Game.ts) a lövedékhez, előnézethez és AI-hívásokhoz jelenleg
   az alapgravitációt használja. Egy modifikátort minden érintett felületen át kell vezetni.
-- Az [AI](../src/game/systems/ai.ts) fizikai célzási keresése új terepen is használható,
+- Az [AI](../../src/game/systems/ai.ts) fizikai célzási keresése új terepen is használható,
   de mozgása az ellenfél felé közelítést vizsgálja, nem általános taktikai helyezkedést.
-- A [TurnManager](../src/game/systems/turnManager.ts) célzás, lövés és meccsvége
+- A [TurnManager](../../src/game/systems/turnManager.ts) célzás, lövés és meccsvége
   fázisokat kezel. Általános képességfeloldási folyamat még nincs.
-- A [MatchSetup](../src/game/systems/seededRandom.ts) jelenleg seedet és kezdőindexet tartalmaz.
+- A [MatchSetup](../../src/game/systems/seededRandom.ts) jelenleg seedet és kezdőindexet tartalmaz.
   Szektorhoz, modifikátorhoz és szabályverzióhoz bővíteni kell.
 - A helyi profilboríték verziózott, az online profilsnapshotnak viszont nincs külön
   séma-/szabályverziója. A javasolt meccskonfiguráció-verziózás új munka, nem meglévő képesség.
-- A [PHP API](../server/api/index.php) explicit eseménytípusokat engedélyez.
+- A [PHP API](../../server/api/index.php) explicit eseménytípusokat engedélyez.
   Új képességparancs a backend szabályait és a kliens visszajátszását is érinti.
-- A [UnitPresentation](../src/ui/result/result.types.ts) ground/space/air/mech
+- A [UnitPresentation](../../src/ui/result/result.types.ts) ground/space/air/mech
   tartományai megjelenítési előkészítések, nem kész egységfizikák.
-- A [háttérrétegek](../src/game/engine/BattlefieldLayers.ts) újrahasználhatók,
-  de a jelenlegi színek és assetek nem mind a [Theme](../src/game/theme.ts) objektumból jönnek.
+- A [háttérrétegek](../../src/game/engine/BattlefieldLayers.ts) újrahasználhatók,
+  de a jelenlegi színek és assetek nem mind a [Theme](../../src/game/theme.ts) objektumból jönnek.
 
 Nem indokolt teljes engine-újraírással vagy általános ECS bevezetésével kezdeni.
 A közös meccsszabályok célzott leválasztása elegendő első lépés lehet.
@@ -310,7 +310,7 @@ Az eredeti, 2026-11-04-i elemzés során nyolc kapcsolódó tesztfájl összesen
 - determinisztikus replay és két klienses multiplayer-szinkron.
 
 Ez a meglévő alapokat ellenőrzi, nem a javasolt új mechanikákat.
-A [replay-teszt](../src/game/multiplayer/replay.test.ts) részben külön headless
+A [replay-teszt](../../src/game/multiplayer/replay.test.ts) részben külön headless
 meccsfolyamatot használ, ezért az új szabályoknál a tényleges játékmotorral való
 egyezést is ellenőrizni kell.
 

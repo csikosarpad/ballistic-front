@@ -2,7 +2,7 @@
 
 Státusz: a vizuális iteráció lezárt. A jelölt build-/tesztfuttatás korábbi ellenőrzés,
 nem minden későbbi módosításra érvényes garancia. Jelenlegi presentation szerződés:
-[UI rendszer](./result-screen-ui-system.md); aktív feladatok: [ROADMAP](../../ROADMAP.md).
+[UI rendszer](../result-screen-ui-system.md); aktív feladatok: [roadmap](../roadmap.md).
 
 - [x] A referencia szerinti eredménykártya és győztes fejléc kialakítása.
 - [x] A meccsstatisztika külön, négyoszlopos táblázatba rendezése.
