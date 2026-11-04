@@ -1,4 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { TRAINING_SECTOR } from "@/game/data/sectors";
+import { SectorBriefing } from "./SectorBriefing";
 import { PowerDial, UnitGauge } from "./gauges";
 import { MAX_ANGLE, MIN_ANGLE, MIN_POWER, useGameStore } from "@/game/state/gameStore";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
@@ -33,6 +35,7 @@ export function Hud() {
     toggleMuted,
     setAim,
     profiles,
+    matchSequence,
   } = useGameStore();
   const online = useMultiplayerStore((state) => state.credentials !== null);
   const multiplayerError = useMultiplayerStore((state) => state.error);
@@ -139,6 +142,10 @@ export function Hud() {
           </section>
         ))}
         <div className="hud-top-center">
+          <div className="hud-sector" aria-label={t("sector.battlefield")}>
+            <span className="sector-code">{TRAINING_SECTOR.code}</span>
+            <strong>{TRAINING_SECTOR.name}</strong>
+          </div>
           <WindIndicator wind={wind} />
           <div className="hud-readout">
             {t("hud.turn")} <strong style={{ color: toCss(me?.color) }}>{name(currentId)}</strong>
@@ -156,8 +163,9 @@ export function Hud() {
             </div>
           )}
         </div>
+        <CommandConsole />
       </div>
-      <CommandConsole />
+      {matchSequence > 0 && <SectorBriefing key={matchSequence} />}
       <div className="hud-command-dock">
         <div className="hud-controls">
           <div className="hud-control">

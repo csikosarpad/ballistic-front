@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { TRAINING_SECTOR } from "@/game/data/sectors";
 import { useGameStore } from "@/game/state/gameStore";
 import { MAX_NAME_LENGTH, usePlayerNamesStore } from "@/game/state/playerNames";
 import { AUDIO_CHANNELS, useAudioSettings } from "@/game/state/audioSettings";
@@ -120,6 +121,10 @@ export function MainMenu() {
         <div className="panel main-menu-panel">
           <header className="main-menu-header">
             <h1>{t("menu.title")}</h1>
+            <div className="menu-sector" aria-label={t("sector.battlefield")}>
+              <span className="sector-code">{TRAINING_SECTOR.code}</span>
+              <strong>{TRAINING_SECTOR.name}</strong>
+            </div>
             <p>{t("menu.tagline")}</p>
             <small>{t("menu.controls")}</small>
           </header>

@@ -49,6 +49,8 @@ export interface GameState {
   previewRemaining: number;
   previewActive: boolean;
   screen: Screen;
+  /** Helyi prezentációs sorszám; új csatánál változik, nem online protokollmező. */
+  matchSequence: number;
   muted: boolean;
   setAim: (angle: number, power: number) => void;
   /** Az erőt a [MIN_POWER, maxPower] tartományban tartva változtatja. */
@@ -80,6 +82,7 @@ export const useGameStore = create<GameState>((set) => ({
   previewRemaining: 0,
   previewActive: false,
   screen: "menu",
+  matchSequence: 0,
   muted: readMuted(),
   setAim: (angle, power) => set({ angle, power }),
   nudgePower: (delta) => set((s) => ({ power: Math.min(s.maxPower, Math.max(MIN_POWER, s.power + delta)) })),

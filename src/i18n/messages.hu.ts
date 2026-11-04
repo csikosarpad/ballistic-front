@@ -11,6 +11,10 @@ export const hu = {
   "menu.resetConfirm": "Biztosan törlöd az összes XP-t és fejlesztést?",
   "menu.language": "Nyelv",
 
+  "sector.battlefield": "Harctér",
+  "sector.briefing": "Szektor eligazítás",
+  "sector.trainingBrief": "Kiképzési hadszíntér. Rombolható terep, változó szél. Semlegesítsd az ellenséges egységet.",
+
   "lobby.title": "Online multiplayer",
   "lobby.playerName": "Játékosnév",
   "lobby.create": "Szoba létrehozása",

@@ -17,6 +17,15 @@ describe("MainMenu", () => {
     useMultiplayerStore.getState().leave();
   });
 
+  it("a játékcím alatt a jelenlegi harctér azonosítója és neve szerepel", () => {
+    const { container } = render(<MainMenu />);
+    const header = container.querySelector(".main-menu-header");
+    expect(header).toHaveTextContent("Solvyr Prime: Siege Protocol");
+    expect(header).toHaveTextContent("SECTOR ALPHA-01");
+    expect(header).toHaveTextContent("Training Grounds");
+    expect(header?.children[1]).toHaveClass("menu-sector");
+  });
+
   it("a nyelvváltó angolra állítja a menüt, majd vissza magyarra", () => {
     render(<MainMenu />);
     fireEvent.click(screen.getByRole("button", { name: "Beállítások" }));

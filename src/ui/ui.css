@@ -438,6 +438,102 @@
   font-size: 11px;
 }
 
+.sector-code {
+  display: block;
+  color: var(--bf-shield);
+  font: 600 11px var(--bf-font-data);
+  letter-spacing: 1.6px;
+}
+
+.menu-sector {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding-left: 12px;
+  border-left: 2px solid var(--bf-shield);
+}
+
+.menu-sector strong {
+  color: var(--bf-text);
+  font: 600 19px var(--bf-font-ui);
+}
+
+.hud-sector {
+  min-width: 0;
+  max-width: 100%;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--bf-divider);
+}
+
+.hud-sector .sector-code {
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.hud-sector strong {
+  display: block;
+  color: var(--bf-text);
+  font: 600 13px var(--bf-font-data);
+}
+
+.sector-briefing {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  pointer-events: none;
+}
+
+.sector-briefing-panel {
+  width: min(460px, 100%);
+  box-sizing: border-box;
+  padding: clamp(16px, 4vw, 28px);
+  border: 1px solid var(--bf-shield);
+  border-radius: 2px 18px;
+  background: linear-gradient(135deg, rgba(4, 22, 42, 0.96), rgba(7, 14, 33, 0.92));
+  box-shadow: 0 0 32px color-mix(in srgb, var(--bf-shield) 25%, transparent);
+  text-align: center;
+  animation: sector-briefing-reveal 0.3s ease-out;
+}
+
+.sector-briefing-eyebrow {
+  margin-bottom: 18px;
+  color: var(--bf-highlight);
+  font: 600 12px var(--bf-font-data);
+  letter-spacing: 3px;
+}
+
+.sector-briefing h2 {
+  margin: 8px 0 12px;
+  color: var(--bf-text);
+  font: 600 clamp(22px, 5vw, 32px) var(--bf-font-ui);
+}
+
+.sector-briefing p {
+  margin: 0;
+  color: var(--bf-muted);
+  font: 500 16px var(--bf-font-data);
+}
+
+@keyframes sector-briefing-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sector-briefing-panel {
+    animation: none;
+  }
+}
+
 .main-menu-actions {
   display: grid;
   gap: 8px;
@@ -1807,6 +1903,175 @@
     display: none;
   }
 }
+
+/* Mobilon a teljes napló helyett egyetlen közlés marad a felső HUD alatt. */
+@media (max-width: 1024px), (pointer: coarse), (orientation: landscape) and (max-height: 500px) {
+  .hud-unit {
+    padding: 4px 6px;
+    column-gap: 5px;
+  }
+
+  .unit-gauge {
+    width: 42px;
+    height: 42px;
+  }
+
+  .hud-unit-heading {
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .hud-rank {
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+
+  .hud-top-center {
+    gap: 2px;
+    padding: 4px 6px;
+  }
+
+  .hud-readout,
+  .hud-status-message {
+    font-size: 11px;
+  }
+
+  .wind-indicator {
+    gap: 4px;
+    min-width: 0;
+    font-size: 14px;
+  }
+
+  .wind-indicator-label {
+    font-size: 10px;
+  }
+
+  .wind-indicator-arrow {
+    font-size: 16px;
+  }
+
+  .hud-sector {
+    padding-bottom: 2px;
+  }
+
+  .hud-sector strong {
+    font-size: 12px;
+  }
+
+  .hud-command-dock {
+    gap: 3px;
+    padding: 4px;
+  }
+
+  .hud-controls {
+    gap: 4px;
+    padding: 0 0 3px;
+  }
+
+  .hud-control {
+    gap: 2px;
+    font-size: 11px;
+  }
+
+  .power-dial {
+    display: none;
+  }
+
+  .hud-actions {
+    gap: 4px;
+  }
+
+  .hud-actions button {
+    gap: 2px;
+    min-height: 38px;
+    padding: 3px;
+    font-size: 11px;
+  }
+
+  .command-console {
+    position: static;
+    display: block;
+    grid-column: 1 / -1;
+    grid-row: 3;
+    justify-self: center;
+    width: min(360px, 100%);
+    padding: 2px 6px;
+    border-radius: 2px 6px;
+    background: rgba(4, 22, 42, 0.66);
+    font-size: 11px;
+  }
+
+  .command-console:has(.command-feed:empty),
+  .command-header,
+  .command-time,
+  .command-line:not(.is-latest) {
+    display: none;
+  }
+
+  .command-feed {
+    min-height: 0;
+    margin: 0;
+  }
+
+  .command-line {
+    padding: 1px 4px;
+  }
+
+  .command-text {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .hud-top {
+    grid-template-columns: minmax(0, 1fr) minmax(150px, auto) minmax(0, 1fr);
+    gap: 3px 6px;
+  }
+
+  .hud-unit-p1 {
+    grid-column: 1;
+  }
+
+  .hud-unit-p2 {
+    grid-column: 3;
+  }
+
+  .hud-top-center {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .command-console {
+    grid-row: 2;
+  }
+
+  .hud-controls,
+  .hud-actions {
+    gap: 3px;
+    padding: 4px;
+  }
+
+  .battle-hud .hud-step {
+    width: 34px;
+    height: 34px;
+    font-size: 19px;
+  }
+
+  .hud-control {
+    grid-template-columns: 42px minmax(0, 1fr);
+    font-size: 10px;
+  }
+
+  .hud-stepper {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 4px;
+  }
+}
+
 .player-name-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;

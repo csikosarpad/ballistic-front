@@ -12,6 +12,11 @@ export const de: Record<MessageKey, string> = {
   "menu.resetConfirm": "Möchtest du alle XP und Upgrades löschen?",
   "menu.language": "Sprache",
 
+  "sector.battlefield": "Schlachtfeld",
+  "sector.briefing": "Sektoreinweisung",
+  "sector.trainingBrief":
+    "Übungsgelände. Zerstörbares Terrain, wechselnder Wind. Neutralisiere die feindliche Einheit.",
+
   "lobby.title": "Online-Spiel",
   "lobby.playerName": "Spielername",
   "lobby.create": "Raum erstellen",

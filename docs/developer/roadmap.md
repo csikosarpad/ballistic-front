@@ -33,7 +33,9 @@ orbitális képességek, egységosztályok és kampány rangsora:
   Web Speech API-val (hu/en/de, elérhető böngészőhangtól függően), szintetizált győzelmi
   fanfár és a győztes bemondása. Offline a játékosnevek a Beállításokban állíthatók.
 - Offline AI és érintésbarát célzás működik; valódi telefonos ellenőrzés még hátravan.
-- Egy seedelt terepcsalád, két tank és hét összeadódó statfejlesztés van. Szektor,
+- Egy seedelt terepcsalád, két tank és hét összeadódó statfejlesztés van. A harctér
+  **SECTOR ALPHA-01 / Training Grounds** néven megjelenik a főmenüben és HUD-ban,
+  meccskezdéskor 2,5 másodperces briefinggel. Többpályás választás,
   modifikátor, orbitális képesség, egységosztály-választás és kampány még nincs.
 - A részletes UX- és hang-redesign következő lépései külön checklistként szerepelnek alább.
 
@@ -92,6 +94,11 @@ Az Orbitron korábbi logójavaslat, jelenleg nincs telepítve vagy használva.
 - A vizuális Siege Platform-irány nem jelent új egységosztályt vagy fizikát.
 
 ## Javasolt gameplay-prioritás – jóváhagyás előtt
+
+Az elfogadott szektoridentitás-iteráció elkészült: közös alap pályanév,
+főmenü-/HUD-kijelzés és nem blokkoló briefing. A részletes
+[progressziós TODO](./gameplay-progression-todo.md) a következő csomagok döntési
+kapuit és ellenőrzéseit tartalmazza; a további mechanikák még javaslatok.
 
 A [gameplay-elemzés](./gameplay-progression.md) ajánlása: szektorok → egyszerű
 modifikátorok → korlátozott slotos orbitális támogatás → szárazföldi osztályok →
@@ -189,6 +196,8 @@ azok külön, későbbi terepmechanikák.
 - [ ] Hang-redesign következő fázisai: eseményhangok, lazy loading, zeneválasztó,
   hangerő, fanfár és beszédbeállítások; részletes státuszlista: [hangterv](./sound-redesign.md)
 - [x] Parancsnoki konzol a HUD-ban (`CommandConsole`, `commandStore`): időbélyeges napló, gépelési effekt, reduced-motion esetén azonnali kiírás
+- [x] Kompakt mobil HUD: 42 px védelmi műszerek, kisebb térközök; a konzol
+  legfrissebb közlése egysoros sávként a felső HUD alatt, a csatatérre lógó napló helyett.
 - [x] Parancsnoki felolvasás (`speech.ts`): `speechSynthesis`, nyelvenként férfi hang előnyben, mélyebb hangmagasság; némítás követi
 - [x] Győzelmi fanfár (szintetizált helyettesítő) és „A csatát {név} nyerte!" bemondás
 - [x] Játékosnevek a Beállításokban (offline), online a lobbynév az erősebb

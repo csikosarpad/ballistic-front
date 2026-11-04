@@ -3,7 +3,10 @@
 Kódbázis-alapú helyzetértékelés és fejlesztési javaslat, 2026-11-04.
 
 Ez a dokumentum döntés-előkészítő elemzés, nem elfogadott implementációs specifikáció.
-A javasolt mechanikák még nem részei a játéknak. A meglévő technikai milestone-okat
+A javasolt új mechanikák még nem részei a játéknak. Az alap szektor elnevezése,
+menü-/HUD-kijelzése és briefingje már elkészült; ez nem többpályás rendszer.
+Az elfogadott első lépést és a további döntési kapukat a
+[végrehajtási TODO](./gameplay-progression-todo.md) követi. A meglévő technikai milestone-okat
 a [roadmap](./roadmap.md), a vizuális irányt a [játék redesign terve](./game-redesign.md) rögzíti.
 A ROADMAP milestone-jai tematikus csoportok, nem ennek az ajánlott prioritásnak az
 ellentétes végrehajtási sorrendje. A meglévő játékműködés leírása a [játékosútmutató](../user/guide.md).

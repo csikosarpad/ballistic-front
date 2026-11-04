@@ -9,6 +9,7 @@ Technikai működés, fejlesztési tervek és projektelőzmények. Játékosokna
 | [Fejlesztői kontextus](./dev-notes.md) | Jelenlegi architektúra és bővítési korlátok |
 | [Roadmap](./roadmap.md) | Központi fejlesztési státuszok, milestone-ok és nyitott döntések |
 | [Gameplay és fejlődés](./gameplay-progression.md) | Döntés-előkészítő rangsor és javasolt MVP, nem elfogadott implementációs specifikáció |
+| [Progressziós TODO](./gameplay-progression-todo.md) | A roadmap progressziós részfeladatai, szektoridentitás és a későbbi döntési kapuk |
 | [Játék redesign](./game-redesign.md) | Vizuális/UX részletek, referenciák, mobil és asset-hatókör |
 | [Hang-redesign](./sound-redesign.md) | Hangarchitektúra és részletes hangfejlesztési feladatok |
 | [ResultScreen UI rendszer](./result-screen-ui-system.md) | Megvalósított prezentációs szerződés és korlátok |

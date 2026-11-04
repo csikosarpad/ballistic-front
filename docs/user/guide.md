@@ -11,6 +11,9 @@ A jelenleg elérhető funkciók leírása. Fejlesztési tervek és technikai ré
 - **Online:** két ember külön böngészőből, szobakódos lobbyval.
 
 Jelenleg egy seed alapján változó, tükrözött terepcsalád és egy tanktípus van.
+Az alap harctér **SECTOR ALPHA-01 / Training Grounds**: neve a főmenüben a játékcím
+alatt és a felső középső HUD-ban látható. Új csata és visszavágó elején 2,5 másodperces
+**SECTOR BRIEFING** mutatja be; ez nem szünetelteti és nem zárolja a játékot.
 Szektorválasztás, orbitális képességek, prestige és kampány még nincsenek.
 
 ## A csata menete
@@ -43,6 +46,9 @@ A lövés alatt, az ellenfél körében és meccsvégén a harci vezérlés zár
 - A HUD ±1° / ±10 erő gombjai és a mozgásgombok nyomva tartva ismételnek.
 - A soron lévő tank közeléből indított húzás iránya a szöget, hossza az erőt állítja.
 - Alacsony, fekvő kijelzőn a vezérlők oldalra rendeződnek.
+- Mobilnézetben kisebb védelmi műszerek és tömörebb vezérlőpanelek hagynak helyet
+  a csatatérnek. A parancsnoki konzol a felső HUD alatt csak a legfrissebb közlést
+  mutatja egy sorban, időbélyeg és külön fejléc nélkül; a felolvasás változatlan.
 - Indításkor támogatott érintőböngészőben teljes képernyőt és fekvő tájolást kér a játék.
   Ha ezt a böngésző nem támogatja vagy elutasítja, a bezárható tájolási tipp marad.
 

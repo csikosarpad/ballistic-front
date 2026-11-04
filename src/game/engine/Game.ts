@@ -291,6 +291,7 @@ export class Game {
     this.matchStats = newMatchStats(this.tanks.map((t) => t.id));
     this.previewAllowance.reset(Object.fromEntries(this.tanks.map((tank) => [tank.id, tank.stats.previewCharges])));
     this.shell = null;
+    useGameStore.getState().sync({ matchSequence: useGameStore.getState().matchSequence + 1 });
     this.beginTurn();
   }
 
