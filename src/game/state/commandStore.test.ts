@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { MAX_COMMAND_MESSAGES, useCommandStore } from "./commandStore";
-import { pickVoice } from "../systems/speech";
+import { pickVoice, voiceForSlot } from "../systems/speech";
 
 const voice = (lang: string, localService = true, name = "") => ({ lang, localService, name }) as SpeechSynthesisVoice;
 
@@ -34,5 +34,26 @@ describe("pickVoice", () => {
     expect(pickVoice(voices, "en")).toBe(voices[1]);
     expect(pickVoice(voices, "en", "Other")).toBe(voices[2]);
     expect(pickVoice([voice("en-US", true, "Microsoft Zira")], "en")?.name).toBe("Microsoft Zira");
+  });
+});
+
+describe("voiceForSlot", () => {
+  it("két megfelelő hangnál a játékosok külön hangot kapnak", () => {
+    const voices = [voice("en-US", true, "Microsoft George"), voice("en-US", true, "Microsoft David")];
+    const first = voiceForSlot(voices, "en", 0);
+    const second = voiceForSlot(voices, "en", 1);
+    expect(first.voice).not.toBe(second.voice);
+    expect(second.voice).not.toBeNull();
+    expect(second.pitch).toBeGreaterThan(first.pitch);
+    expect(second.rate).toBeGreaterThan(first.rate);
+  });
+
+  it("egyetlen hangnál ugyanaz a hang, de más magassággal és tempóval", () => {
+    const voices = [voice("hu-HU", true, "Microsoft Szabolcs")];
+    const first = voiceForSlot(voices, "hu", 0);
+    const second = voiceForSlot(voices, "hu", 1);
+    expect(second.voice).toBe(first.voice);
+    expect(second.pitch - first.pitch).toBeGreaterThanOrEqual(0.7);
+    expect(second.rate - first.rate).toBeCloseTo(0.15);
   });
 });

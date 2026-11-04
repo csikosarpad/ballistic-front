@@ -1,6 +1,7 @@
 import { useGameStore } from "@/game/state/gameStore";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { usePlayerName } from "@/game/state/playerNames";
+import { useAiSettings } from "@/game/state/aiSettings";
 import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
 import { Shop } from "./Shop";
@@ -16,6 +17,7 @@ export function ResultScreen() {
   const session = useMultiplayerStore((state) => state.session);
   const multiplayerError = useMultiplayerStore((state) => state.error);
   const onlineMatch = credentials !== null;
+  const aiOpponent = useAiSettings((s) => s.enabled);
   const matchFinished = session?.status === "finished";
 
   return (
@@ -52,7 +54,13 @@ export function ResultScreen() {
           </tbody>
         </table>
         <div className="result-shop">
-          {onlineMatch ? <Shop editablePlayerId={credentials.playerId} disabled={!matchFinished} /> : <Shop />}
+          {onlineMatch ? (
+            <Shop editablePlayerId={credentials.playerId} disabled={!matchFinished} />
+          ) : aiOpponent ? (
+            <Shop editablePlayerId="P1" />
+          ) : (
+            <Shop />
+          )}
         </div>
         {onlineMatch && !matchFinished && <p role="status">{t("result.syncing")}</p>}
         {multiplayerError && onlineMatch && (

@@ -26,26 +26,65 @@ const FEMALE_NAME = /\b(female|zira|hazel|susan|samantha|victoria|karen|moira|fi
 
 const normalizeLang = (lang: string) => lang.toLowerCase().replace("_", "-");
 
+/** A nyelvhez illő hangok előnyben részesített sorrendben: férfi, helyi, majd a többi; női nevűek csak végszükségben. */
+export function rankVoices(voices: readonly SpeechSynthesisVoice[], locale: SpeechLocale): SpeechSynthesisVoice[] {
+  const matching = voices.filter((voice) => normalizeLang(voice.lang).startsWith(locale));
+  const notFemale = matching.filter((voice) => !FEMALE_NAME.test(voice.name));
+  const base = notFemale.length > 0 ? notFemale : matching;
+  const score = (voice: SpeechSynthesisVoice) => (MALE_NAME.test(voice.name) ? 2 : 0) + (voice.localService ? 1 : 0);
+  return base
+    .map((voice, index) => ({ voice, index }))
+    .sort((a, b) => score(b.voice) - score(a.voice) || a.index - b.index)
+    .map((entry) => entry.voice);
+}
+
 /** Nyelv szerint szűr; azon belül férfi, helyi, majd bármely hangot választ. A név megadása felülír. */
 export function pickVoice(
   voices: readonly SpeechSynthesisVoice[],
   locale: SpeechLocale,
   voiceName?: string,
 ): SpeechSynthesisVoice | null {
-  const matching = voices.filter((voice) => normalizeLang(voice.lang).startsWith(locale));
-  const named = voiceName ? matching.find((voice) => voice.name === voiceName) : undefined;
-  if (named) return named;
-  const notFemale = matching.filter((voice) => !FEMALE_NAME.test(voice.name));
-  const male = notFemale.filter((voice) => MALE_NAME.test(voice.name));
-  const pool = male.length > 0 ? male : notFemale.length > 0 ? notFemale : matching;
-  return pool.find((voice) => voice.localService) ?? pool[0] ?? null;
+  const named = voiceName
+    ? voices.find((voice) => voice.name === voiceName && normalizeLang(voice.lang).startsWith(locale))
+    : undefined;
+  return named ?? rankVoices(voices, locale)[0] ?? null;
+}
+
+export interface SlotVoice {
+  voice: SpeechSynthesisVoice | null;
+  pitch: number;
+  rate: number;
+}
+
+/** A második parancsnok hangmagasság- és tempóeltolása, külön hang használatakor is. */
+const SECOND_SLOT_PITCH_SHIFT = 0.7;
+const SECOND_SLOT_RATE_SHIFT = 0.15;
+
+/**
+ * Játékosonként (0 = P1, 1 = P2) eltérő hang: ha van legalább két megfelelő hang, mindenki a sajátját kapja,
+ * a második hang minden esetben magasabban és gyorsabban szólal meg.
+ */
+export function voiceForSlot(
+  voices: readonly SpeechSynthesisVoice[],
+  locale: SpeechLocale,
+  slot: number,
+  settings: VoiceSettings = DEFAULT_VOICE,
+): SlotVoice {
+  const first = pickVoice(voices, locale, settings.voiceName);
+  if (slot <= 0) return { voice: first, pitch: settings.pitch, rate: settings.rate };
+  const distinct = rankVoices(voices, locale).find((voice) => voice !== first);
+  return {
+    voice: distinct ?? first,
+    pitch: Math.min(2, settings.pitch + SECOND_SLOT_PITCH_SHIFT),
+    rate: settings.rate + SECOND_SLOT_RATE_SHIFT,
+  };
 }
 
 const MAX_QUEUED = 3;
 let queued = 0;
 
 /** Tetszőleges szöveget felolvas; a mondatok sorban követik egymást, de a felgyülemlett sort eldobja. */
-export function speak(text: string, locale: SpeechLocale, settings: VoiceSettings = DEFAULT_VOICE): void {
+export function speak(text: string, locale: SpeechLocale, settings: VoiceSettings = DEFAULT_VOICE, slot = 0): void {
   if (!speechSupported() || !text) return;
   const synth = window.speechSynthesis;
   // A böngésző nem adja meg a sor hosszát, ezért magunk számoljuk; túlcsordulásnál újrakezdünk.
@@ -57,10 +96,10 @@ export function speak(text: string, locale: SpeechLocale, settings: VoiceSetting
   queued += 1;
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = LANG_TAG[locale];
-  const voice = pickVoice(synth.getVoices(), locale, settings.voiceName);
+  const { voice, pitch, rate } = voiceForSlot(synth.getVoices(), locale, slot, settings);
   if (voice) utterance.voice = voice;
-  utterance.rate = settings.rate;
-  utterance.pitch = settings.pitch;
+  utterance.rate = rate;
+  utterance.pitch = pitch;
   synth.speak(utterance);
 }
 

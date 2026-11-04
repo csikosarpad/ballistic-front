@@ -45,6 +45,19 @@
   letter-spacing: 0.5px;
 }
 
+.hud-rank {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 2px;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.hud-rank .is-earned {
+  color: #ffc83d;
+  text-shadow: 0 0 6px rgba(255, 200, 61, 0.7);
+}
+
 .hud-unit-meters {
   display: grid;
   gap: 5px;
@@ -408,11 +421,11 @@
 
 .main-menu-header h1 {
   color: #e4f7ff;
-  font-size: clamp(28px, 6vw, 42px);
+  font-size: clamp(28px, 7vw, 40px);
   font-style: italic;
   letter-spacing: 2px;
   text-transform: uppercase;
-  text-shadow: 0 0 16px rgba(67, 218, 255, 0.45);
+  text-shadow: 2px 2px 18px rgba(67, 218, 255, 0.75);
 }
 
 .main-menu-header p {

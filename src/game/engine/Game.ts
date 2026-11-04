@@ -44,12 +44,20 @@ import { MAX_ANGLE, MIN_POWER, useGameStore } from "../state/gameStore";
 import { useMultiplayerStore } from "../state/multiplayerStore";
 import { useCommandStore } from "../state/commandStore";
 import { playerName } from "../state/playerNames";
+import { useAiSettings } from "../state/aiSettings";
+import { AiBrain, chooseUpgrades, simulateImpact, skillFromMemory } from "../systems/ai";
 import type { RoomEvent } from "../multiplayer/protocol";
 
 /** Ennyi HP-arány alatt kritikus a tank állapota. */
 const CRITICAL_HP_FRACTION = 0.3;
 /** A fanfár hossza; ennyi idő után hangzik el a győztes neve. */
 const VICTORY_ANNOUNCE_DELAY_MS = 1800;
+/** A gép „gondolkodási” ideje, majd a célzás látható ideje a lövés előtt. */
+const AI_THINK_MS = 900;
+const AI_AIM_MS = 700;
+const AI_MOVE_STEP_MS = 45;
+/** Esélye, hogy a gép a Smart Aimet is bekapcsolja, ha van még töltete. */
+const AI_PREVIEW_CHANCE = 0.5;
 
 interface ImpactReport {
   tank: Tank;
@@ -100,6 +108,7 @@ export class Game {
   private previewGfx = new Graphics();
   private previewAllowance = new PreviewAllowance();
   private previewActive = false;
+  private previewLocked = false;
   private dragPointerId: number | null = null;
   private theme: Theme = DEFAULT_THEME;
   private particles = new ParticleSystem(Math.random, this.theme.fx);
@@ -120,6 +129,11 @@ export class Game {
   private unsubscribeAim: (() => void) | null = null;
   private targetLocked = false;
   private victoryTimer = 0;
+  /** Offline meccsen a P2-t a gép vezérli; a meccs elején dől el. */
+  private aiActive = false;
+  private aiBrain: AiBrain | null = null;
+  private aiTimers: number[] = [];
+  private aiHits = 0;
   private shell: BallisticBody | null = null;
   private shellAge = 0;
   private acc = 0;
@@ -251,6 +265,11 @@ export class Game {
     if (!this.terrain) return;
     useCommandStore.getState().clear();
     window.clearTimeout(this.victoryTimer);
+    this.clearAiTimers();
+    const aiSettings = useAiSettings.getState();
+    this.aiActive = !this.multiplayer && aiSettings.enabled;
+    this.aiBrain = this.aiActive ? new AiBrain({ skill: skillFromMemory(aiSettings.memory) }) : null;
+    this.aiHits = 0;
     const width = WORLD_WIDTH;
     const matchSetup = setup ?? { seed: Math.floor(Math.random() * 1_000_000), starterIndex: this.nextStarter };
     this.matchRandom = createSeededRandom(matchSetup.seed);
@@ -382,12 +401,12 @@ export class Game {
       const max = r.tank.stats.maxHp;
       return isAlive(r.tank) && r.tank.hp / max <= CRITICAL_HP_FRACTION && r.hpBefore / max > CRITICAL_HP_FRACTION;
     });
-    if (destroyed) announce("command.destroyed", undefined, "critical");
-    else if (critical) announce("command.critical", { id: playerName(critical.tank.id) }, "critical");
-    else if (enemies.some((r) => r.armorBreach)) announce("command.armorBreach", undefined, "warning");
-    else if (enemies.some((r) => r.shieldDown)) announce("command.shieldDown");
-    else if (enemies.length > 0) announce("command.hit");
-    else announce("command.miss", undefined, "warning");
+    if (destroyed) announce("command.destroyed", undefined, "critical", shooter.id);
+    else if (critical) announce("command.critical", { id: playerName(critical.tank.id) }, "critical", critical.tank.id);
+    else if (enemies.some((r) => r.armorBreach)) announce("command.armorBreach", undefined, "warning", shooter.id);
+    else if (enemies.some((r) => r.shieldDown)) announce("command.shieldDown", undefined, "info", shooter.id);
+    else if (enemies.length > 0) announce("command.hit", undefined, "info", shooter.id);
+    else announce("command.miss", undefined, "warning", shooter.id);
   }
 
   /** Fanfár, majd a fanfár lecsengése után a győztes bemondása. */
@@ -395,7 +414,7 @@ export class Game {
     this.audio?.playFanfare();
     window.clearTimeout(this.victoryTimer);
     this.victoryTimer = window.setTimeout(
-      () => useCommandStore.getState().announce("command.victory", { name: playerName(winnerId) }, "info"),
+      () => useCommandStore.getState().announce("command.victory", { name: playerName(winnerId) }, "info", winnerId),
       VICTORY_ANNOUNCE_DELAY_MS,
     );
   }
@@ -404,7 +423,7 @@ export class Game {
   private lockTarget(): void {
     if (this.targetLocked) return;
     this.targetLocked = true;
-    useCommandStore.getState().announce("command.targetAcquired");
+    useCommandStore.getState().announce("command.targetAcquired", undefined, "info", this.turns.current);
   }
 
   private beginTurn(): void {
@@ -414,12 +433,91 @@ export class Game {
     regenTankShield(tank);
     tank.moveLeft = tank.stats.moveBudget;
     this.previewActive = false;
+    this.previewLocked = false;
     // Új szél minden körben.
     const wind = Math.round((this.matchRandom() - 0.5) * 120);
     this.battlefieldLayers.setWind(wind);
     useGameStore.getState().sync({ angle: tank.angle, power: tank.power, maxPower: tank.stats.maxPower, wind });
     this.syncStore();
     this.targetLocked = false;
+    if (this.isAiTurn()) this.scheduleAiTurn();
+  }
+
+  private isAiTurn(): boolean {
+    return this.aiActive && !this.multiplayer && this.turns.current === "P2" && this.turns.phase === "aiming";
+  }
+
+  private clearAiTimers(): void {
+    for (const id of this.aiTimers) window.clearTimeout(id);
+    this.aiTimers = [];
+  }
+
+  private afterAi(ms: number, action: () => void): void {
+    const id = window.setTimeout(() => {
+      this.aiTimers = this.aiTimers.filter((t) => t !== id);
+      if (!this.destroyed && this.isAiTurn()) action();
+    }, ms);
+    this.aiTimers.push(id);
+  }
+
+  /** A gép látható „gondolkodás” után közelít, ha kell, majd beállítja a célzást és lő. */
+  private scheduleAiTurn(): void {
+    this.clearAiTimers();
+    this.afterAi(AI_THINK_MS, () => {
+      const target = this.tanks.find((t) => t.id === "P1");
+      if (!this.terrain || !this.aiBrain || !target) return;
+      const wind = useGameStore.getState().wind;
+      const steps = this.aiBrain.planMove(this.current, target, this.terrain.mask, wind, DEFAULT_WORLD.gravity);
+      this.aiMove(target.x < this.current.x ? -1 : 1, steps);
+    });
+  }
+
+  private aiMove(dir: -1 | 1, stepsLeft: number): void {
+    if (stepsLeft > 0 && this.terrain && moveTank(this.current, dir, this.terrain.mask)) {
+      this.audio?.moveTick();
+      this.syncStore();
+      this.afterAi(AI_MOVE_STEP_MS, () => this.aiMove(dir, stepsLeft - 1));
+      return;
+    }
+    this.aiAimAndFire();
+  }
+
+  private aiAimAndFire(): void {
+    const target = this.tanks.find((t) => t.id === "P1");
+    if (!this.terrain || !this.aiBrain || !target) return;
+    const wind = useGameStore.getState().wind;
+    const smartAim = this.previewAllowance.canUse("P2") && Math.random() < AI_PREVIEW_CHANCE;
+    if (smartAim) this.activatePreview();
+    const plan = this.aiBrain.decide(this.current, target, this.terrain.mask, wind, DEFAULT_WORLD.gravity, smartAim);
+    const angle = Math.round(plan?.angle ?? 135);
+    const power = Math.round(plan?.power ?? this.current.stats.maxPower * 0.6);
+    useGameStore.getState().setAim(angle, power);
+    this.afterAi(AI_AIM_MS, () => this.launchShot(angle, power));
+  }
+
+  /** A gép a lövés végén tanul a becsapódásból. */
+  private aiObserveImpact(shooterId: string, x: number, dealt: number): void {
+    if (!this.aiActive || shooterId !== "P2") return;
+    this.aiBrain?.observe(x);
+    if (dealt > 0) this.aiHits++;
+  }
+
+  /** Meccs végén a gép rögzíti a tapasztalatot, és maga választja ki a fejlesztéseit. */
+  private finishAiMatch(): void {
+    if (!this.aiActive || !this.aiBrain) return;
+    const own = this.matchStats["P2"];
+    const other = this.matchStats["P1"];
+    if (!own || !other) return;
+    const won = this.turns.winner === "P2";
+    useAiSettings.getState().recordMatch({ won, shots: own.shots, hits: this.aiHits });
+    const { profile } = chooseUpgrades(this.profiles["P2"]!, {
+      shots: own.shots,
+      damageDealt: own.damage,
+      damageTaken: other.damage,
+      won,
+    });
+    this.profiles["P2"] = profile;
+    saveProfiles(this.profiles);
   }
 
   private syncStore(): void {
@@ -427,6 +525,7 @@ export class Game {
       phase: this.turns.phase,
       currentId: this.turns.current,
       canControl:
+        !this.isAiTurn() &&
         (!this.multiplayer || useMultiplayerStore.getState().credentials?.playerId === this.turns.current) &&
         this.pendingMultiplayerEvents.length === 0,
       winner: this.turns.winner,
@@ -451,15 +550,41 @@ export class Game {
 
   /** Meccsenként és játékosonként egyszer: az aktuális kör végéig mutatja a várható röppályát. */
   requestPreview(): void {
-    if (this.turns.inputLocked || !this.canControlCurrentTurn() || !this.previewAllowance.use(this.turns.current))
-      return;
+    if (this.turns.inputLocked || !this.canControlCurrentTurn()) return;
+    this.activatePreview();
+  }
+
+  /** Bekapcsolja a röppálya-előnézetet. */
+  private activatePreview(): void {
+    if (!this.previewAllowance.use(this.turns.current)) return;
     this.previewActive = true;
+    this.previewLocked = false;
+    useCommandStore.getState().announce("command.smartAim", undefined, "info", this.turns.current);
     this.syncStore();
+  }
+
+  /** Neon célkereszt a célponton, ha az aktuális röppálya eltalálja. */
+  private drawLockOn(t: Tank): void {
+    const cy = t.y - 6;
+    const color = 0xff1744;
+    const g = this.tanksGfx;
+    g.circle(t.x, cy, 12).stroke({ width: 5, color, alpha: 0.3 });
+    g.circle(t.x, cy, 12).stroke({ width: 2, color, alpha: 1 });
+    for (const [dx, dy] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ] as const) {
+      g.moveTo(t.x + dx * 8, cy + dy * 8)
+        .lineTo(t.x + dx * 17, cy + dy * 17)
+        .stroke({ width: 2, color, alpha: 1 });
+    }
   }
 
   /** Mozgás a jelenlegi tankkal; zárolt bemenetnél nem csinál semmit. */
   move(dir: -1 | 1): void {
-    if (this.turns.inputLocked || !this.terrain) return;
+    if (this.turns.inputLocked || !this.terrain || this.isAiTurn()) return;
     if (this.multiplayer) {
       if (this.canControlCurrentTurn()) void useMultiplayerStore.getState().publish("move", { direction: dir });
       return;
@@ -473,7 +598,7 @@ export class Game {
 
   /** Lövés a store-ban beállított szöggel és erővel. */
   fire(): void {
-    if (this.turns.inputLocked) return;
+    if (this.turns.inputLocked || this.isAiTurn()) return;
     if (this.multiplayer) {
       if (!this.canControlCurrentTurn()) return;
       const { angle, power } = useGameStore.getState();
@@ -503,6 +628,7 @@ export class Game {
   }
 
   private canControlCurrentTurn(): boolean {
+    if (this.isAiTurn()) return false;
     return !this.multiplayer || useMultiplayerStore.getState().credentials?.playerId === this.turns.current;
   }
 
@@ -623,6 +749,7 @@ export class Game {
       });
     }
     this.announceImpact(shooter, hurt);
+    this.aiObserveImpact(shooter.id, x, dealt);
     this.award(shooter.id, dealt);
     this.matchStats = recordDamage(this.matchStats, shooter.id, dealt);
     this.shake.trigger(Math.min(1, radius / 80) * 0.75 + (dealt > 0 ? 0.25 : 0));
@@ -633,6 +760,7 @@ export class Game {
     else {
       if (this.turns.winner) {
         this.award(this.turns.winner, WIN_BONUS_XP);
+        this.finishAiMatch();
         this.announceVictory(this.turns.winner);
       }
       const onlineRoom = useMultiplayerStore.getState();
@@ -656,6 +784,7 @@ export class Game {
     if (hitTank || this.terrain.mask.isSolid(x, y)) this.explode(x, y);
     else if (x < 0 || x > this.terrain.mask.width || y > WORLD_HEIGHT) {
       // Pályán kívül: nincs robbanás, a kör véget ér.
+      this.aiObserveImpact(this.turns.current, x, 0);
       this.shell = null;
       this.turns.endShot(this.tanks.filter(isAlive).map((t) => t.id));
       this.beginTurn();
@@ -683,6 +812,22 @@ export class Game {
     if (!this.previewActive || this.turns.phase !== "aiming" || !this.terrain || !tank || !isAlive(tank)) return;
     const { angle, power, wind } = useGameStore.getState();
     const mask = this.terrain.mask;
+    const target = this.tanks.find((t) => t.id !== tank.id && isAlive(t));
+    const impact = target
+      ? simulateImpact(
+          barrelTip({ ...tank, angle }),
+          angle,
+          power,
+          { ...DEFAULT_WORLD, wind },
+          mask,
+          target,
+        )
+      : null;
+    const locked = impact?.hitTarget === true;
+    if (locked && !this.previewLocked) {
+      useCommandStore.getState().announce("command.aimed", undefined, "info", this.turns.current);
+    }
+    this.previewLocked = locked;
     const points = predictTrajectory(
       barrelTip({ ...tank, angle }),
       angle,
@@ -769,6 +914,7 @@ export class Game {
         top -= 4;
         this.drawStripe(t.x, top, t.armor / t.stats.maxArmor, this.theme.hud.armorFill);
       }
+      if (this.previewLocked && t.id !== this.turns.current && this.turns.phase !== "gameOver") this.drawLockOn(t);
       if (t.id === this.turns.current && this.turns.phase === "aiming") {
         const my = top - 8;
         this.tanksGfx.poly([t.x - 4, my, t.x + 4, my, t.x, my + 6]).fill(this.theme.hud.turnMarker);
@@ -793,6 +939,7 @@ export class Game {
   destroy(): void {
     this.destroyed = true;
     window.clearTimeout(this.victoryTimer);
+    this.clearAiTimers();
     this.unsubscribeMultiplayer?.();
     this.unsubscribeMultiplayer = null;
     this.unsubscribeAim?.();

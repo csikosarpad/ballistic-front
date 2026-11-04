@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useGameStore } from "@/game/state/gameStore";
 import { MAX_NAME_LENGTH, usePlayerNamesStore } from "@/game/state/playerNames";
 import { AUDIO_CHANNELS, useAudioSettings } from "@/game/state/audioSettings";
+import { useAiSettings } from "@/game/state/aiSettings";
 import type { MatchSetup } from "@/game/systems/seededRandom";
 import type { Profile } from "@/game/systems/upgrades";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
@@ -20,6 +21,10 @@ export function MainMenu() {
   const setName = usePlayerNamesStore((s) => s.setName);
   const channels = useAudioSettings((s) => s.channels);
   const setChannel = useAudioSettings((s) => s.setChannel);
+  const aiEnabled = useAiSettings((s) => s.enabled);
+  const setAiEnabled = useAiSettings((s) => s.setEnabled);
+  const aiMatches = useAiSettings((s) => s.memory.matches);
+  const resetAiMemory = useAiSettings((s) => s.resetMemory);
   const [showLobby, setShowLobby] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -76,6 +81,20 @@ export function MainMenu() {
                   </button>
                 ))}
               </div>
+            </div>
+            <div className="main-menu-setting">
+              <span>{t("menu.opponent")}</span>
+              <div className="audio-channel-buttons">
+                <button className="btn secondary" aria-pressed={aiEnabled} onClick={() => setAiEnabled(!aiEnabled)}>
+                  {aiEnabled ? t("menu.opponentAi") : t("menu.opponentHuman")}
+                </button>
+                {aiEnabled && (
+                  <button className="btn secondary" onClick={resetAiMemory} disabled={aiMatches === 0}>
+                    {t("menu.aiExperience", { matches: aiMatches })}
+                  </button>
+                )}
+              </div>
+              <small>{t("menu.opponentHint")}</small>
             </div>
             <div className="main-menu-setting">
               <span>{t("menu.playerNames")}</span>
