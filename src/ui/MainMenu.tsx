@@ -143,7 +143,7 @@ export function MainMenu() {
       ) : (
         <div className="panel main-menu-panel">
           <header className="main-menu-header">
-            <h1>{t("menu.title")}</h1>
+            <h1><span>{t("menu.title")}</span></h1>
             <div className="menu-sector" aria-label={t("sector.battlefield")}>
               <span className="sector-code">{t("campaign.operation")}</span>
               <span className="sector-code">{TRAINING_SECTOR.code}</span>

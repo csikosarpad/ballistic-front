@@ -116,10 +116,21 @@ A képernyő/navigáció/meccskontextus alapjai elkészültek.
 Csak egy pálya szükséges; nincs új fizika vagy extra kampányjutalom. A hot-seat/online
 gyorscsata megmarad; a kampány mindig P1 vs AI. Kampányreset csak teljesítést,
 a teljes mentéstörlés XP-t/szinteket/teljesítést töröl. Valós telefonos próba hátravan.
-Következő fejlesztés: új csatadefiníciók és térképes útvonalak a nyitott döntések után.
+**Következő csomag: C3, elfogadott terv (2026-11-05), még nem implementált.**
+Összesen öt játszható pont: ALPHA-01 / Training Grounds, DELTA-08 / Crystal Basin,
+FORGE-17 / Industrial Expanse, VANGUARD-12 / Defense Grid, PRIME-00 / Capital Perimeter.
+ALPHA → DELTA / FORGE → VANGUARD → PRIME; szabad ágbejárás, VANGUARD feloldása OR,
+extra kampánybónusz/Smart Aim jutalom nélkül. PRIME biztosítása műveletzárás;
+mind az öt szektor teljesítése 5/5, kihagyott ág és replay utólag is elérhető.
+Előfeltétel a minimális közös szektorkonfig és négy valódi új csatadefiníció;
+szektor-ID alapú mentés és a meglévő ALPHA-teljesítés migrációja is a csomag része.
+A [részletes csataprofil-javaslat](./gameplay-progression.md#1010-c3-csataprofilok--részletes-tervezési-javaslat)
+geometriai kiindulóértékeket, palettát és tesztelési korlátokat rögzít; még nem
+jóváhagyott balansz. A felhasználó előbb ezt kívánja megtervezni, C3 kódfejlesztés még nem indult.
 
-A három terepprofil/két modifikátor Sector Operations csomag ezt később bővíti,
-nem előfeltétele a térképmódnak. Tervezett szektor nem játszható célpont és nem
+A Sector Operations közös katalógus-/terepkonfig része C3-at támogatja; két
+modifikátor és online szektorválasztás későbbi bővítés. A korábbi háromszektoros
+tartalmi javaslatot az öt célpontos C3 váltja fel. Tervezett szektor nem játszható célpont és nem
 növeli a teljesítési nevezőt. A [megvalósíthatósági elemzés](./gameplay-progression.md#10-campaign-map--sector-progression-megvalósíthatóság)
 elválasztja a Foundationt a teljes stratégiai hadjárattól és a közös online kampánytól.
 A részletes feladatok a [progressziós TODO](./gameplay-progression-todo.md) 2. pontjában vannak.

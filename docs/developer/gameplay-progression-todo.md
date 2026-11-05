@@ -6,7 +6,8 @@ részterületét bontja ellenőrizhető lépésekre. Nem új, párhuzamos projek
 
 Jelölés: `[x]` elkészült, `[ ]` hátravan. **2026-11-05: elfogadott prioritás a térképmód.**
 Elkészült: C1+C2 **Campaign Map Foundation**, a meglévő ALPHA-01 csatakörével.
-A további mód-, feloldás- és jutalomszabályok döntési kapui megmaradnak.
+**2026-11-05: C3 öt szektora, szabad ágbejárása, OR feloldása és bónusz nélküli
+első csomagja elfogadva.** Most csak a terv véglegesült; a C3 implementáció még hátravan.
 
 ## 1. Szektoridentitás – első iteráció
 
@@ -81,27 +82,60 @@ Függőség: C1 és offline csatakontekstus. Nincs új fizika vagy extra XP-juta
 - [x] Foundation elfogadás: teljes navigációs kör, egy pálya, kezdetben 0/1 majd 1/1;
   refresh után megmaradó teljesítés, változatlan gyorscsata/online játék.
 
-### C3 – Elágazó művelet és jutalmazás
+### C3 – Elágazó művelet, öt játszható szektor
 
-Függőség: C2, legalább két további játszható csatadefiníció és elfogadott gráfszabályok.
-Új bónuszjutalom nem kötelező az elágazáshoz, csak külön döntés után kerül be.
+Függőség: C2 és négy további valódi csatadefiníció. A közös szektorkatalógus/
+terepkonfiguráció minimális alapja a 3. pontból a C3 elé kerül; nem kell hozzá
+modifikátor, online pályaválasztó vagy új fegyverrendszer.
 
-- [ ] Első bővítés darabszáma és nevei: javasolt későbbi cél az 5 játszható pont.
-- [ ] DELTA-08 vs DELTA-03, VANGUARD-12 vs GRID-09 elnevezések véglegesítése.
-- [ ] Planetáris/orbitális lépték; OR/AND feloldás, szabad vagy végleges ágkizárás.
-- [ ] Körmentes gráf validálása, OR/AND feltételek, elérhető végpont és ágbejárás.
+#### Elfogadott első csomag
+
+| Szektor | Név | Feloldás |
+| --- | --- | --- |
+| ALPHA-01 | Training Grounds | Kezdettől elérhető |
+| DELTA-08 | Crystal Basin | ALPHA-01 teljesítése |
+| FORGE-17 | Industrial Expanse | ALPHA-01 teljesítése |
+| VANGUARD-12 | Defense Grid | DELTA-08 **vagy** FORGE-17 teljesítése |
+| PRIME-00 | Capital Perimeter | VANGUARD-12 teljesítése |
+
+ALPHA → DELTA / FORGE → VANGUARD → PRIME. A két ág nem zárja ki egymást;
+a kihagyott ág később is bejárható. Mind az öt szektor beleszámít a teljesített/összes
+haladásba. PRIME biztosítása a művelet lezárása (akár 4/5 mellett), az 5/5 minden
+szektor teljesítését jelenti; a térkép és replay mindkét esetben használható marad.
+
+- [x] Összesen 5 játszható pont: ALPHA-01, DELTA-08, FORGE-17, VANGUARD-12, PRIME-00.
+- [x] DELTA-08 / Crystal Basin és VANGUARD-12 / Defense Grid nevei véglegesek ehhez a csomaghoz;
+  DELTA-03 és GRID-09 nem új alias vagy további szektor.
+- [x] Szabad ágbejárás, OR feloldás; nincs végleges ágkizárás.
+- [x] Nincs extra kampánybónusz vagy +1 Smart Aim; a meglévő harci és győzelmi XP marad.
+- [x] Részletes profiljavaslat dokumentálva: geometria, vizuális paletta, járhatóság,
+  ALPHA regresszió és elfogadási próbák a
+  [C3 csataprofil-tervben](./gameplay-progression.md#1010-c3-csataprofilok--részletes-tervezési-javaslat).
+- [ ] A profiljavaslat jóváhagyása; a paraméterek még nem elfogadott balanszértékek.
+- [ ] Öt valódi csatadefiníció: stabil ID, terepprofil és vizuális beállítás,
+  alap fizikával; ne pusztán átnevezett ALPHA-csaták legyenek. Pontos profilparaméterek
+  és vizuális csomagok az implementáció előtti tartalmi feladat részei.
+- [ ] Körmentes gráf validálása, elfogadott OR feltétel, elérhető végpont és szabad ágbejárás.
 - [ ] Teljesített/elérhető/zárolt állapot levezetése; aktuális kijelölés külön kiemelés.
-- [ ] Kampányvége, korábbi csaták replay-e és ténylegesen új útvonal jelzése.
-- [ ] Egyszeri kampánybónusz döntése, elkülönítve a meglévő sebzés- és győzelmi XP-től.
-- [ ] „+1 Smart Aim” pontos jelentése, szintplafon és maxos profil kezelése, vagy elhagyása.
-- [ ] XP + haladás ismétlésbiztos mentési egysége/helyreállítása; félbeszakadt írás tesztje.
+- [ ] Kampánymentés bővítése szektor-ID alapú teljesítésekre; v1 `completed: true`
+  migrációja csak ALPHA-01 teljesítésére, XP/szintek elvesztése nélkül.
+- [ ] Aktív csata szektor-ID-ja vezérelje a teljesítést, főmenüt, briefinget, HUD-ot
+  és eredményt; a visszavágó ugyanazt a szektort indítsa.
+- [ ] Kampányvége PRIME-nál, korábbi és kihagyott csaták replay-e; „új útvonal”
+  csak újonnan elérhető pont esetén, replay győzelemkor ne legyen ál-feloldás.
+- [ ] Idempotens szektorteljesítés, mentési hibajelzés és újratöltés/reset tesztje.
+  Extra bónusz hiányában XP+haladás jutalomtranzakció/ledger nem része a C3-nak.
+- [ ] Gyorscsata és online alapkonfiguráció változatlan; kampányfeloldás nem kapuzza a PvP-t.
+- [ ] Elfogadás: új mentés 0/5; ALPHA után két elérhető ág; bármelyik után VANGUARD;
+  PRIME után műveletzárás; másik ág utólag teljesíthető, végül 5/5.
 - [ ] Játékpróba: az útvonalválasztás érdemi, nem csak ágas rajz?
 
 ### C4 – Változatos csaták és opcionális polish
 
-Függőség: C3 és a 3. pont szektor-/szabályalapjai.
+Függőség: C3 és a 3. pont további közös szabály-/modifikátoralapjai.
 
-- [ ] Öt csomópont / három terepprofil összerendelése vagy más elfogadott tartalomcsomag.
+- [ ] A C3-ban elkészült terepprofilok további taktikai finomhangolása; a részletes
+  profiljavaslat öt külön profilt tervez, a korábbi háromprofilos példa nem követelmény.
 - [ ] Valós nehézség, gravitáció/szél, tereptípus és jutalom a kártyán.
 - [ ] Kontrollált kampány-AI policy; a nehézség ne függjön észrevétlenül korábbi gyorscsatáktól.
 - [ ] Közös fizika ellenőrzése lövedék/előnézet/Smart Aim/AI célzás és mozgástervezés esetén.
@@ -112,14 +146,17 @@ Függőség: C3 és a 3. pont szektor-/szabályalapjai.
 ## 3. Sector Operations MVP – közös pálya- és szabályalap
 
 Függőség: C1+C2 Foundation és a konfigurációs döntések. A minimális katalógus és
-meccskontextus már a Foundation része. Tartalmi cél: összesen három
-valóban eltérő szektor és két egyszerű modifikátor, legfeljebb egy aktív hatással.
+meccskontextus már a Foundation része. A valódi több-szektoros katalógus és
+terep-/vizuális konfiguráció C3-at támogató része előre kerül.
+A korábbi háromszektoros javaslatot az elfogadott ötcsomópontos C3 váltja fel;
+a két modifikátor és az online szektorválasztás külön későbbi bővítés.
 
 ### Döntési kapuk
 
-- [ ] Kiválasztani az alap pálya mellé a két első játszható szektort a névjelöltekből.
-- [ ] Meghatározni a két új terepprofilt, vizuális eltérést és a két környezeti hatást.
-- [ ] Eldönteni a szektorok hozzáférését: alapból, XP-ből vagy teljesítményből.
+- [x] Az alap mellé DELTA-08, FORGE-17, VANGUARD-12 és PRIME-00 az első tartalmi csomag.
+- [ ] Véglegesíteni a C3 négy új terepprofilját és vizuális eltérését a részletes javaslat alapján.
+- [ ] Meghatározni a két későbbi környezeti hatást (nem C3 előfeltétel).
+- [x] Kampányban teljesítésalapú hozzáférés, az elfogadott C3 gráf szerint; nincs XP-belépődíj.
 - [ ] Eldönteni az online pályahozzáférést úgy, hogy a host választása mindkét félnek használható legyen.
 - [ ] Rögzíteni a szabályverziót, legacy online meccsek kezelését és a visszavágó pályaválasztását.
 
@@ -138,7 +175,7 @@ valóban eltérő szektor és két egyszerű modifikátor, legfeljebb egy aktív
 - [ ] Két klienses, duplikált/darabolt eseményes és újracsatlakozási tesztek.
 - [ ] Kezdőpozíciók, mozgás és találati lehetőségek ellenőrzése minden szektoron,
   alap- és maximális fejlesztésekkel, emberrel és AI-val.
-- [ ] Játékpróba: három pálya ténylegesen eltérő döntésekre ösztönöz-e?
+- [ ] Játékpróba: az öt szektor ténylegesen eltérő döntésekre ösztönöz-e?
 
 ## 4. Orbitális támogatás – az MVP után, tervezési kapuval
 
@@ -173,18 +210,18 @@ Függőség: változatos szektorok és taktikai összeállítások. A 2. pont eg
 
 ## Szektornév-jelöltek
 
-Csak az ALPHA-01 játszható. A többi név tartalmi jelölt, nem kész pálya és
-nem végleges megvalósítási sorrend.
+Csak az ALPHA-01 játszható. Négy további név elfogadott C3 tartalom, de még nem kész
+pálya; a többi név későbbi jelölt.
 
 | Kód | Név | Állapot |
 | --- | --- | --- |
 | SECTOR ALPHA-01 | Training Grounds | Meglévő alap harctér |
-| SECTOR DELTA-08 | Crystal Basin | Jelölt |
-| SECTOR FORGE-17 | Industrial Expanse | Jelölt |
+| SECTOR DELTA-08 | Crystal Basin | Elfogadott C3 terv; még nem játszható |
+| SECTOR FORGE-17 | Industrial Expanse | Elfogadott C3 terv; még nem játszható |
 | SECTOR BOREALIS-02 | Frozen Frontier | Jelölt |
 | SECTOR HELIOS-21 | Solar Wastes | Jelölt |
 | SECTOR ORBITAL-05 | Elevator Nexus | Jelölt |
 | SECTOR TITAN-09 | Ringfall Ridge | Jelölt |
-| SECTOR VANGUARD-12 | Defense Grid | Jelölt |
+| SECTOR VANGUARD-12 | Defense Grid | Elfogadott C3 terv; még nem játszható |
 | SECTOR VEYLORA-03 | Mining Colony | Jelölt |
-| SECTOR PRIME-00 | Capital Perimeter | Jelölt |
+| SECTOR PRIME-00 | Capital Perimeter | Elfogadott C3 terv; még nem játszható |

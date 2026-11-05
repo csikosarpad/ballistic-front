@@ -423,12 +423,18 @@ megvalósítható; a jelentős költség a mögöttes állapot-, csata- és juta
 | Solvyr Prime identitás | Nagyon erős: műveletek, útvonalak, fenyegetés és fővárosi célpont; a lore-t a játékszabályok támasszák alá |
 
 **Első szállítás:** Campaign Map Foundation egy játszható ALPHA-01 célponttal.
-**Későbbi tartalmi cél:** öt csomópontos, enyhén elágazó offline hadművelet P1 vs AI,
-helyi mentéssel és egyszerű feloldási szabályokkal. Az ötös darabszám még javaslat;
-a Foundation P1 vs AI szereposztása működik. Öt célpont használhat három terepprofilt, de minden célpontnak valódi
+**Elfogadott C3 terv (2026-11-05; még nem implementált):** öt csomópontos,
+enyhén elágazó offline hadművelet P1 vs AI, helyi mentéssel.
+ALPHA-01 → DELTA-08 / FORGE-17 → VANGUARD-12 → PRIME-00.
+ALPHA mindkét ágat feloldja, VANGUARD bármelyik ág teljesítése után elérhető (OR);
+az ágak szabadon bejárhatók és nem zárják ki egymást. Nincs extra kampánybónusz
+vagy Smart Aim jutalom. PRIME biztosítása lezárja a műveletet akár 4/5 mellett;
+a kihagyott ág utólag is teljesíthető az 5/5-höz. Replay végig megmarad.
+Öt célpont használhat három terepprofilt, de minden célpontnak valódi
 csatadefiníció kell; a puszta átnevezés nem új pálya.
 
-Az egy célpontos P1 vs AI Foundation működik; az ötcsomópontos bővítés még módjavaslat.
+Az egy célpontos P1 vs AI Foundation működik; az ötcsomópontos bővítés elfogadott terv,
+nem kész funkció. A pontos terepprofilok/vizuális eltérések még tartalmi feladatok.
 A hot-seat és online játék
 maradjon külön **Skirmish / gyors csata** útvonalon; ne kelljen minden játékosnak
 kampányt teljesítenie egy egyszerű mérkőzéshez.
@@ -444,14 +450,15 @@ kétszer. Végleges assetek és hosszabb balansziteráció nincsenek a becslésb
 | --- | --- | --- | ---: | --- |
 | C1 – Térkép és csatabelépés | ALPHA-01 pont, kijelölés/kártya, navigáció és valódi csataindítás; React + SVG | ALPHA-katalógus és új képernyő/meccskontextus kialakítása | 2–4 nap | Működő belépési útvonal; a Foundation első részlépése, még nincs mentett teljesítés |
 | C2 – Helyi haladás | Csataeredmény, térképre visszatérés, ALPHA teljesítésmentése és újrapróbálás | C1, mód-/resetdöntések, meccslezárás | 4–7 nap | Kész Foundation egy pályával, meglévő harci XP-vel; új fizika és bónuszjutalom nélkül |
-| C3 – Elágazó művelet | Új játszható célpontok bekötése, statikus gráf, útvonalválasztás és feloldás; külön jóváhagyott jutalom | C2, legalább két további kész csatadefiníció és gráfszabályok | 2–4 nap, új pályák nélkül | Érdemi célválasztás; még nincs erőforrás-háború vagy ellenfél-területfoglalás |
+| C3 – Elágazó művelet | Öt játszható célpont, statikus gráf, szabad ágbejárás, OR feloldás, szektoros mentésmigráció; extra bónusz nélkül | C2, négy további valódi csatadefiníció és minimális közös szektorkonfig | 2–4 nap a gráf/haladás alapjára; a pályák és migráció további munkák | Érdemi célválasztás; még nincs erőforrás-háború vagy ellenfél-területfoglalás |
 | C4 – Eltérő szektorcsaták | Közös szabálykonfig, kontrollált AI-nehézség, valós kártyaadatok, TTS és opcionális térkép-VFX | C3 és Sector Operations alapok | 5–10 nap | Taktikailag eltérő csaták; nem szükséges új fegyver vagy osztály |
 | C5 – Stratégiai hadjárat | Küldetések, ellenséges ellenlépések, erőforrások, tartós veszteségek | C4 és külön design | 20–40 napos teljes hadjárat-nagyságrend, a meglévő részek beszámítandók | Új stratégiai játék, nem térkép-polish |
 | C6 – Közös online kampány | Közös tulajdon, tartós szerverállapot, konfliktuskezelés, hitelesített eredmény/jutalom | Külön backend- és termékspecifikáció | Jelen adatokból nem becsülhető megbízhatóan | Nem következik a jelenlegi kétfős lobbyból |
 
 **Végrehajtás:** minimális ALPHA-katalógus/meccskontextus → C1 → C2 →
-új csatadefiníciók és C3 → modifikátorok/C4. A C1+C2 együtt a következő,
-becslés szerint 6–11 nettó fejlesztői napos csomag, nem határidővállalás.
+minimális közös szektorkonfig és új csatadefiníciók → C3 → modifikátorok/C4.
+A C1+C2 már elkészült; a következő csomag az elfogadott C3 terv megvalósítása,
+amelynek teljes költségét a csatadefiníciók véglegesítése után lehet becsülni.
 Nem kell előre véglegesíteni mind a tíz szektort vagy megírni az online pályaprotokollt.
 Az „ágas” térképhez később sem kell procedurális generátor vagy stratégiai AI.
 
@@ -520,20 +527,24 @@ Visszavágó legyen új meccs-ID ugyanazon szektoron; vereség/döntetlen ne fog
 - A minták `+350 XP` és `+150 XP` értékei nem balanszdöntések. Most a
   [Game](../../src/game/engine/Game.ts) már harc közben ad sebzés-XP-t és +50 győzelmi XP-t.
   A kampánybónuszt külön kell megjeleníteni és elszámolni, nem újra kiosztani a meccs-XP-t.
-- **C2-ben ne legyen új bónusz.** C3-ban első teljesítéshez kötött egyszeri jutalom ajánlott,
-  külön szabállyal arra, mit ad a replay és a kampányreset; XP-grind és dupla jutalom nélkül.
+- **C2 és az elfogadott első C3 csomag nem ad új bónuszt.** A meglévő harci XP és
+  +50 győzelmi XP marad replay esetén is. Egyszeri kampányjutalom csak későbbi külön
+  döntés után kerülhet be, ismétlésbiztos elszámolással.
 - `+1 Smart Aim` jelenthet állandó szintet, következő csatás töltetet vagy feloldást.
   Ezek eltérő rendszerek. Állandó szintnél a 3-as plafon, maxos profil kompenzációja
   és AI-vásárlás; ideiglenes töltetnél külön csatakonfig és élettartam szükséges.
   Döntésig a kártya ne ígérjen ilyen jutalmat.
 
-Frissítés, ResultScreen-remount, ismételt eredménykézbesítés és mentés közbeni hiba
+Későbbi extra kampányjutalom bevezetésekor: frissítés, ResultScreen-remount,
+ismételt eredménykézbesítés és mentés közbeni hiba
 nem adhat másodszor jutalmat. Ha XP és kampányhaladás külön localStorage-kulcsban él,
 az „XP elmentve, teljesítés még nem” megszakítás duplázást okozhat.
 Az érintett adatokat egy verziózott elszámolási egységben vagy helyreállítható
 eredményrekorddal kell kezelni; sima két egymás utáni `setItem` nem tranzakció.
 Meglévő profilokhoz kezdeti üres kampányhaladás tartozzon, korábbi XP elvesztése nélkül.
-Ez helyi megbízhatóság, nem csalásbiztos online gazdaság.
+Ez helyi megbízhatóság, nem csalásbiztos online gazdaság. Az első C3-ban nincs
+extra jutalomledger: a szektor-ID alapú teljesítés idempotens mentése és a v1
+ALPHA-boolean migrációja szükséges, a meglévő XP/profilok megőrzésével.
 
 ### 10.6. Szektorcsaták és AI: olcsóbbtól a drágábbig
 
@@ -588,12 +599,12 @@ felolvasásával; külön beszédszöveg indokolt. A TTS nem előfeltétele C1�
 
 - Az eddigi **DELTA-08 / Crystal Basin** helyett a mintában DELTA-03 szerepel.
   **VANGUARD-12 / Defense Grid** helyett GRID-09 / Defense Network.
-  Jelenleg egyik jelölt sem játszható; a katalógus véglegesítésekor kell dönteni.
-  Addig a TODO korábbi nevei maradnak, új ID nem kerül a kódba.
+  A 2026-11-05-i C3 döntés véglegesíti a **DELTA-08** és **VANGUARD-12** neveket;
+  egyik új célpont sem játszható még. A minták eltérő kódjai nem további szektorok.
 - Az eddigi lista 10 nevet ad, a főmenüminta 12-t jelez, a lineáris példa 6 szektort,
   az MVP 5–10-et. Ezek nem azonos vállalások. A Foundation egy játszható ALPHA-01 ponttal
-  indul; az ötcsomópontos bővítés javaslat. A további darabszámot és gráfot csak
-  a tartalmi bővítés előtt kell elfogadni, nem a Foundation előfeltételeként.
+  indult; az ötcsomópontos C3 bővítés és gráf már elfogadott terv. A 6/10/12
+  szektoros példák nem az első C3 csomag vállalásai.
 - A „galaktikus kampány” Solvyr Prime bolygószektoraihoz képest nagyobb lépték.
   Elsőként planetáris/orbitális **műveleti hálózat** ajánlott csillagtérképes esztétikával,
   tényleges többbolygós utazás és új világkánon nélkül.
@@ -621,3 +632,120 @@ Nem egyből 12 szektorral, Pixi térképmotorral, Smart Aim-jutalmakkal és köz
 kampánnyal indulunk. A térképmód nem vár ezekre a rendszerekre.
 Az XP-plafont a térkép önmagában nem szünteti meg; látható célt ad, amelyet később
 horizontális feloldások és valóban különböző taktikai helyzetek tesznek tartóssá.
+
+### 10.10. C3 csataprofilok – részletes tervezési javaslat
+
+**Státusz (2026-11-05): tervezet, nem elfogadott balansz és nem implementált tartalom.**
+Az öt név, a gráf és a bónusz nélküli működés elfogadott; az alábbi geometria,
+színek és ellenőrzési célok ezek megvalósításához készített javaslatok.
+A felhasználó a profilok részletes megtervezését kérte a fejlesztés megkezdése előtt.
+
+#### Közös keret
+
+- Minden szektor Solvyr Prime felszíni hadszíntere; nincs bolygóváltás vagy orbitális fizika.
+- Világ: 1280×720, két tank, tükrözött kezdőterep; P1 x = 153,6, P2 x = 1126,4.
+  ALPHA a jelenlegi generátort használja, azonos seedhez pontosan azonos magasságtérképpel.
+- Gravitáció 600 px/s²; a jelenlegi seedelt körönkénti szél, fegyverek, upgrade-ek,
+  mozgás és XP változatlan. Nincs új akadálytípus, omlási sebzés vagy bónusz.
+- Az új profiloknak saját szerkezeti sziluettjük legyen, ne csak más noise-seedjük vagy színük.
+  Kezdetben mind az ötnek külön szektor-/profil-ID-ja van; a generálási segédek közösek lehetnek.
+- Az új szektorok alapgörbéje rögzített, seedelt kisebb felszíni hullámokkal.
+  A seed a csata változatosságát adja, nem írhatja felül a szektor medence/terasz/gerinc karakterét.
+  Replay/visszavágó azonos profilt, új meccsnél a jelenlegi szabály szerint új seedet használ.
+- A kampány a meglévő közös profilokat és AI-memóriát használja. A terep taktikai
+  kihívása eltérhet, de C3 nem ígér szektorhoz kötött, rögzített AI-nehézséget vagy statbónuszt.
+  A kártya terepleírást adjon, ne nem kalibrált nehézségi csillagokat.
+
+#### Öt szektor karaktere
+
+| Szektor | Terep és taktikai szerep | Vizuális irány | Rövid eligazítás tartalma |
+| --- | --- | --- | --- |
+| ALPHA-01 / Training Grounds | Meglévő tükrözött hullámos terep; kontrollpálya, általános mozgás és célzás | Jelenlegi kék-cián rétegek, sziklák és városfények változatlanul | Rombolható terep, változó szél, ellenséges egység semlegesítése |
+| DELTA-08 / Crystal Basin | Széles, mély központi medence; lefelé haladva alacsonyabb tüzelőállás, a visszakapaszkodás hosszabb út | Sötét palakék talaj, türkiz felszín, kevés lila köd; gyenge városfények | A medencébe ereszkedés megváltoztatja a lövési szögeket; figyeld a kijáratokat |
+| FORGE-17 / Industrial Expanse | Hosszú lapos teraszok, köztük járható rámpák; pozícióváltás és kiszámíthatóbb felszíni mozgás | Grafitszürke talaj, visszafogott réz/narancs felszín, erősebb meglévő városfények | A teraszok mozgásteret adnak; a kráterek megszakíthatják a járható útvonalakat |
+| VANGUARD-12 / Defense Grid | Két alacsonyabb árok egy széles központi gerinc körül; a gerinc részben takarja a közvetlen lövéseket | Sötét acélkék talaj, jégkék felszín, tisztább háttér | Használd a magas ívű lövéseket vagy bontsd meg a központi gerincet |
+| PRIME-00 / Capital Perimeter | Két kisebb védődomb és egy központi, sekély teknő; összetettebb, de nem magasabb statokra épülő zárócsata | Sötét kékes talaj, arany felszíni hangsúly, hangsúlyos meglévő városfények | A védődombok és a központi mélyedés között válassz tüzelőállást |
+
+A DELTA nem alacsony gravitációjú pálya, FORGE nem kap működő gyárat, VANGUARD
+nem kap aktív védelmi pajzsot, PRIME nem boss-statcsata. Ezek későbbi rendszerek lennének.
+A különbség most a rombolható talaj geometriája és az olvasható vizuális karakter.
+
+#### Geometriai kiindulóértékek
+
+Az alábbiak a **bal félpálya alapgörbéjének** normalizált vezérlőpontjai `(x/W, y/H)`.
+Kisebb y magasabb talaj. A jobb fél a bal tükrözése; a pontokat sima átmenet köti össze,
+FORGE lapos szakaszait azonban meg kell őrizni. Nem kész magasságtérképek vagy mért balanszértékek.
+
+| Profil | Bal félpálya vezérlőpontjai | Seedelt hullám legnagyobb amplitúdója |
+| --- | --- | --- |
+| ALPHA | Jelenlegi 4 oktávos value-noise, y/H = 0,45 + 0,35 × normalizált noise | Változatlan |
+| DELTA | (0; 0,58), (0,12; 0,58), (0,22; 0,60), (0,34; 0,71), (0,50; 0,76) | ±0,015 H, kb. 11 px |
+| FORGE | (0; 0,62), (0,20; 0,62), (0,28; 0,58), (0,40; 0,58), (0,48; 0,63), (0,50; 0,63) | ±0,006 H, kb. 4 px |
+| VANGUARD | (0; 0,62), (0,20; 0,62), (0,28; 0,67), (0,40; 0,52), (0,50; 0,49) | ±0,012 H, kb. 9 px |
+| PRIME | (0; 0,62), (0,20; 0,62), (0,30; 0,56), (0,40; 0,65), (0,50; 0,63) | ±0,010 H, kb. 7 px |
+
+Az új profilok hullámaihoz a meglévő value-noise módszer használható, kezdetben két
+oktávval, 160 és 80 px hullámhosszal, 1 és 0,5 súllyal; a súlyozott eredmény
+középre igazítva és normalizálva adja a táblázat amplitúdóját.
+Ez külön terepgenerálási véletlen: a dekoráció nem fogyaszthatja a szél/AI véletlensorozatát.
+
+**Járhatósági korlátok az új profilokon:**
+
+- Mindkét kezdőpont körül legalább ±110 px bejárható, szilárd felszín legyen.
+  Ez a maximális, 110 px-es mozgáskerethez is ad kezdő mozgásteret.
+- A jelenlegi lépés 2 px, a maximális felfelé lépés 4 px. A kezdeti, rombolás előtti
+  közlekedési útvonalakon egyik irányban se legyen 4 px-nél nagyobb emelkedés egy lépés alatt.
+  A teraszok rámpásak, nem függőleges falak; a hullámok ezt a korlátot nem léphetik át.
+- Az új profilokon a kiinduló talaj y/H értéke 0,46–0,80 között maradjon:
+  legyen hely a HUD alatt, és legalább 144 px talajvastagság a pálya aljáig.
+- Minden kiinduló solid pixel kapcsolódjon az alsó pályaszélhez. Nem kerül szándékosan
+  lebegő sziget ebbe a csomagba; a robbanás utáni leválás-törlés mindegyiken működik.
+- ALPHA regresszióvédelem miatt nem kap utólag új simítást vagy kezdőpont-korrekciót.
+  A fentiek az új profilok tervezési/tesztelési korlátai, nem az alapgenerátor átírása.
+
+#### Vizuális kiindulóértékek és assethatár
+
+| Profil | Talaj kitöltése | Felszíni sáv / világos perem | Városfények |
+| --- | --- | --- | --- |
+| ALPHA | `#2a3a4f` | `#2399ad` / `#8beeff` | Jelenlegi értékek |
+| DELTA | `#26384c` | `#36b8bc` / `#b2fbf2` | A jelenlegi intenzitás 30%-a |
+| FORGE | `#34343b` | `#b87843` / `#ffd0a0` | A jelenlegi intenzitás 100%-a |
+| VANGUARD | `#243347` | `#477ea8` / `#a8ddff` | A jelenlegi intenzitás 50%-a |
+| PRIME | `#293447` | `#b49a52` / `#ffe4a3` | A jelenlegi intenzitás 100%-a |
+
+- A meglévő égbolt-/városképeket használjuk; árnyalat, köd- és hegyrétegszínek,
+  városfény-intenzitás paraméterezhető. Nem vállalunk új részletes ipari/fővárosi hátteret.
+- A szikladekoráció marad külön, collision nélküli réteg. DELTA opcionálisan kevés
+  egyszerű, Pixi Graphics-szal rajzolt kristálysziluettet kaphat; ezek nem járható platformok.
+  Az első elfogadáshoz nem kötelező dekorációs geometria vagy új képasset.
+- A játékosszín, HP/pajzs/páncél színjelentése, célzási jelölés és kompakt HUD nem változik.
+  A szektor arany/narancs színe ne tegye összetéveszthetővé a tankokat vagy állapotjelzőket.
+- Reduced-motion és a meglévő bloom-kezelés marad; nincs új shader vagy kötelező VFX.
+- A térképkártya és hu/en/de briefing ugyanebből a szektordefinícióból írja le a terepet.
+  „Kristályos” vizuális irány nem jelent külön kristályfizikát vagy ellenőrizetlen képforrást.
+
+#### Elfogadás a profilok implementációja után
+
+1. ALPHA azonos seedre azonos magasságtérképet ad, a gyorscsata és online alapcsata változatlan.
+2. Az új profilok legalább 100 rögzített seeden (0–99) determinisztikusak, tükrözöttek,
+   és teljesítik a magasság-, járhatósági és kezdőterep-korlátokat.
+3. Minden seeden megmarad a szerkezeti karakter: DELTA közepe mélyebb a kezdőpontoknál,
+   VANGUARD középső gerince magasabb náluk, FORGE lapos teraszai és PRIME oldalgerincei
+   a kisebb hullámok ellenére felismerhetők.
+4. Alap és maximális fejlesztésekkel mindkét tank mozoghat induláskor; a lövegcső
+   kiinduló vége nem lehet talajban. Mindkét kezdőjátékossal legyen ember/AI játékpróba.
+5. Nem követelmény az első pozícióból közvetlen találat: az alaperő 600, a kezdőtáv
+   közel 973 px, így a jelenlegi pályán is szükség lehet közeledésre. Viszont minden
+   szektorban legyen elérhető találati helyzet kötelező upgrade nélkül; ne zárjuk
+   a meccset bejárhatatlan terep vagy minden hasznos lövést blokkoló gerinc mögé.
+6. A lövedék, Smart Aim és AI ugyanazt a tényleges maszkot használja; leszakadás után
+   collision és látvány egyezzen, a tankok új talajra kerüljenek.
+7. A képernyők és visszavágó a kiválasztott szektort mutassák/indítsák; az öt terep
+   név nélkül is megkülönböztethető legyen sziluett és szín alapján.
+8. Álló/fekvő mobilnézetben a tank és terepperem olvasható; a profilok és collapse
+   futásidejét mobilon is mérjük. Az asztali/emulált eredmény nem valós telefonos mérés.
+
+**Javasolt implementációs sorrend a terv elfogadása után:** közös katalógus és ALPHA
+regresszióteszt → DELTA/FORGE generálás és járhatósági ellenőrzés → VANGUARD/PRIME →
+vizuális paraméterezés → szektorkontextus és mentésmigráció → térképgráf és teljes C3 kör.
+Nem adunk külön első szektorjutalmat, és a C4 modifikátor-/AI-nehézségrendszere nem előfeltétel.
