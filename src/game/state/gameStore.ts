@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { TRAINING_SECTOR } from "../data/sectors";
+import { TRAINING_SECTOR, type Sector, type SectorId } from "../data/sectors";
 import type { MatchStats } from "../systems/matchStats";
 import type { Phase } from "../systems/turnManager";
 import type { Profile } from "../systems/upgrades";
@@ -53,7 +53,8 @@ export interface GameState {
   screen: Screen;
   matchMode: MatchMode;
   matchId: string | null;
-  sector: typeof TRAINING_SECTOR;
+  sector: Sector;
+  campaignNewRoutes: SectorId[];
   aiActive: boolean;
   /** Helyi prezentációs sorszám; új csatánál változik, nem online protokollmező. */
   matchSequence: number;
@@ -91,6 +92,7 @@ export const useGameStore = create<GameState>((set) => ({
   matchMode: "skirmish",
   matchId: null,
   sector: TRAINING_SECTOR,
+  campaignNewRoutes: [],
   aiActive: false,
   matchSequence: 0,
   muted: readMuted(),

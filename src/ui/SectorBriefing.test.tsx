@@ -1,6 +1,6 @@
 import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { TRAINING_SECTOR } from "@/game/data/sectors";
+import { TRAINING_SECTOR, sectorById } from "@/game/data/sectors";
 import { useGameStore } from "@/game/state/gameStore";
 import { useLocaleStore } from "@/i18n";
 import { Hud } from "./Hud";
@@ -10,7 +10,7 @@ describe("Sector briefing", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     useLocaleStore.getState().setLocale("hu");
-    useGameStore.setState({ matchSequence: 0, phase: "aiming", tanks: [], canControl: true });
+    useGameStore.setState({ matchSequence: 0, phase: "aiming", tanks: [], canControl: true, sector: TRAINING_SECTOR });
   });
 
   afterEach(() => {
@@ -50,6 +50,13 @@ describe("Sector briefing", () => {
     expect(vi.getTimerCount()).toBe(before + 1);
     unmount();
     expect(vi.getTimerCount()).toBe(before);
+  });
+
+  it("uses the selected battle's briefing rather than the training text", () => {
+    useGameStore.setState({ sector: sectorById("delta-08") });
+    render(<SectorBriefing />);
+    expect(screen.getByRole("heading", { name: "Crystal Basin" })).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Mély központi medence");
   });
 
   it("csak elkészült meccsnél jelenik meg, új meccsnél megismétlődik, körváltáskor nem", () => {

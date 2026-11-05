@@ -35,12 +35,11 @@ orbitális képességek, egységosztályok és kampány rangsora:
   Web Speech API-val (hu/en/de, elérhető böngészőhangtól függően), szintetizált győzelmi
   fanfár és a győztes bemondása. Offline a játékosnevek a Beállításokban állíthatók.
 - Offline AI és érintésbarát célzás működik; valódi telefonos ellenőrzés még hátravan.
-- Egy seedelt terepcsalád, két tank és hét összeadódó statfejlesztés van. A harctér
-  **SECTOR ALPHA-01 / Training Grounds** néven megjelenik a főmenüben és HUD-ban,
-  meccskezdéskor 2,5 másodperces briefinggel. Többpályás választás,
-  modifikátor, orbitális képesség, egységosztály-választás és stratégiai hadjárat még nincs.
-- Campaign Map Foundation működik: külön térképképernyő, ALPHA-01 indítása mindig
-  P1 vs AI módban, eredmény utáni visszatérés, helyileg mentett 0/1 → 1/1 teljesítés.
+- Öt seedelt terepprofil, két tank és hét összeadódó statfejlesztés van. A kampány
+  aktuális művelete a főmenüben, a tényleges csataszektor a HUD-ban és 2,5 másodperces
+  briefingben látható. Modifikátor, orbitális képesség, osztályválasztás és stratégiai hadjárat még nincs.
+- Campaign Map C3 működik: öt szektoros elágazó térkép, P1 vs AI, OR feloldás,
+  eredmény utáni visszatérés, helyileg mentett 0/5 → 5/5 teljesítés és v1→v2 migráció.
   Külön kampányreset és teljes mentéstörlés; extra kampányjutalom nincs.
 - A részletes UX- és hang-redesign következő lépései külön checklistként szerepelnek alább.
 
@@ -116,17 +115,17 @@ A képernyő/navigáció/meccskontextus alapjai elkészültek.
 Csak egy pálya szükséges; nincs új fizika vagy extra kampányjutalom. A hot-seat/online
 gyorscsata megmarad; a kampány mindig P1 vs AI. Kampányreset csak teljesítést,
 a teljes mentéstörlés XP-t/szinteket/teljesítést töröl. Valós telefonos próba hátravan.
-**Következő csomag: C3, elfogadott terv (2026-11-05), még nem implementált.**
+**Elkészült bővítés: C3 (2026-11-05); hosszabb balansz- és valódi telefonos próba még hátravan.**
 Összesen öt játszható pont: ALPHA-01 / Training Grounds, DELTA-08 / Crystal Basin,
 FORGE-17 / Industrial Expanse, VANGUARD-12 / Defense Grid, PRIME-00 / Capital Perimeter.
 ALPHA → DELTA / FORGE → VANGUARD → PRIME; szabad ágbejárás, VANGUARD feloldása OR,
 extra kampánybónusz/Smart Aim jutalom nélkül. PRIME biztosítása műveletzárás;
 mind az öt szektor teljesítése 5/5, kihagyott ág és replay utólag is elérhető.
-Előfeltétel a minimális közös szektorkonfig és négy valódi új csatadefiníció;
-szektor-ID alapú mentés és a meglévő ALPHA-teljesítés migrációja is a csomag része.
-A [részletes csataprofil-javaslat](./gameplay-progression.md#1010-c3-csataprofilok--részletes-tervezési-javaslat)
-geometriai kiindulóértékeket, palettát és tesztelési korlátokat rögzít; még nem
-jóváhagyott balansz. A felhasználó előbb ezt kívánja megtervezni, C3 kódfejlesztés még nem indult.
+Közös szektorkatalógus, négy valódi új csatadefiníció, szektor-ID alapú mentés és
+a meglévő ALPHA-teljesítés migrációja elkészült. Az ALPHA gyorscsata/online pálya változatlan.
+A [részletes csataprofil-terv](./gameplay-progression.md#1010-c3-csataprofilok--részletes-tervezési-javaslat)
+geometriája és palettája bekötött; a balansz játékpróbával tovább finomítandó.
+Következő lépés: játékpróba, majd C4 közös modifikátor-/AI-policy fejlesztés külön döntéssel.
 
 A Sector Operations közös katalógus-/terepkonfig része C3-at támogatja; két
 modifikátor és online szektorválasztás későbbi bővítés. A korábbi háromszektoros

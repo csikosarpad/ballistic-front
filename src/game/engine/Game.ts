@@ -49,7 +49,7 @@ import { useCampaignStore } from "../state/campaignStore";
 import type { MatchMode } from "../state/gameStore";
 import { AiBrain, chooseUpgrades, simulateImpact, skillFromMemory } from "../systems/ai";
 import type { RoomEvent } from "../multiplayer/protocol";
-import { TRAINING_SECTOR } from "../data/sectors";
+import { TRAINING_SECTOR, sectorById, type Sector, type SectorId } from "../data/sectors";
 
 /** Ennyi HP-arány alatt kritikus a tank állapota. */
 const CRITICAL_HP_FRACTION = 0.3;
@@ -124,6 +124,7 @@ export class Game {
   private matchRandom = Math.random;
   private multiplayer = false;
   private matchMode: MatchMode = "skirmish";
+  private sector: Sector = TRAINING_SECTOR;
   private matchActive = true;
   private matchProfiles: Record<string, Profile> | null = null;
   private lastMultiplayerRevision = 0;
@@ -280,8 +281,8 @@ export class Game {
     const width = WORLD_WIDTH;
     const matchSetup = setup ?? { seed: Math.floor(Math.random() * 1_000_000), starterIndex: this.nextStarter };
     this.matchRandom = createSeededRandom(matchSetup.seed);
-    this.battlefieldLayers.draw(WORLD_WIDTH, WORLD_HEIGHT, matchSetup.seed);
-    this.terrain.build(WORLD_WIDTH, WORLD_HEIGHT, matchSetup.seed);
+    this.battlefieldLayers.draw(WORLD_WIDTH, WORLD_HEIGHT, matchSetup.seed, this.sector.atmosphere);
+    this.terrain.build(WORLD_WIDTH, WORLD_HEIGHT, matchSetup.seed, this.sector);
     this.tanks = [
       createTank("P1", width * 0.12, this.playerColor(0), 45, this.statsFor("P1")),
       createTank("P2", width * 0.88, this.playerColor(1), 135, this.statsFor("P2")),
@@ -301,13 +302,15 @@ export class Game {
     useGameStore.getState().sync({
       matchSequence: useGameStore.getState().matchSequence + 1,
       matchId: crypto.randomUUID(),
-      sector: TRAINING_SECTOR,
+      sector: this.sector,
+      campaignNewRoutes: [],
     });
     this.beginTurn();
   }
 
   startMultiplayer(setup: MatchSetup, profiles: Record<string, Profile>, revision: number): void {
     this.matchMode = "skirmish";
+    this.sector = TRAINING_SECTOR;
     if (!this.terrain) {
       this.pendingMultiplayerStart = { setup, profiles, revision };
       return;
@@ -329,6 +332,7 @@ export class Game {
 
   startOffline(mode: MatchMode = "skirmish"): void {
     this.matchMode = mode;
+    if (mode === "skirmish") this.sector = TRAINING_SECTOR;
     this.pendingMultiplayerStart = null;
     this.unsubscribeMultiplayer?.();
     this.unsubscribeMultiplayer = null;
@@ -336,12 +340,22 @@ export class Game {
     this.matchProfiles = null;
     this.pendingMultiplayerEvents = [];
     this.lastMultiplayerRevision = 0;
-    useGameStore.getState().sync({ matchMode: mode, phase: "aiming", winner: null });
+    useGameStore.getState().sync({
+      matchMode: mode,
+      sector: this.sector,
+      campaignNewRoutes: [],
+      phase: "aiming",
+      winner: null,
+    });
     this.restart();
   }
 
-  startCampaign(): void {
+  startCampaign(id: SectorId = useCampaignStore.getState().selectedId): boolean {
+    const sector = sectorById(id);
+    if (!useCampaignStore.getState().select(id)) return false;
+    this.sector = sector;
     this.startOffline("campaign");
+    return true;
   }
 
   leaveBattle(): void {
@@ -803,7 +817,8 @@ export class Game {
     if (this.turns.phase === "aiming") this.beginTurn();
     else {
       if (this.matchMode === "campaign" && this.turns.winner === "P1") {
-        useCampaignStore.getState().complete();
+        const routes = useCampaignStore.getState().complete(this.sector.id);
+        useGameStore.getState().sync({ campaignNewRoutes: routes });
       }
       if (this.turns.winner) {
         this.award(this.turns.winner, WIN_BONUS_XP);

@@ -22,7 +22,7 @@ export function SectorBriefing() {
         <div className="sector-briefing-eyebrow">SECTOR BRIEFING</div>
         <div className="sector-code">{sector.code}</div>
         <h2>{sector.name}</h2>
-        <p>{t("sector.trainingBrief")}</p>
+        <p>{t(sector.briefing)}</p>
       </div>
     </div>
   );

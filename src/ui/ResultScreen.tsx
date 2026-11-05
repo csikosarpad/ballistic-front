@@ -7,14 +7,16 @@ import { gameRef } from "./gameRef";
 import { Shop } from "./Shop";
 import { ResultDecorCanvas } from "./result/ResultDecorCanvas";
 import { getUnitPresentation } from "./result/unitPresentation";
+import { sectorById } from "@/game/data/sectors";
 
 /** Meccs végén: győztes, statisztika, bolt és továbblépés. */
 export function ResultScreen() {
   const t = useT();
   const name = usePlayerName();
-  const { winner, matchStats, setScreen, matchMode, aiActive, sector } = useGameStore();
+  const { winner, matchStats, setScreen, matchMode, aiActive, sector, campaignNewRoutes } = useGameStore();
   const campaign = matchMode === "campaign";
   const campaignError = useCampaignStore((s) => s.error);
+  const completedIds = useCampaignStore((s) => s.completedIds);
   const credentials = useMultiplayerStore((state) => state.credentials);
   const session = useMultiplayerStore((state) => state.session);
   const multiplayerError = useMultiplayerStore((state) => state.error);
@@ -36,6 +38,16 @@ export function ResultScreen() {
         {campaign && (
           <p className="campaign-result" role="status">
             {winner === "P1" ? t("campaign.secured", { code: sector.code }) : t("campaign.notSecured")}
+          </p>
+        )}
+        {campaign && winner === "P1" && campaignNewRoutes.length > 0 && (
+          <p className="campaign-result" role="status">
+            {t("campaign.newRoutes", { names: campaignNewRoutes.map((id) => sectorById(id).name).join(", ") })}
+          </p>
+        )}
+        {campaign && winner === "P1" && completedIds.includes("prime-00") && (
+          <p className="campaign-result" role="status">
+            {t("campaign.operationComplete")}
           </p>
         )}
         {campaign && campaignError && (

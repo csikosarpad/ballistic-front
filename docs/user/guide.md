@@ -10,19 +10,39 @@ A jelenleg elérhető funkciók leírása. Fejlesztési tervek és technikai ré
   Az ellenfélválasztás a következő meccstől érvényes.
 - **Online:** két ember külön böngészőből, szobakódos lobbyval.
 - **Műveleti térkép:** külön menügomb, mindig P1 ember vs P2 AI, a gyorscsata
-  ellenfélbeállításától függetlenül. Egyelőre csak ALPHA-01 játszható.
+  ellenfélbeállításától függetlenül. Öt szektor, elágazó útvonal és helyi haladás.
 
-Jelenleg egy seed alapján változó, tükrözött terepcsalád és egy tanktípus van.
-Az alap harctér **SECTOR ALPHA-01 / Training Grounds**: neve a főmenüben a játékcím
-alatt és a felső középső HUD-ban látható. Új csata és visszavágó elején 2,5 másodperces
+Jelenleg öt seed alapján változó, tükrözött terepprofil és egy tanktípus van.
+A gyorscsata/online alap harctere **SECTOR ALPHA-01 / Training Grounds**.
+A főmenü az aktuális kampányműveletet mutatja, a felső középső HUD a tényleges csataszektort.
+Új csata és visszavágó elején 2,5 másodperces
 **SECTOR BRIEFING** mutatja be; ez nem szünetelteti és nem zárolja a játékot.
-Többpályás szektorválasztás, orbitális képességek, prestige és stratégiai hadjárat még nincsenek.
+Online szektorválasztás, környezeti modifikátorok, orbitális képességek, prestige
+és stratégiai hadjárat még nincsenek.
 
 ### A műveleti térkép használata
 
-Főmenü → Műveleti térkép → Művelet indítása → Csata → Eredmény → Műveleti térkép.
-P1 győzelme teljesíti az ALPHA-01 szektort; vereség és döntetlen nem.
-A teljesítés helyileg mentett, újratöltés után is 1/1 marad; a szektor újrajátszható.
+Főmenü → Műveleti térkép → szektor kijelölése → Művelet indítása → Csata → Eredmény → Műveleti térkép.
+P1 győzelme teljesíti az adott szektort; vereség és döntetlen nem.
+A teljesítés és az elérhető aktuális művelet helyileg mentett, újratöltés után is megmarad.
+
+| Szektor | Harctér | Elérés |
+| --- | --- | --- |
+| ALPHA-01 | Training Grounds – az eredeti hullámos terep | Kezdettől |
+| DELTA-08 | Crystal Basin – mély központi medence | ALPHA teljesítése |
+| FORGE-17 | Industrial Expanse – teraszok és rámpák | ALPHA teljesítése |
+| VANGUARD-12 | Defense Grid – árkok és központi gerinc | DELTA **vagy** FORGE teljesítése |
+| PRIME-00 | Capital Perimeter – védődombok és sekély teknő | VANGUARD teljesítése |
+
+Az ágak nem zárják ki egymást. A zárolt pont részletei megtekinthetők, de nem indítható.
+PRIME biztosításakor a művelet lezárul akár 4/5 mellett; a kihagyott ág később is
+teljesíthető az 5/5-höz. A teljesített szektorok újrajátszhatók, a visszavágó ugyanazon
+szektort használja. „Új útvonal” csak tényleges új feloldáskor jelenik meg.
+Győzelem után a következő még nem teljesített, elérhető művelet kerül kijelölésre.
+
+Mindegyik szektoron a megszokott gravitáció és szél működik, az AI-tapasztalat közös;
+nincs szektorhoz rendelt rögzített AI-nehézség. A régi 1/1 mentés ALPHA teljesítésként
+migrálódik, nem ad automatikusan győzelmet a többi szektoron.
 Nincs külön kampányjutalom, a megszokott harci XP és +50 győzelmi XP jár.
 A gyorscsata győzelme nem teljesít térképes szektort.
 

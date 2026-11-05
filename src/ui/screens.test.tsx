@@ -4,6 +4,7 @@ import type { Game } from "@/game/engine/Game";
 import { useGameStore } from "@/game/state/gameStore";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { useAudioSettings } from "@/game/state/audioSettings";
+import { useCampaignStore } from "@/game/state/campaignStore";
 import { gameRef } from "./gameRef";
 import { MainMenu } from "./MainMenu";
 import { ResultScreen } from "./ResultScreen";
@@ -16,6 +17,7 @@ describe("MainMenu", () => {
   beforeEach(() => {
     useGameStore.setState({ screen: "menu", muted: false, matchMode: "skirmish", aiActive: false });
     useMultiplayerStore.getState().leave();
+    useCampaignStore.getState().reset();
     useAudioSettings.setState({ channels: { music: true, voice: true, effects: true }, volume: 1, error: null });
   });
 

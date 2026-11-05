@@ -5,9 +5,11 @@ Kódbázis-alapú helyzetértékelés, 2026-11-04; térképközpontú irány pon
 **Rögzített fejlesztési irány: a Campaign Map legyen a fejlődés központi felülete.**
 Ez a prioritás elfogadott; a részletes mód-, feloldás-, jutalom- és balanszszabályok
 továbbra is döntést igényelnek. A dokumentum nem minden elemében kész implementációs specifikáció.
-A Campaign Map Foundation már működik egy ALPHA-01 célponttal, helyi teljesítésmentéssel
-és mindig P1 vs AI csatával. A további mechanikák még tervek. Az alap szektor elnevezése,
-menü-/HUD-kijelzése és briefingje elkészült; ez nem többpályás rendszer.
+A Campaign Map C3 már öt játszható szektort, OR feloldást, helyi teljesítésmentést
+és mindig P1 vs AI csatát ad. A v1 ALPHA-teljesítés migrálódik; a további mechanikák
+(modifikátorok, orbitális képességek, osztályok, stratégiai hadjárat) még tervek.
+Az alábbi korábbi helyzetértékelés/Foundation-hatókör történeti alap;
+az aktuális C3 működést a 10.1., 10.3. és 10.10. pont rögzíti.
 Az elfogadott első lépést és a további döntési kapukat a
 [végrehajtási TODO](./gameplay-progression-todo.md) követi. A meglévő technikai milestone-okat
 a [roadmap](./roadmap.md), a vizuális irányt a [játék redesign terve](./game-redesign.md) rögzíti.
@@ -84,19 +86,19 @@ Következmények:
 
 | Terület | Meglévő alap | Bővítési lehetőség és korlát |
 | --- | --- | --- |
-| Terep | Seedelt, tükrözött magasságtérkép és rombolható pixelmaszk | Új terepprofilok olcsóbbak; épületek és összeomlás új szabályokat igényelnek |
+| Terep | Öt seedelt, tükrözött profil és rombolható pixelmaszk, levált földdarabok törlésével | További profilok olcsóbbak; épületek és fizikai lehullás új szabályokat igényelnek |
 | Fizika | Közös gravitáció-/szélmodell, fix időlépés | Egyszerű fizikai modifikátorokhoz jó alap |
 | AI | A játék fizikájával keres lövéseket, szükség esetén közelít | Terephez alkalmazkodhat; veszélykerülés és képességválasztás még nincs |
 | Multiplayer | Közös seed, profilsnapshot, revision alapú eseménynapló | Determinisztikus új szabályokkal bővíthető; nem szerveroldali fizikai szimuláció |
 | Egységek | Két konkrét tank, talajhoz kötött mozgás és rögzített találati geometria | Szárazföldi variáns egyszerűbb; hover és orbitális egység jelentősen drágább |
 | Megjelenítés | Rétegezett Pixi háttér, külön egységprezentáció | Vizuálisan bővíthető; a prezentáció nem általános gameplay-egységmodell |
 | Mentés | Verziózott helyi profiltárolás | Új feloldásokhoz migráció kell; tartós online hadjáratállapot nincs |
-| Kampány | Egy ALPHA-01 ponttal működő térkép és helyi teljesítésmentés | Új célpontok, útvonalak és stratégiai szabályok még szükségesek |
+| Kampány | Öt ponttal működő elágazó térkép és helyi ID-alapú teljesítésmentés | Modifikátorok, tartalombővítés és stratégiai szabályok még szükségesek |
 
 ### Fontos konkrét kapcsolódások
 
-- A [terepgenerátor](../../src/game/terrain/heightmap.ts) egyetlen terepcsaládot variál.
-  Más seed nem jelent új pályatípust.
+- A [terepgenerátor](../../src/game/terrain/heightmap.ts) öt profilt variál.
+  Az ALPHA régi generátora változatlan; más seed önmagában nem új pályatípus.
 - A [Terrain](../../src/game/terrain/Terrain.ts) a fizikai maszkot és a látványt
   párhuzamosan rombolja. Új rombolási mechanika mindkettőt érinti.
 - A [ballisztika](../../src/game/physics/ballistics.ts) már fogad gravitációt, de a
@@ -107,7 +109,8 @@ Következmények:
 - A [TurnManager](../../src/game/systems/turnManager.ts) célzás, lövés és meccsvége
   fázisokat kezel. Általános képességfeloldási folyamat még nincs.
 - A [MatchSetup](../../src/game/systems/seededRandom.ts) jelenleg seedet és kezdőindexet tartalmaz.
-  Szektorhoz, modifikátorhoz és szabályverzióhoz bővíteni kell.
+  Online szektorválasztáshoz, modifikátorhoz és szabályverzióhoz bővíteni kell;
+  a helyi C3 kampány ettől függetlenül kezeli a szektort.
 - A helyi profilboríték verziózott, az online profilsnapshotnak viszont nincs külön
   séma-/szabályverziója. A javasolt meccskonfiguráció-verziózás új munka, nem meglévő képesség.
 - A [PHP API](../../server/api/index.php) explicit eseménytípusokat engedélyez.
@@ -285,7 +288,7 @@ Main Menu → Campaign Map → ALPHA-01 Battlefield → Result Screen → Campai
 Ez külön térképmód-útvonal. A hot-seat és online gyorscsata megmaradt;
 a kampány P1 ember vs P2 AI, a gyorscsata-beállítás megváltoztatása nélkül.
 Külön kampányreset csak teljesítést töröl; a teljes mentéstörlés XP-t, szinteket és kampányt.
-Az alábbi hatókör a megvalósított Foundation szerződése; többpályás bővítés még nincs.
+Az alábbi hatókör az eredeti Foundation szerződése; ezt azóta az öt szektoros C3 bővíti.
 
 Hatókör:
 
@@ -310,14 +313,14 @@ győzelem/vereség/döntetlen következetes; teljesítés refresh után megmarad
 ugyanazon eredmény nem dolgozódik fel kétszer; gyorscsata/online működés változatlan.
 A mentett haladás a C2 részlépésben elkészült; a Foundation a C1+C2 közös eredménye.
 
-### 6.2. Következő tartalmi csomag: Sector Operations MVP
+### 6.2. További szabálybővítés: Sector Operations MVP
 
 #### Hatókör
 
 Függőség: a Foundation működő térképes köre és a szektorszabályok véglegesítése.
 A katalógus/meccskontextus a Foundationnel közös alap, nem második pályarendszer.
 
-- Három eltérő terepprofilú szektor.
+- Az öt C3 terepprofil további finomhangolása; a korábbi háromszektoros javaslatot C3 felváltotta.
 - Két egyszerű környezeti modifikátor.
 - Meccsenként legfeljebb egy aktív modifikátor.
 - Offline szektorválasztás, online host által meghatározott közös pálya.
@@ -423,18 +426,18 @@ megvalósítható; a jelentős költség a mögöttes állapot-, csata- és juta
 | Solvyr Prime identitás | Nagyon erős: műveletek, útvonalak, fenyegetés és fővárosi célpont; a lore-t a játékszabályok támasszák alá |
 
 **Első szállítás:** Campaign Map Foundation egy játszható ALPHA-01 célponttal.
-**Elfogadott C3 terv (2026-11-05; még nem implementált):** öt csomópontos,
+**Megvalósított C3 (2026-11-05):** öt csomópontos,
 enyhén elágazó offline hadművelet P1 vs AI, helyi mentéssel.
 ALPHA-01 → DELTA-08 / FORGE-17 → VANGUARD-12 → PRIME-00.
 ALPHA mindkét ágat feloldja, VANGUARD bármelyik ág teljesítése után elérhető (OR);
 az ágak szabadon bejárhatók és nem zárják ki egymást. Nincs extra kampánybónusz
 vagy Smart Aim jutalom. PRIME biztosítása lezárja a műveletet akár 4/5 mellett;
 a kihagyott ág utólag is teljesíthető az 5/5-höz. Replay végig megmarad.
-Öt célpont használhat három terepprofilt, de minden célpontnak valódi
-csatadefiníció kell; a puszta átnevezés nem új pálya.
+Öt célpont öt tényleges terepprofilt és szektorfüggő vizuális beállításokat használ;
+ALPHA az eredeti generátort, a másik négy a 10.10. pont alapgörbéit.
 
-Az egy célpontos P1 vs AI Foundation működik; az ötcsomópontos bővítés elfogadott terv,
-nem kész funkció. A pontos terepprofilok/vizuális eltérések még tartalmi feladatok.
+Az egy célpontos Foundation az ötcsomópontos C3 előzménye.
+További balansz- és valódi telefonos próbák még szükségesek.
 A hot-seat és online játék
 maradjon külön **Skirmish / gyors csata** útvonalon; ne kelljen minden játékosnak
 kampányt teljesítenie egy egyszerű mérkőzéshez.
@@ -457,8 +460,9 @@ kétszer. Végleges assetek és hosszabb balansziteráció nincsenek a becslésb
 
 **Végrehajtás:** minimális ALPHA-katalógus/meccskontextus → C1 → C2 →
 minimális közös szektorkonfig és új csatadefiníciók → C3 → modifikátorok/C4.
-A C1+C2 már elkészült; a következő csomag az elfogadott C3 terv megvalósítása,
-amelynek teljes költségét a csatadefiníciók véglegesítése után lehet becsülni.
+A C1+C2 és az első C3 csomag már elkészült; következő feladat a játékpróba,
+majd a C4 szabály-/AI-policy bővítés külön döntés után. A táblázat napértékei
+az eredeti tervezési becslések, nem mért ráfordítások.
 Nem kell előre véglegesíteni mind a tíz szektort vagy megírni az online pályaprotokollt.
 Az „ágas” térképhez később sem kell procedurális generátor vagy stratégiai AI.
 
@@ -474,16 +478,18 @@ Az „ágas” térképhez később sem kell procedurális generátor vagy strat
   A térkép megnyitása önmagában nem állítja le a
   [Game](../../src/game/engine/Game.ts) AI-időzítőit, ezért a bekötött `leaveBattle`
   csatazárást végez. Rejtett csata nem fut tovább a térkép alatt.
-- Az [alap szektor](../../src/game/data/sectors.ts) a közös ALPHA-definíció.
-  A Game ezt teszi a meccsnézetbe, a briefing/HUD/eredmény ezt olvassa;
-  a menü/térkép ugyanazt az egyetlen műveletet mutatja.
+- A [szektorkatalógus](../../src/game/data/sectors.ts) öt definíciót, OR előfeltételeket,
+  térképpozíciót, terepprofilt, palettát és briefingkulcsot ad.
+  A Game az aktív szektort teszi a meccsnézetbe, a briefing/HUD/eredmény ezt olvassa;
+  a menü/térkép az elérhető kijelölt vagy következő műveletet mutatja.
 - A [ResultScreen](../../src/ui/ResultScreen.tsx) bemutatja az eredményt és boltot,
   de ne itt, rendereléskor történjen jutalmazás. A meccs lezárása adjon egyszer
   feldolgozott eredményt a kampánylogikának; a képernyő ezt csak megjelenítse.
 - A [profil](../../src/game/systems/upgrades.ts) XP-t és szinteket tárol.
   A [verziózott mentés](../../src/game/systems/profileStorage.ts) újrahasználható minta,
-  mellett külön [kampánymentés](../../src/game/state/campaignStore.ts) v1 tárolja az
-  egyetlen teljesítés booleanját. Ez idempotens, nem jutalomledger; több tároló közti
+  mellett külön [kampánymentés](../../src/game/state/campaignStore.ts) v2 tárolja a
+  `contentVersion: 1`, `completedIds` és `selectedId` adatokat.
+  A v1 boolean csak ALPHA-teljesítésre migrálódik. Ez idempotens, nem jutalomledger; több tároló közti
   tranzakció nincs. Extra kampány-XP előtt továbbra is kell az ismétlésbiztos elszámolás.
 - A [MatchSetup](../../src/game/systems/seededRandom.ts) csak seed/starterIndex.
   Az offline kampány helyi meccskontextusa már külön működik; online pályaválasztás csak
@@ -600,10 +606,10 @@ felolvasásával; külön beszédszöveg indokolt. A TTS nem előfeltétele C1�
 - Az eddigi **DELTA-08 / Crystal Basin** helyett a mintában DELTA-03 szerepel.
   **VANGUARD-12 / Defense Grid** helyett GRID-09 / Defense Network.
   A 2026-11-05-i C3 döntés véglegesíti a **DELTA-08** és **VANGUARD-12** neveket;
-  egyik új célpont sem játszható még. A minták eltérő kódjai nem további szektorok.
+  az öt célpont már játszható. A minták eltérő kódjai nem további szektorok.
 - Az eddigi lista 10 nevet ad, a főmenüminta 12-t jelez, a lineáris példa 6 szektort,
   az MVP 5–10-et. Ezek nem azonos vállalások. A Foundation egy játszható ALPHA-01 ponttal
-  indult; az ötcsomópontos C3 bővítés és gráf már elfogadott terv. A 6/10/12
+  indult; az ötcsomópontos C3 bővítés és gráf már működik. A 6/10/12
   szektoros példák nem az első C3 csomag vállalásai.
 - A „galaktikus kampány” Solvyr Prime bolygószektoraihoz képest nagyobb lépték.
   Elsőként planetáris/orbitális **műveleti hálózat** ajánlott csillagtérképes esztétikával,
@@ -635,10 +641,12 @@ horizontális feloldások és valóban különböző taktikai helyzetek tesznek 
 
 ### 10.10. C3 csataprofilok – részletes tervezési javaslat
 
-**Státusz (2026-11-05): tervezet, nem elfogadott balansz és nem implementált tartalom.**
-Az öt név, a gráf és a bónusz nélküli működés elfogadott; az alábbi geometria,
-színek és ellenőrzési célok ezek megvalósításához készített javaslatok.
-A felhasználó a profilok részletes megtervezését kérte a fejlesztés megkezdése előtt.
+**Státusz (2026-11-05): az első C3 profilcsomag implementálva a részletes terv alapján.**
+Az alábbi geometria és paletta a jelenlegi kiindulóérték; nem végleges játékpróbás balansz.
+Az automatizált ellenőrzések 100 seed/profilon igazolják a karaktert, szimmetriát
+és járhatóságot; alap/max stat kezdőmozgás és közeledés utáni találó lövések is teszteltek.
+A teljes 0/5→4/5 műveletzárás→5/5 csatakör és refresh böngészőben ellenőrzött.
+Hosszabb ember/AI balansz, valós telefonos teljesítmény és képernyőolvasós próba még hátravan.
 
 #### Közös keret
 
@@ -745,7 +753,7 @@ Ez külön terepgenerálási véletlen: a dekoráció nem fogyaszthatja a szél/
 8. Álló/fekvő mobilnézetben a tank és terepperem olvasható; a profilok és collapse
    futásidejét mobilon is mérjük. Az asztali/emulált eredmény nem valós telefonos mérés.
 
-**Javasolt implementációs sorrend a terv elfogadása után:** közös katalógus és ALPHA
+**Az első implementáció sorrendje:** közös katalógus és ALPHA
 regresszióteszt → DELTA/FORGE generálás és járhatósági ellenőrzés → VANGUARD/PRIME →
 vizuális paraméterezés → szektorkontextus és mentésmigráció → térképgráf és teljes C3 kör.
 Nem adunk külön első szektorjutalmat, és a C4 modifikátor-/AI-nehézségrendszere nem előfeltétel.

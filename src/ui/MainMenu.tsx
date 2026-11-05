@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TRAINING_SECTOR } from "@/game/data/sectors";
+import { SECTORS, sectorById } from "@/game/data/sectors";
 import { useGameStore } from "@/game/state/gameStore";
 import { MAX_NAME_LENGTH, usePlayerNamesStore } from "@/game/state/playerNames";
 import { AUDIO_CHANNELS, useAudioSettings } from "@/game/state/audioSettings";
@@ -30,7 +30,9 @@ export function MainMenu() {
   const setAiEnabled = useAiSettings((s) => s.setEnabled);
   const aiMatches = useAiSettings((s) => s.memory.matches);
   const resetAiMemory = useAiSettings((s) => s.resetMemory);
-  const completed = useCampaignStore((s) => s.completed);
+  const completedIds = useCampaignStore((s) => s.completedIds);
+  const selectedId = useCampaignStore((s) => s.selectedId);
+  const operation = sectorById(selectedId);
   const campaignError = useCampaignStore((s) => s.error);
   const [showLobby, setShowLobby] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -143,12 +145,14 @@ export function MainMenu() {
       ) : (
         <div className="panel main-menu-panel">
           <header className="main-menu-header">
-            <h1><span>{t("menu.title")}</span></h1>
+            <h1>
+              <span>{t("menu.title")}</span>
+            </h1>
             <div className="menu-sector" aria-label={t("sector.battlefield")}>
               <span className="sector-code">{t("campaign.operation")}</span>
-              <span className="sector-code">{TRAINING_SECTOR.code}</span>
-              <strong>{TRAINING_SECTOR.name}</strong>
-              <small>{t("campaign.progress", { value: completed ? 1 : 0, total: 1 })}</small>
+              <span className="sector-code">{operation.code}</span>
+              <strong>{operation.name}</strong>
+              <small>{t("campaign.progress", { value: completedIds.length, total: SECTORS.length })}</small>
             </div>
             <p>{t("menu.tagline")}</p>
             <small>{t("menu.controls")}</small>

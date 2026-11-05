@@ -25,11 +25,22 @@ A dokumentumok szerepeit a [fejlesztői index](./README.md) rögzíti.
   kötéseit. Így a Pixi képernyőméret-váltáskor biztonságosan törölheti a pool textúráit
   `BindGroup` figyelmeztetések nélkül; az effekt beállításai változatlanok.
 - Két szárazföldi tank, hot-seat vagy offline P2 AI; online két emberi játékos.
-- A Campaign Map Foundation külön `campaignMap` képernyő és `campaign` meccsmód,
-  mindig P1 ember vs P2 AI. ALPHA-01 az egyetlen célpont; P1 győzelmekor a Game
-  idempotens teljesítést ment a külön `ballistic-front:campaign` v1 borítékba.
+- A Campaign Map C3 külön `campaignMap` képernyő és `campaign` meccsmód,
+  mindig P1 ember vs P2 AI. Öt valódi célpont: ALPHA → DELTA / FORGE → VANGUARD → PRIME.
+  Szabad ágbejárás, OR feloldás; PRIME műveletzárás akár 4/5 mellett, replay/kimaradt ág megmarad.
+  A `sectors.ts` katalógus adja a gráfot, profilokat, palettát és briefingkulcsot.
+  P1 győzelmekor a Game az aktív szektor-ID teljesítését idempotensen menti.
+  A külön `ballistic-front:campaign` v2 boríték `contentVersion: 1`, `completedIds`,
+  `selectedId` mezőket tárol; v1 booleanból csak ALPHA teljesítés migrálódik.
+  Ismeretlen/verzióhibás/ellentmondó mentésnél indítás tiltott, látható hibával.
+  A `campaignNewRoutes` csak a csata eredményének prezentációja, nem mentett unlock-boolean.
   XP/profil és AI-memória közös a gyorscsatával; extra jutalom nincs.
   A `leaveBattle` lezárja az elhagyott csatát/AI-időzítőket, a renderer megmarad.
+- A `generateSectorHeightmap` ALPHA-n a régi generálás+tükrözés pontos eredményét adja;
+  az új szektorok normalizált alapgörbét és kétoktávos seedelt hullámot használnak.
+  A Terrain ugyanabból a magasságtérképből építi a maszkot és a textúrát.
+  A BattlefieldLayers szektoronként tintet, hegy-/ködszínt és városfény-intenzitást kap.
+  Fizika, játékosszín és állapotszínek nem szektorfüggők; online setup továbbra is csak seed/starterIndex.
 - Hét adatvezérelt statfejlesztés; helyi profil `{ xp, levels }`,
   verziózott tárolási borítékban (`STORAGE_VERSION = 2`).
 - A Célzástámogatás alapból 1, szintenként +1 meccsenkénti előnézet-töltetet ad.

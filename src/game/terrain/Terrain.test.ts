@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { Graphics, type Renderer } from "pixi.js";
 import { Terrain } from "./Terrain";
 import { TerrainMask } from "./mask";
+import { DEFAULT_THEME } from "../theme";
+import { sectorById } from "../data/sectors";
 
 vi.hoisted(() => {
   HTMLCanvasElement.prototype.getContext = () => null;
@@ -10,6 +12,21 @@ vi.hoisted(() => {
 afterEach(() => vi.restoreAllMocks());
 
 describe("Terrain collapse", () => {
+  it("uses sector colors only for explicit sector builds and otherwise preserves constructor colors", () => {
+    const colors = { ...DEFAULT_THEME.terrain, fill: 0xabcdef };
+    const terrain = new Terrain({ render: vi.fn() } as unknown as Renderer, colors);
+    const fill = vi.spyOn(Graphics.prototype, "fill");
+    terrain.build(40, 40);
+    expect(fill).toHaveBeenCalledWith(colors.fill);
+    fill.mockClear();
+    terrain.build(40, 40, 1, sectorById("delta-08"));
+    expect(fill).toHaveBeenCalledWith(sectorById("delta-08").colors.fill);
+    fill.mockClear();
+    terrain.build(40, 40);
+    expect(fill).toHaveBeenCalledWith(colors.fill);
+    terrain.destroy();
+  });
+
   it("clears collision and the visual island including its outline before returning from carve", () => {
     const render = vi.fn();
     const terrain = new Terrain({ render } as unknown as Renderer);

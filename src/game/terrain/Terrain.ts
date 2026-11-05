@@ -1,5 +1,6 @@
 import { Container, Graphics, RenderTexture, Sprite, type Renderer } from "pixi.js";
-import { generateHeightmap, mirrorHeightmap } from "./heightmap";
+import { generateSectorHeightmap } from "./heightmap";
+import type { Sector } from "../data/sectors";
 import { TerrainMask, type TerrainSpan } from "./mask";
 import { scorchDots } from "./scorch";
 import { DEFAULT_THEME, type Theme } from "../theme";
@@ -13,17 +14,20 @@ export class Terrain {
   /** A gyökér konténer blend módját a Pixi nem alkalmazza, ezért a törlő kört egy szülőn keresztül rajzoljuk. */
   private eraseLayer = new Container();
   private scorch = new Graphics();
+  private colors: Theme["terrain"];
 
   constructor(
     private renderer: Renderer,
-    private colors: Theme["terrain"] = DEFAULT_THEME.terrain,
+    private readonly baseColors: Theme["terrain"] = DEFAULT_THEME.terrain,
   ) {
+    this.colors = baseColors;
     this.eraser.blendMode = "erase";
     this.eraseLayer.addChild(this.eraser);
   }
 
-  build(width: number, height: number, seed = 1): void {
-    const heightmap = mirrorHeightmap(generateHeightmap(width, height, seed));
+  build(width: number, height: number, seed = 1, sector?: Sector): void {
+    this.colors = sector?.colors ?? this.baseColors;
+    const heightmap = generateSectorHeightmap(width, height, seed, sector?.terrain ?? null);
     this.mask = TerrainMask.fromHeightmap(heightmap, height);
 
     const shape = new Graphics().moveTo(0, height);

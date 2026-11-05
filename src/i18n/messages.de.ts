@@ -21,11 +21,17 @@ export const de: Record<MessageKey, string> = {
   "campaign.progress": "Abgeschlossen: {value} / {total}",
   "campaign.completed": "Abgeschlossen",
   "campaign.available": "Verfügbar",
+  "campaign.locked": "Gesperrt",
+  "campaign.requires": "Freischaltbedingung",
+  "campaign.or": "oder",
+  "campaign.newRoutes": "Neue Route verfügbar: {names}",
+  "campaign.operationComplete":
+    "Hauptstadtperimeter gesichert. Operation abgeschlossen; übersprungene Sektoren und Wiederholungen bleiben verfügbar.",
   "campaign.foundation": "Die erste Operation ist aktiv. Weitere Sektoren folgen in späteren Inhaltsupdates.",
   "campaign.status": "Status",
   "campaign.opponent": "P1 Mensch vs P2 KI",
   "campaign.rules": "Kampfregeln",
-  "campaign.baseRules": "Basisgelände, wechselnder Wind, normale Gravitation",
+  "campaign.baseRules": "Sektorgelände, wechselnder Wind, normale Gravitation",
   "campaign.rewards": "Belohnungen",
   "campaign.baseRewards": "Bisherige Kampf-XP; kein zusätzlicher Kampagnenbonus",
   "campaign.deploy": "Operation starten",
@@ -45,6 +51,12 @@ export const de: Record<MessageKey, string> = {
 
   "sector.battlefield": "Schlachtfeld",
   "sector.briefing": "Sektoreinweisung",
+  "sector.deltaBrief": "Tiefes zentrales Becken. Der Abstieg verändert die Schusswinkel; achte auf die Ausgänge.",
+  "sector.forgeBrief":
+    "Industrielle Terrassen und Rampen. Flache Abschnitte erlauben Bewegung; Krater können den Weg unterbrechen.",
+  "sector.vanguardBrief":
+    "Gräben und ein zentraler Verteidigungsrücken. Nutze steile Schüsse oder durchbrich den Rücken.",
+  "sector.primeBrief": "Der Hauptstadtperimeter. Wähle Feuerstellungen zwischen den Hügeln und der zentralen Senke.",
   "sector.trainingBrief":
     "Übungsgelände. Zerstörbares Terrain, wechselnder Wind. Neutralisiere die feindliche Einheit.",
 
