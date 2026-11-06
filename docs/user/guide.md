@@ -5,6 +5,11 @@ A jelenleg elérhető funkciók leírása. Fejlesztési tervek és technikai ré
 
 ## Játékmódok
 
+A nyitóképernyőn egy kis, felfelé gördülő **Köszönet** panel sorolja fel az ismert
+tartalomforrásokat és alkotókat, kattintható linkekkel. Egérrel fölé állva megáll,
+a Megállítás gombbal vagy billentyűzetfókusszal kézzel görgethető listára vált.
+Csökkentett mozgás beállítás mellett nem animálódik. Kis kijelzőn a menü alatt található.
+
 - **Hot-seat:** két ember egy eszközön, felváltva vezérli a két tankot.
 - **Offline AI:** a Beállításokban a „Gép (AI)” ellenfél választható; P1 az ember, P2 a gép.
   Az ellenfélválasztás a következő meccstől érvényes.

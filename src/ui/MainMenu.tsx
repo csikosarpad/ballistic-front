@@ -11,6 +11,7 @@ import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { useT, type MessageKey } from "@/i18n";
 import { gameRef } from "./gameRef";
 import { LanguageSwitch } from "./LanguageSwitch";
+import { MenuCredits } from "./MenuCredits";
 import { MultiplayerLobby } from "./MultiplayerLobby";
 import { requestLandscape } from "./orientation";
 
@@ -188,6 +189,7 @@ export function MainMenu() {
           )}
         </div>
       )}
+      {!showLobby && !showSettings && <MenuCredits />}
     </div>
   );
 }

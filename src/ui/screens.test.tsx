@@ -43,6 +43,17 @@ describe("MainMenu", () => {
     expect(screen.getByRole("button", { name: "Játék indítása" })).toBeInTheDocument();
   });
 
+  it("a stáblista csak a nyitóképernyőn jelenik meg", () => {
+    render(<MainMenu />);
+    expect(screen.getByRole("complementary", { name: "Köszönet" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Beállítások" }));
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Vissza" }));
+    expect(screen.getByRole("complementary", { name: "Köszönet" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Online játék" }));
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+  });
+
   it("a beállításokból módosítható és visszajelzett a hang állapota", () => {
     render(<MainMenu />);
     fireEvent.click(screen.getByRole("button", { name: "Beállítások" }));

@@ -6,7 +6,7 @@ Környezet, parancsok, forrásstruktúra és tartalomkezelés.
 ## Tech stack
 
 Windows, Node.js 24, pnpm, Vite, React 18, TypeScript, PixiJS 8 (WebGL),
-Zustand, Vitest + React Testing Library.
+Zustand, Tailwind CSS 4, Vitest + React Testing Library.
 
 ## Parancsok
 
@@ -90,6 +90,20 @@ A játék UI-mértékegysége 1 px = 1 méter; a mozgás és robbanási sugár m
 A PHP API hibaüzenetei egyelőre angolul érkeznek.
 Külső nyelvfájl-betöltés és admin felület még nincs; tervek a [roadmapben](./roadmap.md).
 
+## CSS és Tailwind
+
+A Tailwind CSS 4 a `@tailwindcss/vite` pluginnal működik. A
+[ui.css](../../src/ui/ui.css) a Tailwind témáját és utility osztályait importálja;
+a `src/` alatt megadott teljes classneveket automatikusan felismeri.
+Például: `className="language-switch flex gap-2"`.
+Feltételes stílusoknál teljes classneveket használj (`active ? "text-cyan-400" : "text-white"`),
+ne dinamikusan összerakott neveket (`text-${color}-400`).
+
+A Preflight globális reset nincs betöltve, így a meglévő UI alapstílusai megmaradnak.
+A jelenlegi, rétegen kívüli saját CSS azonos tulajdonság esetén elsőbbséget élvez
+a Tailwind utility rétegével szemben. Ha egy tulajdonságot utility class kezel,
+az ütköző saját deklarációt távolítsd el; a meglévő CSS-t nem kell átírni.
+
 ## Skinezhetőség
 
 A [ui.css](../../src/ui/ui.css) elején CSS változók vannak, például `--bf-panel`,
@@ -129,7 +143,10 @@ nyilvános repóba vagy publikus buildbe kerülés előtt a feltételek ellenőr
 A `plans/` további próbaszámai (energysound „Dark Cyberpunk Synthwave”, Jamii
 „Warhammer Background Music”) nem részei a futásidejű zenekatalógusnak;
 forrásaik a [plans/license.txt](../../plans/license.txt) fájlban vannak.
-Játékon belüli „Kreditek” nézet még nincs.
+A főmenü [gördülő stáblistája](../../src/ui/MenuCredits.tsx) a beépített zene,
+a Kenney képi effektek, a Freesound hangforrás és a betűtípusok ismert adatait mutatja.
+A nem használt próbaanyagok és az ismeretlen szerzőjű háttérképek nincsenek felsorolva;
+a stáblista nem helyettesíti a hiányzó fájlonkénti forrás- és licencellenőrzést.
 
 A betűtípusok **Oxanium** (UI) és **Rajdhani** (HUD adatok), SIL Open Font License 1.1
 alatt, a [Fontsource](https://fontsource.org) csomagjaiból önállóan hosztolva.

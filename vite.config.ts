@@ -1,4 +1,5 @@
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vitest/config";
 import { fileURLToPath } from "node:url";
 
@@ -7,7 +8,7 @@ const srcPath = fileURLToPath(new URL("./src", import.meta.url));
 export default defineConfig({
   // Relatív útvonalak: a dist mappa bármilyen alútvonalról kiszolgálható (pl. Live Server).
   base: "./",
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   server: {
     proxy: {
       "/api": {
