@@ -1,0 +1,35 @@
+.battle-exit-dialog {
+  width: min(440px, calc(100vw - 32px));
+  box-sizing: border-box;
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid #e8b45b;
+  border-radius: 4px 16px;
+  background: var(--bf-panel);
+  color: var(--bf-text);
+  font: 16px var(--bf-font-ui);
+  box-shadow: 0 0 32px rgb(232 180 91 / 20%);
+  pointer-events: auto;
+}
+
+.battle-exit-dialog::backdrop {
+  background: rgb(2 8 20 / 85%);
+}
+
+.battle-exit-dialog h2 {
+  margin: 0 0 16px;
+  color: #ffe4a0;
+}
+
+.battle-exit-dialog p {
+  line-height: 1.5;
+}
+
+.battle-exit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}

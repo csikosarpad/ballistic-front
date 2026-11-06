@@ -6,7 +6,7 @@ import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { useAudioSettings } from "@/game/state/audioSettings";
 import { useCampaignStore } from "@/game/state/campaignStore";
 import { gameRef } from "./gameRef";
-import { MainMenu } from "./MainMenu";
+import { MainMenu } from "./main-menu/MainMenu";
 import { ResultScreen } from "./ResultScreen";
 
 const mockGame = (overrides: Partial<Record<keyof Game, unknown>>) => {
@@ -54,16 +54,29 @@ describe("MainMenu", () => {
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
   });
 
+  it("a beállítások megmaradnak a panelek közötti váltáskor", () => {
+    render(<MainMenu />);
+    fireEvent.click(screen.getByRole("button", { name: "Beállítások" }));
+    fireEvent.change(screen.getByRole("slider", { name: "Játék hangereje" }), { target: { value: "80" } });
+    fireEvent.click(screen.getByRole("button", { name: "Vissza" }));
+    fireEvent.click(screen.getByRole("button", { name: "Online játék" }));
+    fireEvent.click(screen.getByRole("button", { name: "Vissza" }));
+    expect(screen.getByRole("complementary", { name: "Köszönet" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Beállítások" }));
+    expect(screen.getByRole("slider", { name: "Játék hangereje" })).toHaveValue("80");
+    expect(screen.getByRole("slider", { name: "Játék hangereje" })).toHaveAttribute("data-volume-high", "true");
+  });
+
   it("a beállításokból módosítható és visszajelzett a hang állapota", () => {
     render(<MainMenu />);
     fireEvent.click(screen.getByRole("button", { name: "Beállítások" }));
 
-    const soundButton = screen.getByRole("button", { name: "Hang: be (M)" });
+    const soundButton = screen.getByRole("button", { name: "Kommunikáció: aktív (M)" });
     expect(soundButton).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(soundButton);
 
     expect(useGameStore.getState().muted).toBe(true);
-    expect(screen.getByRole("button", { name: "Hang: ki (M)" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "Kommunikáció: némítva (M)" })).toHaveAttribute("aria-pressed", "false");
   });
 
   it("az online játék gomb megnyitja a szobalobbyt", () => {
@@ -83,12 +96,27 @@ describe("MainMenu", () => {
     expect(screen.getByText("35%")).toBeInTheDocument();
     expect(useAudioSettings.getState().volume).toBe(0.35);
     expect(JSON.parse(localStorage.getItem("ballistic-front:audio-settings")!).volume).toBe(0.35);
-    fireEvent.click(screen.getByRole("button", { name: "Hang: be (M)" }));
+    fireEvent.click(screen.getByRole("button", { name: "Kommunikáció: aktív (M)" }));
     fireEvent.change(slider, { target: { value: "0" } });
     expect(useGameStore.getState().muted).toBe(true);
-    fireEvent.click(screen.getByRole("button", { name: "Hang: ki (M)" }));
+    fireEvent.click(screen.getByRole("button", { name: "Kommunikáció: némítva (M)" }));
     expect(slider).toHaveValue("0");
     expect(useAudioSettings.getState().volume).toBe(0);
+  });
+
+  it.each([
+    [0, "0%", "false"],
+    [40, "50%", "false"],
+    [79, "98.75%", "false"],
+    [80, "100%", "true"],
+    [100, "100%", "true"],
+  ])("a hangerő %i százalékánál megfelelő színt és fényküszöböt ad át", (value, whiteness, high) => {
+    render(<MainMenu />);
+    fireEvent.click(screen.getByRole("button", { name: "Beállítások" }));
+    const slider = screen.getByRole("slider", { name: "Játék hangereje" });
+    fireEvent.change(slider, { target: { value: String(value) } });
+    expect(slider.style.getPropertyValue("--volume-whiteness")).toBe(whiteness);
+    expect(slider).toHaveAttribute("data-volume-high", high);
   });
 
   it("megjeleníti a hangbeállítások mentési hibáját", () => {

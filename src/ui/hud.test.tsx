@@ -1,17 +1,85 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Game } from "@/game/engine/Game";
 import { useGameStore } from "@/game/state/gameStore";
 import { gameRef } from "./gameRef";
 import { Hud } from "./Hud";
+import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 
 const power = () => useGameStore.getState().power;
 const angle = () => useGameStore.getState().angle;
 
 describe("Hud billentyűk", () => {
   beforeEach(() => {
-    useGameStore.setState({ phase: "aiming", power: 400, maxPower: 600, angle: 45, currentId: "P1", tanks: [] });
+    useMultiplayerStore.setState({ credentials: null });
+    useGameStore.setState({
+      phase: "aiming",
+      canControl: true,
+      power: 400,
+      maxPower: 600,
+      angle: 45,
+      currentId: "P1",
+      tanks: [],
+      screen: "playing",
+      matchMode: "skirmish",
+    });
     render(<Hud />);
+  });
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it.each(["skirmish", "campaign"] as const)("Escape megnyitja a főmenü megerősítését lövés közben is: %s", (matchMode) => {
+    const leaveBattle = vi.fn();
+    gameRef.current = { leaveBattle } as unknown as Game;
+    act(() => useGameStore.setState({ matchMode, phase: "flying", canControl: false }));
+    fireEvent.keyDown(window, { key: "Escape", repeat: true });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(leaveBattle).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Bevetés megszakítása" }));
+    expect(leaveBattle).toHaveBeenCalledOnce();
+    expect(useGameStore.getState().screen).toBe("menu");
+  });
+
+  it.each(["skirmish", "campaign"] as const)("csak jóváhagyás után lép a főmenübe: %s", (matchMode) => {
+    const leaveBattle = vi.fn();
+    const fire = vi.fn();
+    gameRef.current = { leaveBattle, fire } as unknown as Game;
+    act(() => useGameStore.setState({ matchMode }));
+    fireEvent.click(screen.getByRole("button", { name: "Főmenü" }));
+    expect(screen.getByRole("dialog")).toHaveTextContent("ebben a menetben gyűjtött XP elvész");
+    fireEvent.keyDown(window, { key: " " });
+    expect(fire).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Harc folytatása" }));
+    expect(leaveBattle).not.toHaveBeenCalled();
+    expect(useGameStore.getState().screen).toBe("playing");
+    fireEvent.click(screen.getByRole("button", { name: "Főmenü" }));
+    fireEvent.click(screen.getByRole("button", { name: "Bevetés megszakítása" }));
+    expect(leaveBattle).toHaveBeenCalledOnce();
+    expect(useGameStore.getState().screen).toBe("menu");
+  });
+
+  it("Escape esetén nem lép ki, és a kampánytérképhez is megerősítést kér", () => {
+    const leaveBattle = vi.fn();
+    gameRef.current = { leaveBattle } as unknown as Game;
+    act(() => useGameStore.setState({ matchMode: "campaign", phase: "flying", canControl: false }));
+    fireEvent.click(screen.getByRole("button", { name: "Főmenü" }));
+    fireEvent(screen.getByRole("dialog"), new Event("cancel", { bubbles: true, cancelable: true }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(leaveBattle).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Vissza a térképre" }));
+    fireEvent.click(screen.getByRole("button", { name: "Bevetés megszakítása" }));
+    expect(useGameStore.getState().screen).toBe("campaignMap");
+  });
+
+  it("online nem kínálja fel a helyi csata megszakítását", () => {
+    act(() => useMultiplayerStore.setState({
+      credentials: { roomCode: "room", playerId: "P1", token: "test" },
+    }));
+    expect(screen.queryByRole("button", { name: "Főmenü" })).not.toBeInTheDocument();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("fel/le nyíl 10-zel változtatja az erőt, Shift-tel 50-nel", () => {
@@ -51,18 +119,18 @@ describe("Hud billentyűk", () => {
   });
 
   it("a ± gombok 1° / 10 erő lépést adnak, zárolva tiltottak", () => {
-    fireEvent.click(screen.getByRole("button", { name: "Szög növelése" }));
-    fireEvent.click(screen.getByRole("button", { name: "Erő csökkentése" }));
+    fireEvent.click(screen.getByRole("button", { name: "Tűzszög növelése" }));
+    fireEvent.click(screen.getByRole("button", { name: "Töltet csökkentése" }));
     expect(angle()).toBe(46);
     expect(power()).toBe(390);
     act(() => useGameStore.setState({ phase: "flying" }));
-    expect(screen.getByRole("button", { name: "Szög csökkentése" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Tűzszög csökkentése" })).toBeDisabled();
   });
 
   it("a nyomva tartott gomb ismétel", () => {
     vi.useFakeTimers();
     try {
-      const button = screen.getByRole("button", { name: "Erő növelése" });
+      const button = screen.getByRole("button", { name: "Töltet növelése" });
       fireEvent.pointerDown(button, { button: 0 });
       expect(power()).toBe(410);
       act(() => {
@@ -88,7 +156,19 @@ describe("Hud billentyűk", () => {
 
   it("az elhasznált előnézet gombja tiltott", () => {
     act(() => useGameStore.setState({ previewAvailable: false }));
-    expect(screen.getByRole("button", { name: /elhasználva/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /felhasználva/i })).toBeDisabled();
+  });
+
+  it("az aktív tűzvezetés gombja további töltetek mellett is tiltott", () => {
+    const requestPreview = vi.fn();
+    gameRef.current = { requestPreview } as unknown as Game;
+    act(() => useGameStore.setState({ previewActive: true, previewAvailable: true, previewRemaining: 3 }));
+    const button = screen.getByRole("button", { name: "Tűzvezető rendszer aktív" });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(button);
+    expect(requestPreview).not.toHaveBeenCalled();
+    act(() => useGameStore.setState({ previewActive: false }));
   });
 
   it("az átrendezett action bar minden meglévő műveletet elérhetővé tesz", () => {
@@ -98,11 +178,11 @@ describe("Hud billentyűk", () => {
     gameRef.current = { move, fire, requestPreview } as unknown as Game;
     act(() => useGameStore.setState({ previewAvailable: true, previewRemaining: 1, muted: false }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Mozgás balra" }));
-    fireEvent.click(screen.getByRole("button", { name: "Mozgás jobbra" }));
-    fireEvent.click(screen.getByRole("button", { name: /Célzástámogatás/i }));
-    fireEvent.click(screen.getByRole("button", { name: "Tűz!" }));
-    fireEvent.click(screen.getByRole("button", { name: "Hang: be (M)" }));
+    fireEvent.click(screen.getByRole("button", { name: "Átcsoportosítás balra" }));
+    fireEvent.click(screen.getByRole("button", { name: "Átcsoportosítás jobbra" }));
+    fireEvent.click(screen.getByRole("button", { name: /Tűzvezetés/i }));
+    fireEvent.click(screen.getByRole("button", { name: "TÜZET!" }));
+    fireEvent.click(screen.getByRole("button", { name: "Kommunikáció: aktív (M)" }));
 
     expect(move.mock.calls).toEqual([[-1], [1]]);
     expect(requestPreview).toHaveBeenCalledOnce();
@@ -143,10 +223,10 @@ describe("Hud billentyűk", () => {
     const meters = screen.getAllByRole("meter");
     // P1: HP + pajzs + páncél, P2: csak HP.
     expect(meters).toHaveLength(4);
-    const shield = screen.getByRole("meter", { name: "Pajzs" });
+    const shield = screen.getByRole("meter", { name: "Energiapajzs" });
     expect(shield).toHaveAttribute("aria-valuenow", "12");
     expect(shield).toHaveAttribute("aria-valuemax", "40");
-    expect(screen.getByRole("meter", { name: "Páncél" })).toHaveAttribute("aria-valuetext", "15/60");
+    expect(screen.getByRole("meter", { name: "Páncélzat" })).toHaveAttribute("aria-valuetext", "15/60");
   });
 
   it("az M billentyű némítást kapcsol, lövés közben is", () => {
@@ -168,10 +248,10 @@ describe("Hud billentyűk", () => {
 
   it("a szélindikátor az előjelet iránnyal, az erősséget abszolút értékkel mutatja", () => {
     act(() => useGameStore.setState({ wind: -42 }));
-    expect(screen.getByRole("status", { name: "Szél: -42" })).toHaveTextContent("←");
-    expect(screen.getByRole("status", { name: "Szél: -42" })).toHaveTextContent("42");
+    expect(screen.getByRole("status", { name: "Légköri szél: -42" })).toHaveTextContent("←");
+    expect(screen.getByRole("status", { name: "Légköri szél: -42" })).toHaveTextContent("42");
 
     act(() => useGameStore.setState({ wind: 0 }));
-    expect(screen.getByRole("status", { name: "Szél: 0" })).toHaveTextContent("—");
+    expect(screen.getByRole("status", { name: "Légköri szél: 0" })).toHaveTextContent("—");
   });
 });

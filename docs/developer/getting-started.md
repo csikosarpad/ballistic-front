@@ -47,6 +47,7 @@ server/                 # PHP/MySQL backend, nem része a Vite buildnek
 src/
   main.tsx, App.tsx
   ui/                   # React HUD, menü, lobby, bolt és ResultScreen; Pixi UI dekoráció
+    main-menu/          # főmenü-vezérlő, kezdőpanel, beállítások, lobby, nyelvváltó és stáblista
   i18n/                 # magyar forráskatalógus, angol/német fordítások, t() / useT()
   test/                 # Vitest setup
   game/
@@ -92,6 +93,15 @@ Külső nyelvfájl-betöltés és admin felület még nincs; tervek a [roadmapbe
 
 ## CSS és Tailwind
 
+A [MainMenu](../../src/ui/main-menu/MainMenu.tsx) a `home | settings | lobby`
+helyi állapottal vált a kezdőpanel, a beállítások és a lobby között. A
+[MainMenuHome](../../src/ui/main-menu/MainMenuHome.tsx) kezeli a kezdőpanel akcióit,
+a [MainMenuSettings](../../src/ui/main-menu/MainMenuSettings.tsx) a beállítások
+store-kapcsolatait; a lobby továbbra is saját komponens. Ezek, a nyelvváltó és
+a stáblista a `ui/main-menu/` mappába tartoznak. A közös `gameRef` és tájoláskezelés
+a `ui/` gyökerében marad. A menü CSS-e egyelőre a globális `ui.css` része;
+a komponensstruktúra átrendezése nem változtatja meg a CSS betöltési sorrendjét.
+
 A Tailwind CSS 4 a `@tailwindcss/vite` pluginnal működik. A
 [ui.css](../../src/ui/ui.css) a Tailwind témáját és utility osztályait importálja;
 a `src/` alatt megadott teljes classneveket automatikusan felismeri.
@@ -104,7 +114,67 @@ A jelenlegi, rétegen kívüli saját CSS azonos tulajdonság esetén elsőbbsé
 a Tailwind utility rétegével szemben. Ha egy tulajdonságot utility class kezel,
 az ütköző saját deklarációt távolítsd el; a meglévő CSS-t nem kell átírni.
 
+A közös téma (`--bf-*` változók), alapstílusok (`overlay`, `panel`, `btn`) és a több
+képernyőn használt osztályok a globális [ui.css](../../src/ui/ui.css) fájlban maradnak.
+Az önálló komponensek saját stílusai fokozatosan melléjük emelhetők ki:
+a [CampaignMap.tsx](../../src/ui/CampaignMap.tsx) közvetlenül importálja a
+[CampaignMap.css](../../src/ui/CampaignMap.css) fájlt, a reszponzív szabályokkal és
+animációkkal együtt. A téma változóit használja, nem hoz létre külön témát.
+
+A [main.tsx](../../src/main.tsx) a közös CSS-t az `App` előtt importálja, így a
+komponens stílusai az alapok után kerülnek betöltésre. A külön CSS-fájl nem izolált
+hatóköri egység: a szelektorok továbbra is globálisak, ezért komponens-előtagot
+használj (például `campaign-`), ne önálló `.is-selected` vagy általános elemszelektort.
+Valódi lokális osztálynevekhez később CSS Modules vezethető be; pusztán a kiemeléshez
+ez nem szükséges.
+
+A hangerőcsúszka saját stílusa a `ui.css` `.audio-volume-control` szabályaiban van.
+A `--volume-track-height` a sín vastagsága, a `--volume-thumb-size` a fogantyú mérete;
+az input 32 px magas kezelési területe ezektől független. A WebKit és Firefox
+pszeudoelemei külön szabályokat kapnak, közös CSS-változókkal.
+A `MainMenuSettings` a hangerőből számítja a `--volume-whiteness` értékét: a sín 0%-nál
+semleges, 80%-ra fehérré válik. A `data-volume-high` 80%-tól fehér ragyogást kapcsol be.
+A projekt sima CSS-t használ; Sass `@mixin` / `@include` nincs beállítva.
+
+## Csata megszakítása
+
+Offline csata és kampány közben a HUD főmenügombja natív, a játék témájához igazított
+megerősítő dialógust nyit. A kampánytérképre visszalépés ugyanezt használja.
+Offline csata közben az Escape is megnyitja a főmenübe lépés megerősítését, lövés vagy az AI köre alatt is.
+Az ablak alatt a HUD gyorsbillentyűi nem aktívak; újabb Escape vagy a folytatás gomb megszakítja a kilépést.
+A csata ettől nem szünetel. Offline az aktuális csata XP-je csak a befejezéskor kerül mentésre;
+félbehagyáskor a korábbi profil áll vissza, a korábbi XP és fejlesztések megmaradnak.
+Az online játékmenet kilépése és XP-kezelése nem változik.
+
+## AI célzástámogatás
+
+Az AI csak akkor fogyaszt célzástámogatási töltetet, ha a pontos tervező az aktuális
+terepen és szélben közvetlen találatot jelez. Ilyenkor a kiszámolt szöggel és erővel,
+célzási zaj nélkül lő. Ha nincs találó terv, a töltet megmarad, és a normál,
+tapasztalatfüggő célzás érvényesül.
+
 ## Skinezhetőség
+
+A kampánytérkép kísérleti [Pixi csillagmezője](../../src/ui/CampaignStarfieldCanvas.tsx)
+160 halvány csillagot mozgat lassú perspektivikus sodródással, legfeljebb 30 FPS-sel.
+A játék és a dekorációk külön Pixi alkalmazást használnak. Egyetlen canvas bezárásakor
+`app.destroy({ removeView: true }, { children: true })` szükséges: az első argumentumként
+adott `true` a globális erőforrásokat is felszabadítaná, sértve a többi aktív renderelőt.
+A szektorgombok kattintása 1,5 másodperces, 45-szörös sebességű térugrást indít;
+újabb kattintás újraindítja az időtartamot. Csökkentett mozgás mellett nincs gyorsítás.
+A [szektorkártya](../../src/ui/CampaignSectorCard.tsx) ugyanekkor 1,5 másodperces,
+fade-out/fade-in szövegváltást kap, forgatás és elmosás nélkül; csökkentett mozgás mellett azonnal vált.
+A korábbi tartalom az első 525 ms alatt elhalványul, ezután jelenik
+meg az új szöveg az 1,5 másodperces átmenet hátralévő részében. A távozó réteg
+nem interaktív, nem hozzáférhető és nem befolyásolja a kártya méretét.
+A kártyatartalmak azonos CSS-grid cellát foglalnak el: a legmagasabb aktuális
+fordítás határozza meg a helyigényt, így szektorváltáskor nincs magasságugrás.
+Csak a kiválasztott tartalom látható és hozzáférhető; a többi indítógomb tiltott.
+A szektorgombok és SVG-útvonalak továbbra is HTML/SVG elemek, a canvas nem fogad bemenetet.
+Csökkentett mozgás mellett statikus képet rajzol; rejtett dokumentumnál leáll a ticker.
+A térkép elhagyásakor a saját renderer és a figyelők felszabadulnak.
+A CSS-háttér az inicializálásig és inicializálási hiba esetén megmarad;
+a hiba a konzolon megjelenik. Új külső kép vagy függőség nem szükséges hozzá.
 
 A [ui.css](../../src/ui/ui.css) elején CSS változók vannak, például `--bf-panel`,
 `--bf-text`, `--bf-primary`. Egy változóalapú felülírás:
@@ -143,7 +213,7 @@ nyilvános repóba vagy publikus buildbe kerülés előtt a feltételek ellenőr
 A `plans/` további próbaszámai (energysound „Dark Cyberpunk Synthwave”, Jamii
 „Warhammer Background Music”) nem részei a futásidejű zenekatalógusnak;
 forrásaik a [plans/license.txt](../../plans/license.txt) fájlban vannak.
-A főmenü [gördülő stáblistája](../../src/ui/MenuCredits.tsx) a beépített zene,
+A főmenü [gördülő stáblistája](../../src/ui/main-menu/MenuCredits.tsx) a beépített zene,
 a Kenney képi effektek, a Freesound hangforrás és a betűtípusok ismert adatait mutatja.
 A nem használt próbaanyagok és az ismeretlen szerzőjű háttérképek nincsenek felsorolva;
 a stáblista nem helyettesíti a hiányzó fájlonkénti forrás- és licencellenőrzést.

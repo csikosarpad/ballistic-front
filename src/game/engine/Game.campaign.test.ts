@@ -5,8 +5,9 @@ import { useGameStore } from "../state/gameStore";
 import { useCampaignStore } from "../state/campaignStore";
 import { useAiSettings } from "../state/aiSettings";
 import { useMultiplayerStore } from "../state/multiplayerStore";
-import type { Tank } from "../entities/tank";
+import { tankContains, type Tank } from "../entities/tank";
 import { TRAINING_SECTOR, sectorById } from "../data/sectors";
+import { loadProfiles, saveProfiles } from "../systems/profileStorage";
 
 vi.hoisted(() => {
   HTMLCanvasElement.prototype.getContext = () => null;
@@ -44,6 +45,148 @@ describe("Game campaign lifecycle", () => {
     game.fire();
     Reflect.get(game, "explode").call(game, 640, 100);
   };
+
+  it.each([-60, 0, 60])("fires an actual direct hit with AI assistance in wind %s", (wind) => {
+    game.startCampaign();
+    game.restart({ seed: 42, starterIndex: 1 });
+    const tanks: Tank[] = Reflect.get(game, "tanks");
+    const target = tanks[0]!;
+    const shooter = tanks[1]!;
+    target.x = 120;
+    shooter.x = 450;
+    useGameStore.setState({ wind });
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    Reflect.get(game, "aiAimAndFire").call(game);
+    expect(useGameStore.getState()).toMatchObject({ previewActive: true, previewRemaining: 0 });
+    vi.advanceTimersByTime(700);
+    expect(useGameStore.getState().phase).toBe("flying");
+    for (let i = 0; i < 900 && Reflect.get(game, "shell"); i++) {
+      Reflect.get(game, "stepShell").call(game);
+    }
+    const [impactX, impactY] = Reflect.get(game, "terrain").carve.mock.calls[0];
+    expect(tankContains(target, impactX, impactY)).toBe(true);
+    expect(target.hp).toBeLessThan(100);
+    expect(shooter.hp).toBe(100);
+  });
+
+  it("does not consume AI assistance when no direct hit is possible", () => {
+    game.startCampaign();
+    game.restart({ seed: 42, starterIndex: 1 });
+    const tanks: Tank[] = Reflect.get(game, "tanks");
+    tanks[1]!.stats = { ...tanks[1]!.stats, maxPower: 100 };
+    useGameStore.setState({ wind: 0 });
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    Reflect.get(game, "aiAimAndFire").call(game);
+    expect(useGameStore.getState()).toMatchObject({ previewActive: false, previewRemaining: 1 });
+    vi.advanceTimersByTime(700);
+    expect(useGameStore.getState().phase).toBe("flying");
+  });
+
+  it.each(["skirmish", "campaign"] as const)("consumes only one preview charge while already active: %s", (mode) => {
+    game.startOffline(mode);
+    game.restart({ seed: 42, starterIndex: 0 });
+    Reflect.get(game, "previewAllowance").reset({ P1: 3, P2: 3 });
+    game.requestPreview();
+    expect(useGameStore.getState()).toMatchObject({
+      previewActive: true, previewAvailable: false, previewRemaining: 2,
+    });
+    for (let i = 0; i < 10; i++) game.requestPreview();
+    expect(useGameStore.getState().previewRemaining).toBe(2);
+    Reflect.get(game, "beginTurn").call(game);
+    expect(useGameStore.getState()).toMatchObject({ previewActive: false, previewAvailable: true });
+    game.requestPreview();
+    expect(useGameStore.getState().previewRemaining).toBe(1);
+    Reflect.get(game, "beginTurn").call(game);
+    game.requestPreview();
+    game.requestPreview();
+    expect(useGameStore.getState()).toMatchObject({ previewActive: true, previewRemaining: 0 });
+    Reflect.get(game, "beginTurn").call(game);
+    game.requestPreview();
+    expect(useGameStore.getState()).toMatchObject({ previewActive: false, previewAvailable: false, previewRemaining: 0 });
+  });
+
+  it.each(["skirmish", "campaign"] as const)("keeps purchased preview charges available across real shots: %s", (mode) => {
+    game.startOffline(mode);
+    endBattle("P1");
+    Reflect.get(game, "profiles").P1.xp = 1000;
+    for (let i = 0; i < 3; i++) game.buy("P1", "smartAim");
+    expect(useGameStore.getState().profiles.P1?.levels.smartAim).toBe(3);
+    game.restart({ seed: 42, starterIndex: 0 });
+    const tanks: Tank[] = Reflect.get(game, "tanks");
+    tanks.forEach((tank) => { tank.hp = 1000; });
+    expect(useGameStore.getState().previewRemaining).toBe(4);
+    for (let remaining = 3; remaining >= 0; remaining--) {
+      expect(useGameStore.getState()).toMatchObject({
+        currentId: "P1", previewActive: false, previewAvailable: true,
+      });
+      game.requestPreview();
+      game.requestPreview();
+      expect(useGameStore.getState()).toMatchObject({ previewActive: true, previewRemaining: remaining });
+      game.fire();
+      Reflect.get(game, "explode").call(game, 640, 100);
+      Reflect.get(game, "launchShot").call(game, 135, 400);
+      Reflect.get(game, "explode").call(game, 640, 100);
+    }
+    expect(useGameStore.getState()).toMatchObject({
+      currentId: "P1", previewActive: false, previewAvailable: false, previewRemaining: 0,
+    });
+  });
+
+  it("destroys its renderer without releasing resources shared with other Pixi canvases", () => {
+    const destroy = vi.fn();
+    Reflect.set(game, "app", { renderer: {}, destroy });
+    game.destroy();
+    expect(destroy).toHaveBeenCalledWith({ removeView: true }, { children: true });
+  });
+
+  it.each(["skirmish", "campaign"] as const)("discards unfinished XP but preserves earlier progress: %s", (mode) => {
+    const profiles = { P1: { xp: 120, levels: { armor: 1 } }, P2: { xp: 80, levels: {} } };
+    Reflect.set(game, "profiles", structuredClone(profiles));
+    saveProfiles(profiles);
+    game.startOffline(mode);
+    Reflect.get(game, "award").call(game, "P1", 25);
+    Reflect.get(game, "award").call(game, "P2", 10);
+    expect(Reflect.get(game, "profiles").P1.xp).toBe(145);
+    expect(loadProfiles(["P1", "P2"])).toEqual(profiles);
+    game.leaveBattle();
+    game.leaveBattle();
+    expect(useGameStore.getState().profiles).toEqual(profiles);
+    expect(useGameStore.getState().matchStats.P1?.xp).toBe(0);
+    expect(useCampaignStore.getState().completedIds).toEqual([]);
+    game.startCampaign();
+    expect(useGameStore.getState().profiles).toEqual(profiles);
+  });
+
+  it("retains completed match XP when returning to the menu", () => {
+    game.startCampaign();
+    endBattle("P1");
+    const completed = loadProfiles(["P1", "P2"]);
+    expect(useGameStore.getState().matchStats.P1?.xp).toBeGreaterThanOrEqual(50);
+    game.leaveBattle();
+    expect(useGameStore.getState().profiles).toEqual(completed);
+    expect(useCampaignStore.getState().completedIds).toContain("alpha-01");
+  });
+
+  it("does not carry provisional XP into a restarted match", () => {
+    game.startOffline();
+    const before = structuredClone(Reflect.get(game, "profiles"));
+    Reflect.get(game, "award").call(game, "P1", 25);
+    game.restart();
+    expect(Reflect.get(game, "profiles")).toEqual(before);
+    expect(useGameStore.getState().matchStats.P1?.xp).toBe(0);
+  });
+
+  it("keeps the existing immediate XP persistence for online matches", () => {
+    game.startMultiplayer(
+      { seed: 42, starterIndex: 0 },
+      { P1: { xp: 100, levels: {} }, P2: { xp: 100, levels: {} } },
+      0,
+    );
+    Reflect.get(game, "award").call(game, "P1", 25);
+    expect(loadProfiles(["P1"]).P1?.xp).toBe(125);
+    game.leaveBattle();
+    expect(useGameStore.getState().profiles.P1?.xp).toBe(125);
+  });
 
   it("forces campaign AI but preserves quick-battle preference, including rematch", () => {
     game.startCampaign();

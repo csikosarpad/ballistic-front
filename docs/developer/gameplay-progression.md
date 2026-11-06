@@ -552,7 +552,7 @@ Az „ágas” térképhez később sem kell procedurális generátor vagy strat
   az eredmény továbbra is a játék `gameOver` fázisa. A
   [store](../../src/game/state/gameStore.ts) külön `matchMode`, helyi UUID `matchId`
   és szektoradatokat tartalmaz; ezek nem új online protokollmezők.
-- A [MainMenu](../../src/ui/MainMenu.tsx) most közvetlenül indít offline/online meccset.
+- A [főmenü](../../src/ui/main-menu/MainMenu.tsx) egysége közvetlenül indít offline/online meccset.
   A kampánygomb külön térképre megy, a gyorscsata meglévő folyamatát nem cseréli le.
 - A [GameCanvas](../../src/ui/GameCanvas.tsx) az App alatt folyamatosan él.
   A térkép megnyitása önmagában nem állítja le a
