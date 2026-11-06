@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { SectorBriefing } from "./SectorBriefing";
 import { PowerDial, UnitGauge } from "./gauges";
 import { MAX_ANGLE, MIN_ANGLE, MIN_POWER, useGameStore } from "@/game/state/gameStore";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
@@ -33,10 +34,13 @@ export function Hud() {
     toggleMuted,
     setAim,
     profiles,
+    matchSequence,
+    matchMode,
+    aiActive,
+    sector,
   } = useGameStore();
   const online = useMultiplayerStore((state) => state.credentials !== null);
   const multiplayerError = useMultiplayerStore((state) => state.error);
-  const aiActive = useAiSettings((state) => state.enabled) && !online;
   const aiMemory = useAiSettings((state) => state.memory);
   const starsFor = (id: string) =>
     id === "P2" && aiActive ? rankStars(aiMemory) : profileStars(profiles[id] ?? newProfile(), MAX_RANK);
@@ -139,6 +143,10 @@ export function Hud() {
           </section>
         ))}
         <div className="hud-top-center">
+          <div className="hud-sector" aria-label={t("sector.battlefield")}>
+            <span className="sector-code">{sector.code}</span>
+            <strong>{sector.name}</strong>
+          </div>
           <WindIndicator wind={wind} />
           <div className="hud-readout">
             {t("hud.turn")} <strong style={{ color: toCss(me?.color) }}>{name(currentId)}</strong>
@@ -156,8 +164,9 @@ export function Hud() {
             </div>
           )}
         </div>
+        <CommandConsole />
       </div>
-      <CommandConsole />
+      {matchSequence > 0 && <SectorBriefing key={matchSequence} />}
       <div className="hud-command-dock">
         <div className="hud-controls">
           <div className="hud-control">
@@ -224,7 +233,7 @@ export function Hud() {
             </div>
           </div>
         </div>
-        <div className="hud-actions">
+        <div className={`hud-actions${matchMode === "campaign" ? " hud-campaign-actions" : ""}`}>
           <RepeatButton
             aria-label={t("hud.moveLeft")}
             title={t("hud.moveLeft")}
@@ -277,6 +286,22 @@ export function Hud() {
             </span>
             <span>{soundLabel}</span>
           </button>
+          {matchMode === "campaign" && (
+            <button
+              title={t("campaign.return")}
+              onClick={() => {
+                if (window.confirm(t("campaign.abandonConfirm"))) {
+                  gameRef.current?.leaveBattle();
+                  useGameStore.getState().setScreen("campaignMap");
+                }
+              }}
+            >
+              <span className="hud-action-icon" aria-hidden="true">
+                ⌂
+              </span>
+              <span>{t("campaign.return")}</span>
+            </button>
+          )}
         </div>
       </div>
       {!hintDismissed && (

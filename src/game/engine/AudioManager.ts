@@ -5,6 +5,7 @@ import { useGameStore } from "@game/state/gameStore";
 import { HoldGate } from "@game/systems/holdGate";
 import { useAudioSettings } from "@game/state/audioSettings";
 import { DEFAULT_TRACK_ID, trackById } from "@game/data/music";
+import { cancelSpeech } from "@game/systems/speech";
 
 export type SoundName = "shot" | "explosion" | "move";
 
@@ -35,20 +36,30 @@ export class AudioManager {
     // Mobilon a pointerdown/touchstart nem számít felhasználói aktivációnak; a felengedés/koppintás igen.
     for (const type of GESTURES) window.addEventListener(type, this.onGesture);
     document.addEventListener("visibilitychange", this.onVisible);
-    this.unsubscribe = useGameStore.subscribe((s) => {
-      this.applyMute(s.muted);
+    this.unsubscribe = useGameStore.subscribe((s, previous) => {
+      this.applyVolume();
       this.syncMusic();
+      if (s.muted && !previous.muted) cancelSpeech();
     });
-    this.unsubscribeSettings = useAudioSettings.subscribe(() => this.syncMusic());
+    this.unsubscribeSettings = useAudioSettings.subscribe((s, previous) => {
+      this.applyVolume();
+      this.syncMusic();
+      // A Web Speech API a már futó mondat hangerejét nem tudja megbízhatóan módosítani.
+      if (s.volume !== previous.volume || (!s.channels.voice && previous.channels.voice)) cancelSpeech();
+    });
   }
 
-  private applyMute(muted: boolean): void {
-    if (this.master) this.master.gain.value = muted ? 0 : MASTER_VOLUME;
+  private applyVolume(): void {
+    const { volume, channels } = useAudioSettings.getState();
+    if (this.master) {
+      this.master.gain.value = useGameStore.getState().muted || !channels.effects ? 0 : MASTER_VOLUME * volume;
+    }
   }
 
   /** A zene a globális némítástól és a zenecsatorna kapcsolójától függ; a lejátszás felhasználói gesztusra indulhat. */
   private syncMusic(): void {
     if (!this.music) return;
+    this.music.volume = MUSIC_VOLUME * useAudioSettings.getState().volume;
     const wanted = !useGameStore.getState().muted && useAudioSettings.getState().channels.music;
     if (wanted) void this.music.play().catch(() => {});
     else this.music.pause();
@@ -74,7 +85,7 @@ export class AudioManager {
     this.ctx = ctx;
     this.master = ctx.createGain();
     this.master.connect(ctx.destination);
-    this.applyMute(useGameStore.getState().muted);
+    this.applyVolume();
     ctx.onstatechange = () => {
       if (ctx.state === "running") this.removeGestureListeners();
     };

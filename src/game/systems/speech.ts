@@ -84,8 +84,14 @@ const MAX_QUEUED = 3;
 let queued = 0;
 
 /** Tetszőleges szöveget felolvas; a mondatok sorban követik egymást, de a felgyülemlett sort eldobja. */
-export function speak(text: string, locale: SpeechLocale, settings: VoiceSettings = DEFAULT_VOICE, slot = 0): void {
-  if (!speechSupported() || !text) return;
+export function speak(
+  text: string,
+  locale: SpeechLocale,
+  settings: VoiceSettings = DEFAULT_VOICE,
+  slot = 0,
+  volume = 1,
+): void {
+  if (!speechSupported() || !text || volume === 0) return;
   const synth = window.speechSynthesis;
   // A böngésző nem adja meg a sor hosszát, ezért magunk számoljuk; túlcsordulásnál újrakezdünk.
   if (!synth.speaking && !synth.pending) queued = 0;
@@ -100,6 +106,7 @@ export function speak(text: string, locale: SpeechLocale, settings: VoiceSetting
   if (voice) utterance.voice = voice;
   utterance.rate = rate;
   utterance.pitch = pitch;
+  utterance.volume = volume;
   synth.speak(utterance);
 }
 

@@ -1,6 +1,8 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MAX_COMMAND_MESSAGES, useCommandStore } from "./commandStore";
 import { pickVoice, voiceForSlot } from "../systems/speech";
+import { useAudioSettings } from "./audioSettings";
+import { useGameStore } from "./gameStore";
 
 const voice = (lang: string, localService = true, name = "") => ({ lang, localService, name }) as SpeechSynthesisVoice;
 
@@ -10,6 +12,46 @@ describe("commandStore", () => {
   it("keeps only the latest messages", () => {
     for (let i = 0; i < MAX_COMMAND_MESSAGES + 3; i++) useCommandStore.getState().announce("command.fire");
     expect(useCommandStore.getState().messages).toHaveLength(MAX_COMMAND_MESSAGES);
+  });
+
+  describe("narration volume", () => {
+    const speak = vi.fn();
+    beforeEach(() => {
+      vi.clearAllMocks();
+      useGameStore.setState({ muted: false });
+      useAudioSettings.setState({ channels: { music: true, voice: true, effects: true }, volume: 0.35 });
+      vi.stubGlobal(
+        "SpeechSynthesisUtterance",
+        class {
+          constructor(public text: string) {}
+        },
+      );
+      vi.stubGlobal("speechSynthesis", {
+        speak,
+        cancel: vi.fn(),
+        getVoices: () => [],
+        speaking: false,
+        pending: false,
+      });
+    });
+    afterEach(() => vi.unstubAllGlobals());
+
+    it("applies master volume to the utterance", () => {
+      useCommandStore.getState().announce("command.fire");
+      expect(speak).toHaveBeenCalledWith(expect.objectContaining({ volume: 0.35 }));
+    });
+
+    it("keeps console messages without speech at zero volume or when muted or voice-disabled", () => {
+      useAudioSettings.setState({ volume: 0 });
+      useCommandStore.getState().announce("command.fire");
+      useAudioSettings.setState({ volume: 1, channels: { music: true, voice: false, effects: true } });
+      useCommandStore.getState().announce("command.fire");
+      useAudioSettings.setState({ channels: { music: true, voice: true, effects: true } });
+      useGameStore.setState({ muted: true });
+      useCommandStore.getState().announce("command.fire");
+      expect(speak).not.toHaveBeenCalled();
+      expect(useCommandStore.getState().messages.length).toBeGreaterThanOrEqual(3);
+    });
   });
 
   it("stores key, params and tone", () => {

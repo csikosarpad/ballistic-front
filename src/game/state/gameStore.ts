@@ -1,9 +1,11 @@
 import { create } from "zustand";
+import { TRAINING_SECTOR, type Sector, type SectorId } from "../data/sectors";
 import type { MatchStats } from "../systems/matchStats";
 import type { Phase } from "../systems/turnManager";
 import type { Profile } from "../systems/upgrades";
 
-export type Screen = "menu" | "playing";
+export type Screen = "menu" | "playing" | "campaignMap";
+export type MatchMode = "skirmish" | "campaign";
 export const MIN_POWER = 100;
 export const MIN_ANGLE = 0;
 export const MAX_ANGLE = 180;
@@ -49,6 +51,13 @@ export interface GameState {
   previewRemaining: number;
   previewActive: boolean;
   screen: Screen;
+  matchMode: MatchMode;
+  matchId: string | null;
+  sector: Sector;
+  campaignNewRoutes: SectorId[];
+  aiActive: boolean;
+  /** Helyi prezentációs sorszám; új csatánál változik, nem online protokollmező. */
+  matchSequence: number;
   muted: boolean;
   setAim: (angle: number, power: number) => void;
   /** Az erőt a [MIN_POWER, maxPower] tartományban tartva változtatja. */
@@ -80,6 +89,12 @@ export const useGameStore = create<GameState>((set) => ({
   previewRemaining: 0,
   previewActive: false,
   screen: "menu",
+  matchMode: "skirmish",
+  matchId: null,
+  sector: TRAINING_SECTOR,
+  campaignNewRoutes: [],
+  aiActive: false,
+  matchSequence: 0,
   muted: readMuted(),
   setAim: (angle, power) => set({ angle, power }),
   nudgePower: (delta) => set((s) => ({ power: Math.min(s.maxPower, Math.max(MIN_POWER, s.power + delta)) })),

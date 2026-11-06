@@ -4,6 +4,7 @@ import cityGlowUrl from "../assets/backgrounds/siege-city-glow.jpg?url";
 import cityLightsUrl from "../assets/backgrounds/siege-city-lights.jpg?url";
 import { WindDustClouds } from "./WindDustClouds";
 import { BattlefieldProps } from "./BattlefieldProps";
+import { TRAINING_SECTOR, type Sector } from "../data/sectors";
 
 const STAR_COUNT = 48;
 /** A köd-háttér ennyivel nagyobb a pályánál, hogy a parallax mozgás ne mutasson szélet. */
@@ -75,6 +76,7 @@ export class BattlefieldLayers extends Container {
   private nebulaBaseX = 0;
   private time = 0;
   private motionEnabled = true;
+  private atmosphereStyle = TRAINING_SECTOR.atmosphere;
 
   public constructor() {
     super();
@@ -103,7 +105,16 @@ export class BattlefieldLayers extends Container {
     );
   }
 
-  public draw(width: number, height: number, seed: number): void {
+  public draw(
+    width: number,
+    height: number,
+    seed: number,
+    style: Sector["atmosphere"] = TRAINING_SECTOR.atmosphere,
+  ): void {
+    this.atmosphereStyle = style;
+    this.nebula.tint = style.tint;
+    this.cityGlow.tint = style.tint;
+    this.cityLights.tint = style.tint;
     const random = seededRandom(seed);
     this.windDustClouds.setBounds(width, height);
     this.props.draw(width, height, seed);
@@ -148,7 +159,7 @@ export class BattlefieldLayers extends Container {
 
     this.midMountains
       .poly(mountainPoints(width, height * 0.7, height * 0.12, random, 14))
-      .fill({ color: 0x122644, alpha: 0.72 })
+      .fill({ color: style.mountain, alpha: 0.72 })
       .stroke({ color: 0x4a98b8, alpha: 0.32, width: 2 });
 
     this.nearMountains
@@ -198,7 +209,7 @@ export class BattlefieldLayers extends Container {
       // Három koncentrikus réteg: puha, éles szél nélküli folt.
       for (let layer = 0; layer < 3; layer += 1) {
         const scale = 1 - layer * 0.3;
-        this.fog.ellipse(x, y, rx * scale, ry * scale).fill({ color: 0x7fb4d8, alpha: 0.035 });
+        this.fog.ellipse(x, y, rx * scale, ry * scale).fill({ color: this.atmosphereStyle.fog, alpha: 0.035 });
       }
     }
   }
@@ -227,8 +238,9 @@ export class BattlefieldLayers extends Container {
   }
 
   private applyCityPulse(pulse: number): void {
-    this.cityGlow.alpha = CITY_GLOW_ALPHA * pulse;
-    this.cityLights.alpha = CITY_LIGHTS_ALPHA * (CITY_PULSE_MIN + (1 - CITY_PULSE_MIN) * pulse);
+    this.cityGlow.alpha = CITY_GLOW_ALPHA * pulse * this.atmosphereStyle.cityIntensity;
+    this.cityLights.alpha =
+      CITY_LIGHTS_ALPHA * (CITY_PULSE_MIN + (1 - CITY_PULSE_MIN) * pulse) * this.atmosphereStyle.cityIntensity;
   }
 
   public setWind(wind: number): void {

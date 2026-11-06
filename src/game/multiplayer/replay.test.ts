@@ -104,6 +104,7 @@ class HeadlessMatch {
   private explode(shooter: Tank, x: number, y: number): void {
     const radius = shooter.stats.blastRadius;
     this.mask.carveCircle(x, y, radius);
+    this.mask.removeDetachedGround();
     for (const tank of this.tanks) applyDamage(tank, explosionDamage(tank, x, y, radius, shooter.stats.damage));
     for (const tank of this.tanks) settleTank(tank, this.mask);
     this.turns.endShot(this.tanks.filter(isAlive).map((t) => t.id));

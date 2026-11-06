@@ -6,7 +6,7 @@ export function LanguageSwitch() {
   const setLocale = useLocaleStore((state) => state.setLocale);
 
   return (
-    <div className="language-switch" role="group" aria-label={t("menu.language")}>
+    <div className="language-switch flex gap-2" role="group" aria-label={t("menu.language")}>
       {LOCALES.map((code) => (
         <button
           key={code}

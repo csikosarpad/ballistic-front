@@ -1,14 +1,17 @@
 import { useState } from "react";
+import { SECTORS, sectorById } from "@/game/data/sectors";
 import { useGameStore } from "@/game/state/gameStore";
 import { MAX_NAME_LENGTH, usePlayerNamesStore } from "@/game/state/playerNames";
 import { AUDIO_CHANNELS, useAudioSettings } from "@/game/state/audioSettings";
 import { useAiSettings } from "@/game/state/aiSettings";
+import { useCampaignStore } from "@/game/state/campaignStore";
 import type { MatchSetup } from "@/game/systems/seededRandom";
 import type { Profile } from "@/game/systems/upgrades";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { useT, type MessageKey } from "@/i18n";
 import { gameRef } from "./gameRef";
 import { LanguageSwitch } from "./LanguageSwitch";
+import { MenuCredits } from "./MenuCredits";
 import { MultiplayerLobby } from "./MultiplayerLobby";
 import { requestLandscape } from "./orientation";
 
@@ -21,10 +24,17 @@ export function MainMenu() {
   const setName = usePlayerNamesStore((s) => s.setName);
   const channels = useAudioSettings((s) => s.channels);
   const setChannel = useAudioSettings((s) => s.setChannel);
+  const volume = useAudioSettings((s) => s.volume);
+  const setVolume = useAudioSettings((s) => s.setVolume);
+  const audioError = useAudioSettings((s) => s.error);
   const aiEnabled = useAiSettings((s) => s.enabled);
   const setAiEnabled = useAiSettings((s) => s.setEnabled);
   const aiMatches = useAiSettings((s) => s.memory.matches);
   const resetAiMemory = useAiSettings((s) => s.resetMemory);
+  const completedIds = useCampaignStore((s) => s.completedIds);
+  const selectedId = useCampaignStore((s) => s.selectedId);
+  const operation = sectorById(selectedId);
+  const campaignError = useCampaignStore((s) => s.error);
   const [showLobby, setShowLobby] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -64,6 +74,23 @@ export function MainMenu() {
               <button className="btn secondary" aria-pressed={!muted} onClick={toggleMuted}>
                 {t("hud.sound", { state: muted ? t("hud.soundOff") : t("hud.soundOn") })}
               </button>
+            </div>
+            <div className="main-menu-setting">
+              <label htmlFor="master-volume">{t("audio.volume")}</label>
+              <div className="audio-volume-control">
+                <input
+                  id="master-volume"
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={1}
+                  value={Math.round(volume * 100)}
+                  aria-valuetext={`${Math.round(volume * 100)}%`}
+                  onChange={(event) => setVolume(Number(event.target.value) / 100)}
+                />
+                <output htmlFor="master-volume">{Math.round(volume * 100)}%</output>
+              </div>
+              {audioError && <small role="alert">{t(audioError)}</small>}
             </div>
             <div className="main-menu-setting">
               <span>{t("menu.audioChannels")}</span>
@@ -119,11 +146,29 @@ export function MainMenu() {
       ) : (
         <div className="panel main-menu-panel">
           <header className="main-menu-header">
-            <h1>{t("menu.title")}</h1>
+            <h1>
+              <span>{t("menu.title")}</span>
+            </h1>
+            <div className="menu-sector" aria-label={t("sector.battlefield")}>
+              <span className="sector-code">{t("campaign.operation")}</span>
+              <span className="sector-code">{operation.code}</span>
+              <strong>{operation.name}</strong>
+              <small>{t("campaign.progress", { value: completedIds.length, total: SECTORS.length })}</small>
+            </div>
             <p>{t("menu.tagline")}</p>
             <small>{t("menu.controls")}</small>
           </header>
           <nav className="main-menu-actions" aria-label={t("menu.title")}>
+            <button
+              className="btn main-menu-start"
+              onClick={() => {
+                gameRef.current?.leaveBattle();
+                useMultiplayerStore.getState().leave();
+                setScreen("campaignMap");
+              }}
+            >
+              {t("campaign.title")}
+            </button>
             <button className="btn main-menu-start" onClick={start}>
               {t("menu.start")}
             </button>
@@ -137,8 +182,14 @@ export function MainMenu() {
               {t("menu.reset")}
             </button>
           </nav>
+          {campaignError && (
+            <p className="lobby-error" role="alert">
+              {t(campaignError)}
+            </p>
+          )}
         </div>
       )}
+      {!showLobby && !showSettings && <MenuCredits />}
     </div>
   );
 }

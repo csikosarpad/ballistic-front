@@ -1,23 +1,27 @@
 import { useGameStore } from "@/game/state/gameStore";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { usePlayerName } from "@/game/state/playerNames";
-import { useAiSettings } from "@/game/state/aiSettings";
+import { useCampaignStore } from "@/game/state/campaignStore";
 import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
 import { Shop } from "./Shop";
 import { ResultDecorCanvas } from "./result/ResultDecorCanvas";
 import { getUnitPresentation } from "./result/unitPresentation";
+import { sectorById } from "@/game/data/sectors";
 
 /** Meccs végén: győztes, statisztika, bolt és továbblépés. */
 export function ResultScreen() {
   const t = useT();
   const name = usePlayerName();
-  const { winner, matchStats, setScreen } = useGameStore();
+  const { winner, matchStats, setScreen, matchMode, aiActive, sector, campaignNewRoutes } = useGameStore();
+  const campaign = matchMode === "campaign";
+  const campaignError = useCampaignStore((s) => s.error);
+  const completedIds = useCampaignStore((s) => s.completedIds);
   const credentials = useMultiplayerStore((state) => state.credentials);
   const session = useMultiplayerStore((state) => state.session);
   const multiplayerError = useMultiplayerStore((state) => state.error);
   const onlineMatch = credentials !== null;
-  const aiOpponent = useAiSettings((s) => s.enabled);
+  const aiOpponent = aiActive || campaign;
   const matchFinished = session?.status === "finished";
 
   return (
@@ -31,6 +35,26 @@ export function ResultScreen() {
           <h2 className="winner">{winner ? t("result.wins", { name: name(winner) }) : t("result.draw")}</h2>
           <span className="winner-subtitle">{t("result.goodGame")}</span>
         </div>
+        {campaign && (
+          <p className="campaign-result" role="status">
+            {winner === "P1" ? t("campaign.secured", { code: sector.code }) : t("campaign.notSecured")}
+          </p>
+        )}
+        {campaign && winner === "P1" && campaignNewRoutes.length > 0 && (
+          <p className="campaign-result" role="status">
+            {t("campaign.newRoutes", { names: campaignNewRoutes.map((id) => sectorById(id).name).join(", ") })}
+          </p>
+        )}
+        {campaign && winner === "P1" && completedIds.includes("prime-00") && (
+          <p className="campaign-result" role="status">
+            {t("campaign.operationComplete")}
+          </p>
+        )}
+        {campaign && campaignError && (
+          <p className="lobby-error" role="alert">
+            {t(campaignError)}
+          </p>
+        )}
         <table className="stats result-stats" cellPadding={0} cellSpacing={0} border={0}>
           <thead>
             <tr>
@@ -69,6 +93,17 @@ export function ResultScreen() {
           </p>
         )}
         <div className="result-actions">
+          {campaign && (
+            <button
+              className="btn hud-button hud-button-primary"
+              onClick={() => {
+                gameRef.current?.leaveBattle();
+                setScreen("campaignMap");
+              }}
+            >
+              {t("campaign.title")}
+            </button>
+          )}
           {!onlineMatch ? (
             <button className="btn hud-button hud-button-primary" onClick={() => gameRef.current?.restart()}>
               {t("result.rematch")}
@@ -88,6 +123,7 @@ export function ResultScreen() {
             className="btn secondary hud-button hud-button-secondary"
             onClick={() => {
               if (onlineMatch) useMultiplayerStore.getState().leave();
+              gameRef.current?.leaveBattle();
               setScreen("menu");
             }}
           >

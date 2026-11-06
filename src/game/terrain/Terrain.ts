@@ -1,6 +1,7 @@
 import { Container, Graphics, RenderTexture, Sprite, type Renderer } from "pixi.js";
-import { generateHeightmap, mirrorHeightmap } from "./heightmap";
-import { TerrainMask } from "./mask";
+import { generateSectorHeightmap } from "./heightmap";
+import type { Sector } from "../data/sectors";
+import { TerrainMask, type TerrainSpan } from "./mask";
 import { scorchDots } from "./scorch";
 import { DEFAULT_THEME, type Theme } from "../theme";
 
@@ -13,17 +14,20 @@ export class Terrain {
   /** A gyökér konténer blend módját a Pixi nem alkalmazza, ezért a törlő kört egy szülőn keresztül rajzoljuk. */
   private eraseLayer = new Container();
   private scorch = new Graphics();
+  private colors: Theme["terrain"];
 
   constructor(
     private renderer: Renderer,
-    private colors: Theme["terrain"] = DEFAULT_THEME.terrain,
+    private readonly baseColors: Theme["terrain"] = DEFAULT_THEME.terrain,
   ) {
+    this.colors = baseColors;
     this.eraser.blendMode = "erase";
     this.eraseLayer.addChild(this.eraser);
   }
 
-  build(width: number, height: number, seed = 1): void {
-    const heightmap = mirrorHeightmap(generateHeightmap(width, height, seed));
+  build(width: number, height: number, seed = 1, sector?: Sector): void {
+    this.colors = sector?.colors ?? this.baseColors;
+    const heightmap = generateSectorHeightmap(width, height, seed, sector?.terrain ?? null);
     this.mask = TerrainMask.fromHeightmap(heightmap, height);
 
     const shape = new Graphics().moveTo(0, height);
@@ -69,8 +73,33 @@ export class Terrain {
     this.renderer.render({ container: this.scorch, target: this.texture, clear: false });
 
     this.mask.carveCircle(x, y, radius);
+    const detached = this.mask.removeDetachedGround();
     this.eraser.clear().circle(x, y, radius).fill(0xffffff);
+    this.eraseDetached(detached);
     this.renderer.render({ container: this.eraseLayer, target: this.texture, clear: false });
+  }
+
+  private eraseDetached(spans: readonly TerrainSpan[]): void {
+    // A felszíni vonal a solid pixeleken kívülre is kilóg; ezt is töröljük, de élő talajpixelhez nem nyúlunk.
+    const fringe = 2;
+    for (const span of spans) {
+      const x0 = Math.max(0, span.x - fringe);
+      const x1 = Math.min(this.mask.width, span.x + span.width + fringe);
+      const y0 = Math.max(0, span.y - fringe);
+      const y1 = Math.min(this.mask.height - 1, span.y + fringe);
+      for (let y = y0; y <= y1; y++) {
+        let start = -1;
+        for (let x = x0; x <= x1; x++) {
+          if (x < x1 && !this.mask.isSolid(x, y)) {
+            if (start < 0) start = x;
+          } else if (start >= 0) {
+            this.eraser.rect(start, y, x - start, 1);
+            start = -1;
+          }
+        }
+      }
+    }
+    if (spans.length) this.eraser.fill(0xffffff);
   }
 
   destroy(): void {
