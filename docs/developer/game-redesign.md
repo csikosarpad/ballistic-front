@@ -588,6 +588,12 @@ A megvalósíthatóságot ezek a meglévő felületek támasztják alá:
 
 ### Megvalósíthatóság, kockázat és javasolt sorrend
 
+A harctéri olvashatóság következő próbája statikus, játékosszínű Pixi `GlowFilter`
+a teljes test–löveg konténeren: desktopon 4, érintőeszközön 3 képpontos fényudvar,
+visszafogott belső élkiemeléssel. Nincs pulzálás, a reduced-motion nézetben is statikus.
+A filterek újraindításkor és az engine megsemmisítésekor felszabadulnak; a fizika és
+a tank színezése változatlan. Ez nem a külön emissive/team-color assetréteg megvalósítása.
+
 Első harctéri assetpróba: a body/barrel SVG szögletes ostromplatform-sziluettet,
 szegmentált járószerkezetet, páncélpaneleket és sínágyús löveget kapott. A logikai
 méret 24×12 / 16×4, a sprite anchorok, a teljes test játékosszín-tintje és a fizika
