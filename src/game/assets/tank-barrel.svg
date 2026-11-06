@@ -1,5 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="4" viewBox="0 0 16 4">
-  <path d="M0 0.5 1 0h11l1.5 1V3L12 4H1L0 3.5z" fill="#c4d4e0"/>
-  <rect x="5" y="1.4" width="5" height="1.2" fill="#7fe9ff"/>
-  <path d="M13 0h3v4h-3l-0.6-1V1z" fill="#5f7284"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="4" viewBox="0 0 160 40">
+  <defs>
+    <linearGradient id="steel" x2="0" y2="1">
+      <stop stop-color="#d7e5ef"/>
+      <stop offset="0.5" stop-color="#8199ad"/>
+      <stop offset="1" stop-color="#354657"/>
+    </linearGradient>
+  </defs>
+  <path d="M0 9 10 3h31l13 7h66l12-10h20l8 8v24l-8 8h-20l-12-10H54l-13 7H10L0 31z"
+        fill="url(#steel)" stroke="#182a39" stroke-width="2"/>
+  <path d="M45 13h77v14H45z" fill="#1b2c3b"/>
+  <path d="M49 17h72v6H49z" fill="#b5f4ff"/>
+  <path d="M62 12v16m19-16v16m19-16v16" stroke="#526d80" stroke-width="4"/>
+  <path d="m130 5 9 5v20l-9 5-6-9V14z" fill="#d0dce5"/>
+  <path d="M145 8h10v24h-10z" fill="#223442"/>
+  <path d="M151 15h8v10h-8z" fill="#e1fbff"/>
+  <path d="M8 10h24v4H8z" fill="#edf5fa"/>
 </svg>

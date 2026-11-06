@@ -588,6 +588,13 @@ A megvalósíthatóságot ezek a meglévő felületek támasztják alá:
 
 ### Megvalósíthatóság, kockázat és javasolt sorrend
 
+Első harctéri assetpróba: a body/barrel SVG szögletes ostromplatform-sziluettet,
+szegmentált járószerkezetet, páncélpaneleket és sínágyús löveget kapott. A logikai
+méret 24×12 / 16×4, a sprite anchorok, a teljes test játékosszín-tintje és a fizika
+változatlan. Ez SP1 vizuális próba, nem a teljes munkacsomag elfogadása: külön
+team-color/glow réteg, új töltési animáció, terrain shader és VFX még nem készült.
+Az eredményképernyő illusztrációja nem változott.
+
 A becslés egy fejlesztő fókuszált munkanapjainak nagyságrendje, meglévő PixiJS 8-ra
 építve, implementációval és célzott teszteléssel. Nem vállalt határidő; új grafikák
 elkészítése, többkörös art direction és valós eszközparkon végzett mérés külön idő.
