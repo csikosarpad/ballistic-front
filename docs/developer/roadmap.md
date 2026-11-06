@@ -18,6 +18,8 @@ A „javaslat” külön jóváhagyást igényel, és nem kész funkció.
 A fejlődési plafon kódbázis-alapú elemzése és a szektorok, környezeti modifikátorok,
 orbitális képességek, egységosztályok és kampány rangsora:
 [Játékmenet és hosszú távú fejlődés](./gameplay-progression.md).
+A jelenlegi és tervezett fejlesztési ágak áttekintő ábrája:
+[Játékmenet-fejlesztési útvonal](./gameplay-development-path.md).
 
 ## Aktuális állapot (2026-11)
 

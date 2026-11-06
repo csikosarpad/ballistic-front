@@ -197,6 +197,126 @@ Függőség: a közös meccskonfiguráció és környezeti szabályok.
 - [ ] HUD/célzás/visszajelzés és AI képességválasztás.
 - [ ] Balansz-, mentési és multiplayer-regressziótesztek.
 
+## 4A. Választható lövedékek – megvalósíthatósági javaslat
+
+**Státusz:** tervezési javaslat, még nem elfogadott roadmap-prioritás. A körökre
+osztott játékmenethez jól illeszkedik: a játékos a lövés előtt választ típust,
+majd a lövés a jelenlegi célzási és repülési fázisban oldódik fel. Külön
+fegyverváltó kör vagy valós idejű célkövetés nem szükséges.
+
+**Megvalósíthatóság: közepes, a jelenlegi engine megtartható.** A Game jelenleg
+egyetlen lövedéket indít, majd becsapódáskor ugyanazt a robbanás-/tereprombolás-
+folyamatot futtatja; az AI és a replay is ezt a szabályt modellezi. Az online
+`fire` esemény most csak szöget és erőt visz át, a szerver pedig általános
+JSON-eseményt tárol, nem szimulálja a harcot. Ezért a fegyverazonosító és a
+fegyverspecifikus becsapódás-feloldás mindhárom kliensoldali útvonalon
+(Game, AI-szimuláció, headless replay) azonos szabályból kell származzon.
+
+### Döntési kapuk
+
+- [x] Haladási modell: a játékos egy alapfegyverrel indul, a további fegyvereket
+  XP-ért tartósan feloldhatja. Az MVP-ben a feloldott fegyverek lövésenként
+  szabadon választhatók, nincs külön fogyó lőszer.
+- [x] Fegyverkészlet-tulajdonlás: minden játékos a saját profillal feloldott
+  fegyvereit viszi, offline, online és kampánytérképes meccsen egyaránt; nincs
+  lobby-közös készlet. A meccssetup/snapshot rögzítse a használható ID-ket,
+  hogy a készlet replay és visszavágó alatt ne változhasson.
+- [x] **Robbanófej** upgrade: marad a fegyverfeloldásoktól különálló,
+  kompatibilis sebzésfejlesztés. Az első fegyvercsomag rögzíti, mely
+  fegyverosztályokra hat; a feloldás külön, stabil fegyver-ID-hoz kötött
+  profiladat.
+- [x] Fegyverenkénti XP-fejlesztés: nem része az MVP-nek. Később csak az kapjon
+  fegyver-specifikus fejlesztést, amely új taktikai döntést ad (pl. AP-átütés,
+  HE-sugár vagy Smart Missile-irányítás); a Robbanófej nem kerül automatikusan
+  eltérő energiafegyverekre.
+- [x] Fegyverenként eltérő alapértékek és hatások: egyedi sebzés, robbanási
+  sugár, terephatás, valamint páncél-/pajzskölcsönhatás. Ezek adják a fegyverek
+  közti taktikai változatosságot és a játékos fejlődésének új irányait; nem
+  igényelnek automatikusan fegyverenként külön XP-fejlesztési ágat. Az Armor
+  Piercing közvetlen találatot igényel; az átütés pontos szabálya és a
+  fegyverenkénti számértékek balanszdöntést igényelnek.
+- [x] Smart Missile elérhetetlen célpontja: ha a választott cél a beállított
+  lövési erővel nem érhető el, a rakéta nem kap automatikus erőnövelést vagy
+  garantált találatot; az addigi pályanyomvonal szerint halad tovább, majd
+  annak megfelelően lehull/megsemmisül.
+- [ ] Meghatározni a Smart Missile célfelvételi sugarát, fordulási korlátját,
+  célpontválasztását és a fix lépésű, determinisztikus végfázisú korrekciót.
+  Több lehetséges célpont esetén stabil ID szerinti döntés kell; a nem elérhető
+  célpontra vonatkozó elfogadott szabály változatlanul hagyandó.
+- [x] Seismic Charge: az HE-től elkülönülő, nagyobb tereprombolású,
+  mérsékeltebb egységsebzésű hatás; késleltetett körhatás nélkül.
+- [x] Közös fegyverkatalógus: minden játékos ugyanazokat a fegyver-ID-ket és
+  definíciókat ismeri; az ismeretlen fegyver nem választható. A választó csak
+  az adott játékos feloldott fegyvereit kínálja fel, offline és online is.
+- [ ] Az online meccs szabály-/katalógusverzióját rögzíteni; eltérő vagy
+  inkompatibilis verzió explicit hibát adjon, ne használjon csendes fallbacket.
+
+### Javasolt végrehajtási lépések
+
+- [ ] Típusos, stabil ID-jű `WeaponDefinition` katalógus és közös tiszta
+  lövés-/becsapódás-szabályfeloldó; a szög, erő és fegyverazonosító a lövés
+  paramétere legyen. A jelenlegi értékekkel a Standard Shell karakterizációs
+  tesztje bizonyítsa a változatlan alapviselkedést.
+- [ ] Első fegyvercsomag (4–5 típus, kiegyensúlyozva és XP-vel feloldható):
+  **Standard Shell** (kezdő, jelenlegi viselkedés), **High Explosive** (nagyobb
+  robbanási sugár, kisebb közvetlen sebzés), **Armor Piercing** (közvetlen
+  találat, szűk hatás és páncélszabály), **Seismic Charge** (elsősorban
+  tereprombolás), opcionálisan **Smart Missile** (végfázisú célkövetés).
+  Az XP-költség és a feloldási sorrend balanszdöntés; a teljes csomag ne
+  váljon automatikusan elérhetővé a kezdőprofilnak.
+- [ ] A **Robbanófej** sebzés-upgrade, az új **High Explosive** fegyver és a
+  későbbi fegyver-specifikus fejlesztések külön fogalmak/profiladatok legyenek.
+  A meglévő Robbanófej-szintek kompatibilitása maradjon meg.
+- [ ] Az első fegyvercsomag balanszánál ellenőrizni, hogy a közös Robbanófej
+  fejlesztés mely fegyverekre érvényes; ne okozzon rejtett, nem szándékolt
+  szorzóhalmozást az egyedi fegyverhatásokkal.
+- [ ] A kezdőcsomag után külön fegyvernemként tervezni az energiafegyvereket:
+  például lézerágyú/lézerfegyver (egyenes vagy hitscan), energiasokkoló
+  (közeli hatás), energiagömb (lassú, területi lövedék) és villámcsapás
+  (célpont-/lánchatás). Ezek nem részei az első lövedék-MVP-nek: eltérő
+  célzási, találati, animációs és multiplayer-szabályt igényelnek.
+- [ ] Az AP/HE/Seismic eltérő sebzés-/hatásszabályait, közvetlen tanktalálatot
+  és terepütközést külön kezelni; sérülés és tereprombolás célzott tesztjei.
+- [ ] Smart Missile csak a célfelvételi döntések után;
+  az irányítás fix `dt`-vel, rendereléstől függetlenül és seedfogyasztás nélkül
+  működjön. Elérhetetlen célpontnál a rakéta az addigi pályán marad, nem kap
+  találati korrekciót. A pályaelhagyás, terepütközés és önsebzés szabálya legyen
+  közös és determinisztikus.
+- [ ] Fegyverfeloldások tárolása és migrációja a profilban; offline, online és
+  kampánytérképes meccs egyaránt a játékos saját feloldott készletét használja.
+  A meccssetup/snapshot rögzítse ezt a készletet, és az újrajátszás ugyanazt
+  alkalmazza. A lövésnél a fegyver-ID szerepeljen a közös katalógusban, és
+  tartozzon a lövő feloldott készletéhez; ettől eltérő ID-t explicit el kell
+  utasítani, nem szabad másik fegyverre visszaesni.
+- [ ] Játékmotor, röppálya-előnézet/Smart Aim és AI ugyanazt a fegyverdefiníciót
+  és becsapódás-szabályt használja; ne legyen külön, eltérő AI- vagy preview-fizika.
+- [ ] HUD-választó a meglévő célzási vezérlők mellé: billentyűzet, érintés,
+  fókusz/akadálymentes címkék, hu/en/de fordítás, zárolás lövedékrepülés alatt.
+  Lövés előtt a kiválasztott fegyver és releváns hatás legyen érthető.
+- [ ] AI értékelje a fegyvereket várható sebzés, találati esély és saját
+  kockázat alapján; azonos helyzetben és seed mellett legyen determinisztikus.
+- [ ] A `fire` esemény tartalmazzon stabil `weaponId`-t; mindkét kliens azonosan
+  validálja és alkalmazza. A régi, azonosító nélküli replay-esemény Standard
+  lövedéket jelentsen; új, ismeretlen ID ne essen vissza Standardra.
+- [ ] Replay-, kétklienses, darabolt/duplikált esemény- és újracsatlakozási
+  teszt: azonos setup + eseménynapló azonos egységállapotot és terepet adjon.
+  A headless replay ne csak saját magával, hanem a megosztott szabálymaggal
+  egyezzen.
+- [ ] Balanszpróba: minden fegyvernek legyen helyzeti előnye, de ne legyen
+  domináns választás; ellenőrzés alap és fejlesztett statokkal, ember és AI ellen.
+
+**Becsült MVP:** 10–16 nettó fejlesztői nap a tartós XP-feloldással és annak
+profil-/snapshot-integrációjával; a véges lőszer, szerveroldali harcszimuláció
+és új hálózati infrastruktúra nincs benne. Ez tartalmazza az első 4–5 típus
+alapviselkedését, célzott UI-t, AI-, replay- és multiplayer-bekötést; a hosszas
+balansziteráció és végleges VFX/hang nincs benne.
+Az API jelenleg általános eseményeket tárol, így az eseménybővítés önmagában
+kicsi, de a kliensek szabályazonossága és verzió-kompatibilitása elfogadási kapu.
+Az egyes fegyverek saját fejlesztési ágai nem részei ennek a becslésnek: a jelenlegi
+upgrade-rendszer közvetlenül közös `TankStats` értékeket módosít, ezért az egyedi
+fegyverfejlesztésekhez külön, profilban mentett és online snapshotba kerülő
+fegyver-szintű fejlesztési adatok és UI szükséges.
+
 ## 5. Egységosztályok – a taktikai alapok után
 
 - [ ] Két első szárazföldi variáns erőssége/gyengesége, nem egyértelműen jobb utód.

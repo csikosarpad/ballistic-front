@@ -144,6 +144,7 @@ végleges assetgyártást vagy hosszas balansziterációt.
 | 6 | Roguelite kampány | Hosszú távú stratégia | 30–60 nap | Útvonalak, run-állapot, jutalmak, ideiglenes összeállítások |
 | 7 | Prestige | Olcsó, de másodlagos | 3–6 nap | Profilmigráció, reset, bónuszok, multiplayer-szabályok |
 | 8 | További statfejlesztések | Gyors tüneti kezelés | 1–3 nap | Kicsi, ha meglévő statot használ |
+| Külön javaslat | XP-vel feloldható lövedéktípusok | Közepes befektetés | 10–16 nap | Közepes: profil/snapshot, közös lövésfeloldás, AI, HUD és replay |
 
 A sorrend ár-érték arányt és stratégiai hasznosságot jelent, nem pusztán fejlesztési gyorsaságot.
 A becslések nem adandók mechanikusan össze: a közös alapok újrahasználhatók.
@@ -274,6 +275,85 @@ Korlátlanul halmozódó harci bónuszok multiplayerben kerülendők.
 Kis kiegészítésként használhatók, de nem elsődleges megoldásként.
 Az adatvezérelt definícióhoz új sor csak akkor elég, ha a statnak már van működő
 játékmeneti fogyasztója. Fordítás, UI-prezentáció, AI-vásárlás és balansz így is érintett.
+
+### 5.9. Választható lövedéktípusok
+
+Ez a körökre osztott játékmenethez jól illeszkedő, a [progressziós TODO-ban
+részletezett](./gameplay-progression-todo.md#4a-választható-lövedékek--megvalósíthatósági-javaslat)
+önálló bővítés; nem igényel új egységosztályt vagy új körtípust. A játékos a
+lövés előtt választ, a jelenlegi célzás/szög/erő vezérlés megmarad. A feature
+közepes méretű, mert a tényleges lövést, a röppálya-előnézetet, az AI-t és a
+headless replay-t ugyanahhoz az új szabályhoz kell kötni.
+
+Javasolt haladási modell: a játékos **egy Standard Shell alapfegyverrel indul**,
+a további fegyvereket XP-ért tartósan feloldja, majd minden lövés előtt szabadon
+választ közülük. Az MVP-ben ne legyen külön fogyó lőszer. Az első csomag 4–5
+típusa: **Standard Shell** (a mai alapviselkedés), **High Explosive** (nagyobb
+területi hatás, kisebb közvetlen sebzés), **Armor Piercing** (pontos közvetlen
+találat, külön páncélszabály), **Seismic Charge** (elsősorban tereprombolás),
+és opcionálisan **Smart Missile** (determinisztikus, fix lépésű végfázisú
+célkövetés). A költségeket és feloldási sorrendet balanszdöntésben kell
+rögzíteni.
+
+Elfogadott Smart Missile-szabály: ha a választott cél a beállított lövési
+erővel nem érhető el, a rakéta nem kap automatikus erőnövelést vagy garantált
+találatot; az addigi pályanyomvonal szerint halad tovább, majd annak megfelelően
+lehull vagy megsemmisül. A célfelvételi sugár, a fordulási korlát és a
+célpontválasztás még paraméterezendő.
+
+Elfogadott tervezési elv, hogy minden fegyver saját alapkarakterisztikát kap:
+eltérő sebzést, robbanási sugarat, terephatást és páncél-/pajzskölcsönhatást.
+Ezek a fegyverválasztás taktikai értelmét és a játékos fejlődésének változatosságát
+adják, külön XP-fejlesztési ág nélkül is. A pontos számértékek és interakciók
+balanszfeladatok; az Armor Piercing közvetlen találatot igényel, az átütés
+pontos szabályát implementáció előtt kell meghatározni.
+
+Elfogadott Seismic Charge-szerep: az HE-től elkülönülő hatás, nagyobb
+tereprombolással és mérsékeltebb egységsebzéssel, késleltetett körhatás nélkül.
+
+A jelenlegi **Robbanófej** XP-upgrade a kódban a sebzés statot növeli; nem
+fegyverfeloldás. Ezt nem szabad összemosni az új High Explosive lőszerrel:
+a régi upgrade kompatibilitását megőrizve külön profiladat kell a fegyverek
+feloldásához. Elfogadott döntés, hogy a Robbanófej a feloldástól elkülönülő
+közös sebzés-upgrade marad. Az első fegyvercsomag rögzíti, mely
+fegyverosztályokra érvényes; nem kerül automatikusan eltérő energiafegyverekre.
+
+Elfogadott döntés, hogy fegyverenként külön XP-fejlesztési ág nem része az
+MVP-nek. A jelenlegi upgrade-rendszer közös `TankStats` értékeket módosít;
+a fegyver-specifikus fejlesztések külön mentett szinteket, profil-/online
+snapshot-migrációt, UI-t és külön egyensúlyozást igényelnek. Később csak ott
+érdemes ilyen ágat nyitni, ahol saját taktikai döntést ad (például AP-átütés,
+HE-hatásmező vagy Smart Missile-irányítás), nem pusztán minden fegyverhez egy
+újabb sebzésszintet.
+
+Minden játékos a saját profillal feloldott fegyverkészletét használja offline,
+online és kampánytérképes meccsen is; nincs lobby-közös készlet. A meccs
+setupjának/snapshotjának rögzítenie kell az adott játékos használható
+fegyver-ID-it, hogy a két kliens, az AI, a replay és a visszavágó ugyanazt a
+készletet alkalmazza.
+
+Műszakilag a legkisebb kockázat egy stabil ID-jű, típusos fegyverkatalógus és
+közös lövés-/becsapódás-feloldás. A `fire` multiplayer-eseményhez `weaponId`
+adható; az API már tetszőleges JSON payloadot tárol, de nem validálja és nem
+szimulálja a fegyver szabályait. A katalógus és annak ID-i minden játékosnál
+azonosak; a játékos csak a saját feloldott részhalmazából választhat. A lövés
+érvényesítése ezért a katalógustagságot és a lövő feloldását is ellenőrzi;
+ismeretlen vagy fel nem oldott ID nem választható, és hibás eseményként
+elutasítandó. A két kliens azonos, verziózott katalógust használjon, a
+meccssetup pedig rögzítse a szabály-/katalógusverziót. A régi,
+fegyverazonosító nélküli replay Standard Shell-ként értelmezhető;
+inkompatibilis szabályverziót viszont explicit el kell utasítani.
+Ez megőrzi a régi alapviselkedést, de önmagában nem ad szerveroldali csalásvédelmet.
+
+Az XP-vel feloldható készlet az MVP része, de sem a korlátozott lőszer és a
+szerveroldali fizikaszimuláció, sem a fegyverenként külön fejlesztési ágak nem
+részei. A lézerágyú/lézerfegyver, energiasokkoló,
+energiagömb és villámcsapás későbbi, külön energiafegyver-család: hitscan,
+közeli/célpont- vagy lánchatásuk eltérő fizikai, UI- és szinkronszabályai miatt
+nem tartoznak az első lövedékcsomagba. A részletes becslés 10–16 nettó
+fejlesztői nap, célzott tesztekkel és profil-/snapshot-integrációval, hosszas
+balansziteráció és végleges effektek nélkül; a végrehajtás prioritását a
+központi roadmapen külön kell elfogadni.
 
 ## 6. Végrehajtási csomagok: először térkép, utána szektortartalom
 
