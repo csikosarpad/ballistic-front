@@ -8,6 +8,8 @@ import { useMultiplayerStore } from "../state/multiplayerStore";
 import { tankContains, type Tank } from "../entities/tank";
 import { TRAINING_SECTOR, sectorById } from "../data/sectors";
 import { loadProfiles, saveProfiles } from "../systems/profileStorage";
+import { Texture } from "pixi.js";
+import { GlowFilter } from "pixi-filters";
 
 vi.hoisted(() => {
   HTMLCanvasElement.prototype.getContext = () => null;
@@ -45,6 +47,34 @@ describe("Game campaign lifecycle", () => {
     game.fire();
     Reflect.get(game, "explode").call(game, 640, 100);
   };
+
+  it.each([false, true])("adds team-colored glow and releases filters on restart (touch: %s)", (touch) => {
+    vi.stubGlobal("matchMedia", () => ({ matches: touch }));
+    try {
+      Reflect.set(game, "tankTextures", { body: Texture.EMPTY, barrel: Texture.EMPTY });
+      game.startOffline();
+      const layer = Reflect.get(game, "tankLayer");
+      const glows: GlowFilter[] = layer.children.map((root: { filters: GlowFilter[] }) => root.filters[0]);
+      expect(glows).toHaveLength(2);
+      const tanks: Tank[] = Reflect.get(game, "tanks");
+      glows.forEach((glow, i) => {
+        expect(glow).toBeInstanceOf(GlowFilter);
+        expect(glow.color).toBe(tanks[i]!.color);
+        expect(glow.distance).toBe(touch ? 3 : 4);
+      });
+      const destroyed = glows.map((glow) => vi.spyOn(glow, "destroy"));
+      game.restart();
+      destroyed.forEach((destroy) => expect(destroy).toHaveBeenCalledOnce());
+      expect(layer.children).toHaveLength(2);
+      const finalDestroyed = layer.children.map((root: { filters: GlowFilter[] }) =>
+        vi.spyOn(root.filters[0]!, "destroy"),
+      );
+      game.destroy();
+      finalDestroyed.forEach((destroy: ReturnType<typeof vi.spyOn>) => expect(destroy).toHaveBeenCalledOnce());
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
 
   it.each([-60, 0, 60])("fires an actual direct hit with AI assistance in wind %s", (wind) => {
     game.startCampaign();

@@ -1,4 +1,5 @@
 import { Application, Assets, Container, Graphics, Sprite, type Texture } from "pixi.js";
+import { GlowFilter } from "pixi-filters";
 import { TerrainBloomFilter } from "./TerrainBloomFilter";
 import { bloomSettings } from "./bloomQuality";
 import tankBodyUrl from "../assets/tank-body.svg?url";
@@ -88,6 +89,7 @@ interface TankView {
   root: Container;
   barrel: Sprite;
   anim: BarrelState;
+  glow: GlowFilter;
 }
 
 /** Pixi-t és a játéklogikát összefogó engine; Reacttől független, így tesztelhető. */
@@ -396,8 +398,8 @@ export class Game {
   /** Tankonként egy sprite-pár: a cső a test mögött forog a saját forgáspontja körü. */
   private buildTankViews(): void {
     if (!this.tankTextures) return;
-    for (const child of this.tankLayer.removeChildren()) child.destroy({ children: true });
-    this.tankViews.clear();
+    this.destroyTankViews();
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
     for (const t of this.tanks) {
       const barrel = new Sprite(this.tankTextures.barrel);
       barrel.anchor.set(0, 0.5);
@@ -406,9 +408,24 @@ export class Game {
       body.tint = t.color;
       const root = new Container();
       root.addChild(barrel, body);
+      const glow = new GlowFilter({
+        color: t.color,
+        distance: coarsePointer ? 3 : 4,
+        outerStrength: 2,
+        innerStrength: 0.4,
+        quality: coarsePointer ? 0.1 : 0.15,
+        alpha: 0.85,
+      });
+      root.filters = [glow];
       this.tankLayer.addChild(root);
-      this.tankViews.set(t.id, { root, barrel, anim: { angle: t.angle, recoil: 0 } });
+      this.tankViews.set(t.id, { root, barrel, glow, anim: { angle: t.angle, recoil: 0 } });
     }
+  }
+
+  private destroyTankViews(): void {
+    for (const view of this.tankViews.values()) view.glow.destroy();
+    for (const child of this.tankLayer.removeChildren()) child.destroy({ children: true });
+    this.tankViews.clear();
   }
 
   private award(id: string, xp: number): void {
@@ -1034,6 +1051,7 @@ export class Game {
     this.unsubscribeAim = null;
     this.pendingMultiplayerEvents = [];
     this.audio?.destroy();
+    this.destroyTankViews();
     if (this.app.renderer) this.app.destroy({ removeView: true }, { children: true });
   }
 }

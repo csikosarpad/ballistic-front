@@ -1,11 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="12" viewBox="0 0 24 12">
-  <path d="M1 9.5h22l-2 2.5H3z" fill="#4a5566"/>
-  <path d="M0.5 8 3 4.5h18l2.5 3.5-1.5 2H2z" fill="#aab4c4"/>
-  <path d="M3 4.5h18l1 1.5H2z" fill="#fff"/>
-  <path d="M7 4.5 9 1.5a4 2 0 0 1 6 0l2 3z" fill="#e8edf5"/>
-  <path d="M9.5 3.5h5" stroke="#fff" stroke-width="0.8"/>
-  <path d="M2.5 8.2h19" stroke="#fff" stroke-width="0.9"/>
-  <circle cx="5" cy="10.8" r="0.9" fill="#fff"/>
-  <circle cx="12" cy="10.8" r="0.9" fill="#fff"/>
-  <circle cx="19" cy="10.8" r="0.9" fill="#fff"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="12" viewBox="0 0 240 120">
+  <defs>
+    <linearGradient id="armor" x2="0" y2="1">
+      <stop stop-color="#e4e4e4"/>
+      <stop offset="0.48" stop-color="#9b9b9b"/>
+      <stop offset="1" stop-color="#484848"/>
+    </linearGradient>
+    <linearGradient id="turret" x2="0" y2="1">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#777"/>
+    </linearGradient>
+  </defs>
+  <path d="M18 82h204l12 15-17 23H23L6 97z" fill="#161616"/>
+  <path d="M25 92h190l8 7-10 14H27L17 99z" fill="#444" stroke="#888" stroke-width="3"/>
+  <path d="M35 96v13m24-13v13m24-13v13m24-13v13m26-13v13m24-13v13m24-13v13m24-13v13"
+        stroke="#242424" stroke-width="6"/>
+  <path d="M5 72 32 48h176l27 24-10 24H15z" fill="url(#armor)" stroke="#252525" stroke-width="4"/>
+  <path d="m32 48 20-10h136l20 10-19 14H51z" fill="#c6c6c6"/>
+  <path d="M54 43h132l-12 8H66z" fill="#f3f3f3"/>
+  <path d="m16 72 27-16 24 12-9 20H19zm208 0-27-16-24 12 9 20h39z" fill="#646464"/>
+  <path d="m70 66 14-9h72l14 9-9 24H79z" fill="#383838" stroke="#aaa" stroke-width="3"/>
+  <path d="M92 68h56v8H92z" fill="#d8d8d8"/>
+  <path d="M100 80h40v5h-40z" fill="#777"/>
+  <path d="m70 39 9-26L96 2h48l17 11 9 26-18 15H88z" fill="url(#turret)" stroke="#292929" stroke-width="4"/>
+  <path d="M96 2h48l10 12H86z" fill="#dedede"/>
+  <path d="m80 19 18 7-5 20-16-9zm80 0-18 7 5 20 16-9z" fill="#555"/>
+  <path d="M105 17h30l6 8-7 16h-28l-7-16z" fill="#222"/>
+  <path d="M110 19h20v9h-20z" fill="#fff"/>
+  <path d="M23 75h26v6H23zm168 0h26v6h-26z" fill="#fff"/>
+  <path d="m22 91 37 2m122 0 37-2" stroke="#eee" stroke-width="3"/>
 </svg>

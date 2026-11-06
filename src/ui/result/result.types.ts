@@ -10,6 +10,7 @@ export interface UnitPresentation {
   secondaryAsset?: string;
   detailAsset?: string;
   accentAsset?: string;
+  illustrationLayout?: "body-barrel";
   primaryColor: number;
   secondaryColor: number;
   iconSet: string;

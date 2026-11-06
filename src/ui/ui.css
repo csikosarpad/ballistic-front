@@ -1008,6 +1008,16 @@
   transform: scaleX(-1);
 }
 
+.unit-illustration-platform {
+  height: 98px;
+}
+
+.unit-illustration-platform svg {
+  width: 224px;
+  height: 98px;
+  flex-shrink: 0;
+}
+
 .unit-illustration-body {
   width: 224px;
   height: 98px;
