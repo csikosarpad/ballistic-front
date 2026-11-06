@@ -104,6 +104,28 @@ A jelenlegi, rétegen kívüli saját CSS azonos tulajdonság esetén elsőbbsé
 a Tailwind utility rétegével szemben. Ha egy tulajdonságot utility class kezel,
 az ütköző saját deklarációt távolítsd el; a meglévő CSS-t nem kell átírni.
 
+A közös téma (`--bf-*` változók), alapstílusok (`overlay`, `panel`, `btn`) és a több
+képernyőn használt osztályok a globális [ui.css](../../src/ui/ui.css) fájlban maradnak.
+Az önálló komponensek saját stílusai fokozatosan melléjük emelhetők ki:
+a [CampaignMap.tsx](../../src/ui/CampaignMap.tsx) közvetlenül importálja a
+[CampaignMap.css](../../src/ui/CampaignMap.css) fájlt, a reszponzív szabályokkal és
+animációkkal együtt. A téma változóit használja, nem hoz létre külön témát.
+
+A [main.tsx](../../src/main.tsx) a közös CSS-t az `App` előtt importálja, így a
+komponens stílusai az alapok után kerülnek betöltésre. A külön CSS-fájl nem izolált
+hatóköri egység: a szelektorok továbbra is globálisak, ezért komponens-előtagot
+használj (például `campaign-`), ne önálló `.is-selected` vagy általános elemszelektort.
+Valódi lokális osztálynevekhez később CSS Modules vezethető be; pusztán a kiemeléshez
+ez nem szükséges.
+
+A hangerőcsúszka saját stílusa a `ui.css` `.audio-volume-control` szabályaiban van.
+A `--volume-track-height` a sín vastagsága, a `--volume-thumb-size` a fogantyú mérete;
+az input 32 px magas kezelési területe ezektől független. A WebKit és Firefox
+pszeudoelemei külön szabályokat kapnak, közös CSS-változókkal.
+A `MainMenu` a hangerőből számítja a `--volume-whiteness` értékét: a sín 0%-nál
+semleges, 80%-ra fehérré válik. A `data-volume-high` 80%-tól fehér ragyogást kapcsol be.
+A projekt sima CSS-t használ; Sass `@mixin` / `@include` nincs beállítva.
+
 ## Skinezhetőség
 
 A [ui.css](../../src/ui/ui.css) elején CSS változók vannak, például `--bf-panel`,

@@ -91,6 +91,21 @@ describe("MainMenu", () => {
     expect(useAudioSettings.getState().volume).toBe(0);
   });
 
+  it.each([
+    [0, "0%", "false"],
+    [40, "50%", "false"],
+    [79, "98.75%", "false"],
+    [80, "100%", "true"],
+    [100, "100%", "true"],
+  ])("a hangerő %i százalékánál megfelelő színt és fényküszöböt ad át", (value, whiteness, high) => {
+    render(<MainMenu />);
+    fireEvent.click(screen.getByRole("button", { name: "Beállítások" }));
+    const slider = screen.getByRole("slider", { name: "Játék hangereje" });
+    fireEvent.change(slider, { target: { value: String(value) } });
+    expect(slider.style.getPropertyValue("--volume-whiteness")).toBe(whiteness);
+    expect(slider).toHaveAttribute("data-volume-high", high);
+  });
+
   it("megjeleníti a hangbeállítások mentési hibáját", () => {
     useAudioSettings.setState({ error: "audio.saveError" });
     render(<MainMenu />);

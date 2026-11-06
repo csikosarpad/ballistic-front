@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { SECTORS, sectorById } from "@/game/data/sectors";
 import { useGameStore } from "@/game/state/gameStore";
 import { MAX_NAME_LENGTH, usePlayerNamesStore } from "@/game/state/playerNames";
@@ -25,6 +25,10 @@ export function MainMenu() {
   const channels = useAudioSettings((s) => s.channels);
   const setChannel = useAudioSettings((s) => s.setChannel);
   const volume = useAudioSettings((s) => s.volume);
+  const volumePercent = Math.round(volume * 100);
+  const volumeStyle: CSSProperties & { "--volume-whiteness": string } = {
+    "--volume-whiteness": `${Math.min(100, (volumePercent / 80) * 100)}%`,
+  };
   const setVolume = useAudioSettings((s) => s.setVolume);
   const audioError = useAudioSettings((s) => s.error);
   const aiEnabled = useAiSettings((s) => s.enabled);
@@ -84,11 +88,13 @@ export function MainMenu() {
                   min={0}
                   max={100}
                   step={1}
-                  value={Math.round(volume * 100)}
-                  aria-valuetext={`${Math.round(volume * 100)}%`}
+                  value={volumePercent}
+                  aria-valuetext={`${volumePercent}%`}
+                  style={volumeStyle}
+                  data-volume-high={volumePercent >= 80}
                   onChange={(event) => setVolume(Number(event.target.value) / 100)}
                 />
-                <output htmlFor="master-volume">{Math.round(volume * 100)}%</output>
+                <output htmlFor="master-volume">{volumePercent}%</output>
               </div>
               {audioError && <small role="alert">{t(audioError)}</small>}
             </div>

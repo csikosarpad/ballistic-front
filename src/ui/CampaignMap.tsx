@@ -6,6 +6,7 @@ import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
 import { requestLandscape } from "./orientation";
+import "./CampaignMap.css";
 
 export function CampaignMap() {
   const t = useT();
