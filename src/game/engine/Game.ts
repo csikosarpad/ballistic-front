@@ -905,7 +905,7 @@ export class Game {
       },
     );
     for (const [a, b] of dashPolyline(points, PREVIEW_DASH, PREVIEW_GAP)) g.moveTo(a.x, a.y).lineTo(b.x, b.y);
-    g.stroke({ width: 1.5, color: this.theme.hud.previewLine, alpha: 0.18 });
+    g.stroke({ width: 1.5, color: this.theme.hud.previewLine, alpha: 0.68 });
   }
 
   /** Vékony (3 px) csík a tank fölött; a háttér a hiányzó részt jelzi. */

@@ -1,4 +1,3 @@
-/* @import "./tailwind-like.css"; */
 /* Skin: a színeket CSS változók adják; másik kinézethez elég a :root[data-skin="…"] felülírása. */
 :root {
   --bf-text: #fff;
@@ -584,6 +583,8 @@
 }
 
 .language-switch {
+  display: flex;
+  gap: 8px;
   margin-top: 12px;
 }
 
