@@ -366,16 +366,10 @@ termékdöntés, adatmodell/protokoll-elemzés és saját TODO után kerülhet b
 
 ### Siege Platform átalakíthatósági vizsgálat
 
-- [ ] Felmérni, hogy a jelenlegi gameplay-képernyő mely UI-elemei nevezhetők és rendezhetők át
-      közvetlenül a Siege Protocol világába, és melyek igényelnek új vizuális koncepciót.
-- [ ] Megvizsgálni a tank body/barrel SVG-rétegeket, sziluettet, játékosaccenteket és
-      csőanimációt: elegendők-e célzott grafikai módosítások, vagy új Siege Platform asset/API kell.
-- [ ] Rögzíteni, hogy az első Siege Platform-változat a jelenlegi tank fizikáját és
-      viselkedését használja; külön választani a későbbi, mechanikus `Tank` → új egységmodell
-      átnevezéstől és a többféle platform támogatásától.
-- [ ] A vizsgálat eredményeként javasolt, kis kockázatú implementációs lépéseket és becsült
-      ráfordítást felvenni a Roadmapbe; új assetkészítés előtt megállni a vizuális irány
-      jóváhagyásáig.
+Az első kódbázis-alapú felmérés, kockázatelemzés és javasolt sorrend a
+[6. fejezetben](#6-siege-platform-fejlesztési-ütem) található.
+A végrehajtási státuszok egyetlen forrása a [roadmap M7 munkacsomagja](./roadmap.md#m7--sci-fi-vizuális-réteg).
+A felmérés nem jelent jóváhagyott új grafikát vagy elkészült prototípust.
 
 ### Játéktér színvilág TODO
 
@@ -565,7 +559,109 @@ A meglévő állapotok vizuális átrendezéséhez nem kell új backend vagy já
 A referenciák új profil-/képességfunkciói viszont nem részei ennek a hatókörnek.
 A menüfunkciók alapvető hatóköre lezárt; a shop XP-feliratának eltérése nyitott szöveghiba.
 
-## 6. Következő javasolt lépés
+## 6. Siege Platform fejlesztési ütem
+
+### Hatókör és jelenlegi alapok
+
+2026-11-06-i technikai felmérés. A tank jelenleg az egyetlen játszható egységtípus;
+P1/P2 ugyanennek két példánya. A cél a meglévő tank sci-fi ostromplatformmá alakítása,
+nem új osztályválasztás, fegyverrendszer vagy XP-fejlesztési ág bevezetése.
+A korábbi modern tank-referenciák előzmények; az új harctéri asset végső irányát SP0-ban
+kell rögzíteni, a ResultScreen combat-dossier stílusával összehangolva.
+
+A megvalósíthatóságot ezek a meglévő felületek támasztják alá:
+
+- [Harctéri test](../../src/game/assets/tank-body.svg) és
+  [löveg](../../src/game/assets/tank-barrel.svg): külön SVG-k, jelenleg 24×12 és 16×4
+  logikai képpont. A [Game](../../src/game/engine/Game.ts) ezeket textúrává tölti,
+  sprite-okként kezeli; a test kap játékosszín-tintet, a löveg külön forog.
+  Egyetlen SVG belső csoportjai betöltés után nem animálhatók külön: az önállóan
+  mozgó vagy színezhető rétegekhez külön textúra/sprite kell.
+- [Löveg állapotmodell](../../src/game/systems/barrelAnimation.ts): szögsimítás és
+  visszarúgás már van; a töltési animáció új munka.
+- [Terrain](../../src/game/terrain/Terrain.ts): RenderTexture-látvány, felszíni él,
+  három mélységi rétegvonal és perzselés már működik. A rombolás `erase` rajzolással,
+  az ütközés külön pixelmaszkkal történik; ez még nem rétegzett anyagshader.
+- [ParticleSystem](../../src/game/systems/particles.ts) és
+  [FxRenderer](../../src/game/engine/FxRenderer.ts): robbanás, gyűrű, villanás, szikra,
+  füst és törmelék, újrahasznosított sprite-okkal. Új VFX-rendszer helyett ezt érdemes bővíteni.
+
+### Megvalósíthatóság, kockázat és javasolt sorrend
+
+A becslés egy fejlesztő fókuszált munkanapjainak nagyságrendje, meglévő PixiJS 8-ra
+építve, implementációval és célzott teszteléssel. Nem vállalt határidő; új grafikák
+elkészítése, többkörös art direction és valós eszközparkon végzett mérés külön idő.
+
+| Sorrend / azonosító | Feladat és javasolt megoldás | Megvalósíthatóság / kockázat | Ráfordítás |
+| --- | --- | --- | --- |
+| 0 / SP0 | Sziluettpróba tényleges játékméretben, pivotok és semleges/accent/emissive rétegek szerződése; teljesítmény-alapmérés. | Magas; alacsony technikai, közepes vizuális kockázat: a kis tankon a részletek elveszhetnek. | 1–2 nap |
+| 1 / SP1 | Szögletes, sci-fi ostromplatform-test és külön löveg; optika, páncélpanelek, energiacsatornák. A meglévő sprite-összeállítás célzott bővítése. | Magas; közepes kockázat: elcsúszó talppont, lövegforgás, sziluett/hitbox eltérés. | 2–4 nap + assetkészítés |
+| 2 / SP2 | Semleges alapanyag + külön színezhető csapatjelzés és visszafogott additív emissive sprite. Bloom csak opcionális, mérés után. | Magas; alacsony–közepes kockázat: túlexponálás, kék/arany háttérbe olvadás, extra draw call. | 1–2 nap |
+| 3 / SP3 | Meglévő recoil finomítása az új csőhöz; rövid energia-/töltésjelzés a lövési és körállapotokból. | Magas; közepes kockázat: az animált csővég és a fizikai lövedék indulása eltérhet. | 1–3 nap |
+| 4 / SP4 | Becsapódási VFX finomítása: talajpor/perzselés, pajzsvillanás, páncélszikra és HP-találat eltérő visszajelzése. | Magas; közepes kockázat: fedés, villódzás, részecskecsúcs és több védelmi réteget érintő találat. | 2–4 nap |
+| 5 / SP5 | Rétegzett terrain anyagshader prototípus, majd csak sikeres mérés után integráció: mélységi anyagsávok, finom zaj és kráterperem. | Feltételesen magas; a legkockázatosabb: rombolási alpha, textúrakoordináták, bloom/filter sorrend és mobil GPU-költség. | 2–3 nap próba + 3–5 nap integráció |
+
+Összesen kb. **12–23 fejlesztői nap**, külön assetkészítési és jóváhagyási idő nélkül.
+SP5 megállítható a prototípus után; a teljes csomag nem egyetlen nagy átírásként készül.
+
+### Függőségek és döntési kapuk
+
+- **SP0 → SP1 → SP2 és SP3:** a külön színezés és animáció az elfogadott réteg- és
+  pivotkiosztásra épül. SP2 és SP3 ezután egymástól függetlenül is elkészíthető.
+- **SP4 az SP0 effektkeretére épül**, nem függ SP3-tól vagy shadertől. A javasolt
+  későbbi helye vizuális prioritás, nem technikai előfeltétel.
+- **SP5 az SP0 alapmérésére épül**, SP1–SP4 nélkül is prototipizálható, de
+  integrációját az összes bekapcsolt effekt mellett is mérni kell. Az utolsó hely
+  oka a nagyobb kockázat és a már meglévő, használható tereplátvány.
+- SP0 lezárásához desktop és keskeny mobil nézetben elfogadott sziluett kell.
+  Nem növeljük meg automatikusan a tank fizikai méretét a grafika kedvéért.
+- SP3-ban a „töltés” **csak vizuális visszajelzés**: nem új cooldown, nem power-töltés,
+  és nem késlelteti a `launchShot` hívást. A lövés időpontjában a cső iránya és a
+  torkolattűz a fizikai `barrelTip` ponthoz igazodjon; későbbi recoil csak dekoráció.
+  Valódi újratöltési mechanika külön gameplay-/online protokoll-döntés lenne.
+- SP5 első próbája a meglévő terrain textúra alfáját megőrző megjelenítési passz legyen.
+  A shader soha nem helyettesíti a fizikai maszkot. Ha a sprite UV-ja nem ad stabil
+  világkoordinátát a filter alatt, explicit koordinátaátadás kell; képernyőhöz tapadó
+  zaj vagy rétegminta nem elfogadható.
+- Low-quality/reduced-motion változatot a munkacsomag részeként kell bekötni.
+  Statikus team-color és anyagréteg maradhat; a pulzálás, töltési mozgás és erős
+  villanás csökkenjen vagy maradjon el. Mobilon a drága filter helyett emissive sprite,
+  illetve a jelenlegi statikus terrain maradjon.
+
+### Ellenőrzés és elfogadási feltételek
+
+1. **Fizika változatlan:** a [Tank](../../src/game/entities/tank.ts) ütközési mérete,
+   talppontja, `barrelTip` képlete, szöge és a lövés szimulációja nem változik.
+   Assetcsere után 0°, 45°, 90°, 135°, 180° mellett ellenőrizni kell a cső/pivot,
+   lövedékindulás és visszarúgás együttállását.
+2. **Teljes folyamat:** offline kétjátékos, AI és kampány, valamint online két kliens
+   ugyanazon eseménysorral. Animációhossz vagy frame rate nem módosíthat sebzést,
+   mozgást, tüzelési jogosultságot, XP-t vagy kampányteljesítést.
+3. **VFX szemantika:** külön teszteset pajzs-, páncél-, HP-, talajtalálatra és egyetlen
+   robbanással több védelmi réteg áttörésére. A prioritás az aktuális sebzésfeloldásból
+   származzon; dekoratív véletlen ne befolyásolja a játék seedelt állapotát.
+4. **Terrain regresszió:** ismételt kráterezés, leváló talaj, új pálya és viewportváltás.
+   A lyuk maradjon átlátszó, ne térjen vissza anyag/glow a törölt részekre; a látvány
+   és a collision maradjon összhangban. Shader kikapcsolásakor a jelenlegi út működjön.
+5. **Mérési kapu (javasolt, még nem mért):** azonos seed és rögzített lövéssorozat,
+   bemelegítés után legalább 60 másodperc a kiválasztott desktopon és valódi mobilon.
+   Az új effektek p95 frame time-ja legfeljebb 10%-kal romolhat az alaphoz képest;
+   a high profil célja desktopon 16,7 ms, a low profilé mobilon 33,3 ms.
+   Ha az alap sem teljesíti az abszolút célt, előbb külön teljesítménydöntés szükséges.
+6. **Erőforráskeret:** SP0-ban rögzíteni kell a részecske- és poollimit értékét,
+   túllépéskor a kevésbé fontos dekoráció kihagyásának szabályát. Húsz újraindítás/
+   menüváltás után ne nőjön folyamatosan az élő sprite-, ticker- vagy GPU-erőforrásszám.
+   Csak a saját erőforrás szabadítható fel; más aktív Pixi canvas nem sérülhet.
+7. **Olvashatóság:** cyan/gold csapatjelzés sötét és világos terepen, glow nélkül is.
+   A két egység ne csak színnel legyen azonosítható; a meglévő P1/P2 HUD-jelölés marad.
+   Ellenőrzés 1440×900, 390×844 és 900×400 nézetben, reduced-motion mellett is.
+
+**Ajánlás:** először SP0–SP3 adja meg az új egységidentitást. Utána SP4 javítsa a
+harci visszajelzést; SP5 csak mérhető előny és megfelelő fallback mellett kerüljön be.
+Ehhez nem indokolt új animációs könyvtár, skeleton-rendszer, általános egységframework
+vagy második harctéri Pixi alkalmazás bevezetése.
+
+## 7. További javasolt lépések
 
 A főmenü alapvető sci-fi megjelenése, a meglévő nyelv-/hangbeállítások külön nézete és az
 aktív HUD újraelrendezése elkészült. A fizika és a billentyűzet-kiosztás változatlan maradt.

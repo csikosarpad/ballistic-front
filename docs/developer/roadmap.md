@@ -69,8 +69,9 @@ páncélzatú vagy akár más működési tartományú platformok is tartozhatna
   `Tank` entitás- és fájlnevektől; a mechanikus átnevezés külön, későbbi feladat.
 - Az első vizuális változat ne módosítsa a ballisztikát, a terepütközést, a mozgást, a
   mentéseket vagy a multiplayer protokollt.
-- A gameplay-képernyő és a jelenlegi tankassetek Siege Protocol-világba illeszthetőségét
-  külön vizsgálat rögzítse, mielőtt új egységasset vagy animáció készül.
+- A gameplay-képernyő és a jelenlegi tankassetek első technikai felmérését a
+  [Siege Platform fejlesztési ütem](./game-redesign.md#6-siege-platform-fejlesztési-ütem) rögzíti;
+  új asset készítése előtt a sziluettet és a rétegszerződést jóvá kell hagyni.
 - A csatolt terveken szereplő **Siege Platform A-1 / B-2** koncepció vizuális referencia,
   nem végleges modell- vagy osztálynév-döntés.
 
@@ -215,7 +216,23 @@ azok külön, későbbi terepmechanikák.
 - [x] Neon, sci-fi katonai HUD és additív vizuális effektek első rétege
 - [x] Rétegezett csillagos ég-, hegy-, atmoszféra- és terrain-megjelenítés
 - [x] OGG hangassetek bevezetése és webes betöltésre optimalizálása
-- [ ] Siege Platform vizuális megvalósíthatósági vizsgálata: gameplay-képernyő, egységsziluett, SVG-rétegek és animációk; játékmeneti és multiplayer-viselkedés változatlanul hagyásával
+- [x] Siege Platform első kódbázis-alapú megvalósíthatósági és kockázati felmérése:
+  [részletes terv](./game-redesign.md#6-siege-platform-fejlesztési-ütem).
+  Vizuális prototípus, teljesítménymérés és art direction-jóváhagyás még nincs.
+- [ ] SP0 – Sziluett és technikai rétegszerződés jóváhagyása a jelenlegi egyetlen játszható egységtípushoz (tank).
+- [ ] SP1 – Tank redesign sci-fi ostromplatformmá, a fizikai méret és lövegkötés megtartásával.
+- [ ] SP2 – Külön team-color és emissive/glow réteg; semleges páncélzat, olcsó mobil megjelenítés.
+- [ ] SP3 – Meglévő lövegvisszarúgás finomítása és vizuális töltési animáció; új tüzelési késleltetés nélkül.
+- [ ] SP4 – Becsapódási VFX továbbfejlesztése a meglévő részecskerendszeren: talaj/pajzs/páncél/HP szerinti visszajelzés.
+- [ ] SP5 – Rétegzett terrain shader prototípus, rombolás- és bloom-kompatibilitási, valamint teljesítménykapuval.
+
+Az SP-sorrend a vizuális munkacsomagon belüli ajánlás, nem írja felül a gameplay-prioritást.
+Függőségek, becslések és ellenőrzési kapuk a
+[részletes tervben](./game-redesign.md#6-siege-platform-fejlesztési-ütem).
+A meglévő recoil és becsapódási effektek nem újonnan megvalósítandó alapfunkciók;
+itt azok továbbfejlesztése szerepel. Új egységosztály nem része ennek az ütemnek.
+
+**További M7 feladatok**
 - [x] Mobil játszhatóság: fekvő tájolás ajánlása, érintésbarát HUD és célzás (±1°/±10 gombok, nyomva tartás, húzásos célzás); részletes felmérés: [játék redesign](./game-redesign.md), „Mobil játszhatóság felmérése”. Valós eszközös próba hátravan.
 - [ ] Neon, additív blend (erőtér-villanás, pajzsbuborék)
 - [x] Parallax világűr-háttér: csillagköd-kép (`src/game/assets/backgrounds/siege-sky.jpg`, 126 KB), lassan sodródó köd- és csillagréteg, három halványodó hegyréteg légköri homállyal; reduced-motion esetén mozdulatlan
