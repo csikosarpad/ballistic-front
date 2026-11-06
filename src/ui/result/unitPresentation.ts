@@ -1,16 +1,13 @@
 import type { UnitPresentation } from "./result.types";
-import tankBodyUrl from "@/game/assets/tank-body-detailed.svg?url";
-import tankBarrelUrl from "@/game/assets/tank-barrel-detailed.svg?url";
-import tankDetailsUrl from "@/game/assets/tank-details.svg?url";
-import tankAccentUrl from "@/game/assets/tank-accent.svg?url";
+import tankBodyUrl from "@/game/assets/tank-body.svg?url";
+import tankBarrelUrl from "@/game/assets/tank-barrel.svg?url";
 
 const GROUND_PRESENTATION: UnitPresentation = {
   domain: "ground",
   displayName: "Tank",
   silhouetteAsset: tankBodyUrl,
   secondaryAsset: tankBarrelUrl,
-  detailAsset: tankDetailsUrl,
-  accentAsset: tankAccentUrl,
+  illustrationLayout: "body-barrel",
   primaryColor: 0x24d8ff,
   secondaryColor: 0x087fa7,
   iconSet: "ground-combat",

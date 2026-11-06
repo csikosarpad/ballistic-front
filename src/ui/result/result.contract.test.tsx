@@ -5,6 +5,8 @@ import { Shop } from "../Shop";
 import { UnitPanel } from "./UnitPanel";
 import { getUnitPresentation } from "./unitPresentation";
 import { getUpgradePresentation } from "./upgradePresentation";
+import tankBodyUrl from "@/game/assets/tank-body.svg?url";
+import tankBarrelUrl from "@/game/assets/tank-barrel.svg?url";
 
 describe("result presentation contract", () => {
   it("ground theme tank presentationt ad a P1/P2 accentet is megtartja", () => {
@@ -17,10 +19,11 @@ describe("result presentation contract", () => {
       iconSet: "ground-combat",
       accent: "cyan",
     });
-    expect(p1.silhouetteAsset).toBeTruthy();
-    expect(p1.secondaryAsset).toBeTruthy();
-    expect(p1.detailAsset).toBeTruthy();
-    expect(p1.accentAsset).toBeTruthy();
+    expect(p1.silhouetteAsset).toBe(tankBodyUrl);
+    expect(p1.secondaryAsset).toBe(tankBarrelUrl);
+    expect(p1.illustrationLayout).toBe("body-barrel");
+    expect(p1.detailAsset).toBeUndefined();
+    expect(p1.accentAsset).toBeUndefined();
     expect(p2).toMatchObject({
       domain: "ground",
       primaryColor: 0xffc52e,
@@ -98,5 +101,14 @@ describe("UnitPanel and Shop presentation contract", () => {
     expect(screen.getByRole("button", { name: "P2: Páncél" }).closest(".upgrade-row")).toHaveClass("is-unaffordable");
     expect(document.querySelector(".unit-illustration.facing-right")).toBeInTheDocument();
     expect(document.querySelector(".unit-illustration.facing-left")).toBeInTheDocument();
+    const illustrations = document.querySelectorAll(".unit-illustration-platform");
+    expect(illustrations).toHaveLength(2);
+    illustrations.forEach((illustration) => {
+      expect(illustration.querySelectorAll("image")).toHaveLength(2);
+      expect(illustration.querySelector("image")?.getAttribute("href")).toBe(tankBarrelUrl);
+      expect(illustration.querySelector("image[filter]")?.getAttribute("href")).toBe(tankBodyUrl);
+    });
+    const filters = [...document.querySelectorAll(".unit-illustration-platform filter")];
+    expect(new Set(filters.map((filter) => filter.id)).size).toBe(2);
   });
 });

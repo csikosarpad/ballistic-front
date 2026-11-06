@@ -593,7 +593,11 @@ szegmentált járószerkezetet, páncélpaneleket és sínágyús löveget kapot
 méret 24×12 / 16×4, a sprite anchorok, a teljes test játékosszín-tintje és a fizika
 változatlan. Ez SP1 vizuális próba, nem a teljes munkacsomag elfogadása: külön
 team-color/glow réteg, új töltési animáció, terrain shader és VFX még nem készült.
-Az eredményképernyő illusztrációja nem változott.
+Az eredményképernyő következő vizuális próbája ugyanezt a két SVG-t használja:
+`body-barrel` illustration layout, 20°-os löveg, egymás felé forduló P1/P2 és
+SVG-s szorzó színezés a presentation cyan/arany színével. A korábbi részlet- és
+accent-assetek nincsenek bekötve ehhez az összeállításhoz; a generikus réteges
+megjelenítés más presentationök számára megmarad.
 
 A becslés egy fejlesztő fókuszált munkanapjainak nagyságrendje, meglévő PixiJS 8-ra
 építve, implementációval és célzott teszteléssel. Nem vállalt határidő; új grafikák
