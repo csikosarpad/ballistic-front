@@ -6,7 +6,7 @@ import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { useAudioSettings } from "@/game/state/audioSettings";
 import { useCampaignStore } from "@/game/state/campaignStore";
 import { gameRef } from "./gameRef";
-import { MainMenu } from "./MainMenu";
+import { MainMenu } from "./main-menu/MainMenu";
 import { ResultScreen } from "./ResultScreen";
 
 const mockGame = (overrides: Partial<Record<keyof Game, unknown>>) => {
@@ -52,6 +52,19 @@ describe("MainMenu", () => {
     expect(screen.getByRole("complementary", { name: "Köszönet" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Online játék" }));
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+  });
+
+  it("a beállítások megmaradnak a panelek közötti váltáskor", () => {
+    render(<MainMenu />);
+    fireEvent.click(screen.getByRole("button", { name: "Beállítások" }));
+    fireEvent.change(screen.getByRole("slider", { name: "Játék hangereje" }), { target: { value: "80" } });
+    fireEvent.click(screen.getByRole("button", { name: "Vissza" }));
+    fireEvent.click(screen.getByRole("button", { name: "Online játék" }));
+    fireEvent.click(screen.getByRole("button", { name: "Vissza" }));
+    expect(screen.getByRole("complementary", { name: "Köszönet" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Beállítások" }));
+    expect(screen.getByRole("slider", { name: "Játék hangereje" })).toHaveValue("80");
+    expect(screen.getByRole("slider", { name: "Játék hangereje" })).toHaveAttribute("data-volume-high", "true");
   });
 
   it("a beállításokból módosítható és visszajelzett a hang állapota", () => {

@@ -5,7 +5,7 @@ import { useCampaignStore } from "@/game/state/campaignStore";
 import { useAiSettings } from "@/game/state/aiSettings";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { CampaignMap } from "./CampaignMap";
-import { MainMenu } from "./MainMenu";
+import { MainMenu } from "./main-menu/MainMenu";
 import { ResultScreen } from "./ResultScreen";
 import { Hud } from "./Hud";
 import { gameRef } from "./gameRef";

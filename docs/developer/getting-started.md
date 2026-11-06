@@ -47,6 +47,7 @@ server/                 # PHP/MySQL backend, nem része a Vite buildnek
 src/
   main.tsx, App.tsx
   ui/                   # React HUD, menü, lobby, bolt és ResultScreen; Pixi UI dekoráció
+    main-menu/          # főmenü-vezérlő, kezdőpanel, beállítások, lobby, nyelvváltó és stáblista
   i18n/                 # magyar forráskatalógus, angol/német fordítások, t() / useT()
   test/                 # Vitest setup
   game/
@@ -92,6 +93,15 @@ Külső nyelvfájl-betöltés és admin felület még nincs; tervek a [roadmapbe
 
 ## CSS és Tailwind
 
+A [MainMenu](../../src/ui/main-menu/MainMenu.tsx) a `home | settings | lobby`
+helyi állapottal vált a kezdőpanel, a beállítások és a lobby között. A
+[MainMenuHome](../../src/ui/main-menu/MainMenuHome.tsx) kezeli a kezdőpanel akcióit,
+a [MainMenuSettings](../../src/ui/main-menu/MainMenuSettings.tsx) a beállítások
+store-kapcsolatait; a lobby továbbra is saját komponens. Ezek, a nyelvváltó és
+a stáblista a `ui/main-menu/` mappába tartoznak. A közös `gameRef` és tájoláskezelés
+a `ui/` gyökerében marad. A menü CSS-e egyelőre a globális `ui.css` része;
+a komponensstruktúra átrendezése nem változtatja meg a CSS betöltési sorrendjét.
+
 A Tailwind CSS 4 a `@tailwindcss/vite` pluginnal működik. A
 [ui.css](../../src/ui/ui.css) a Tailwind témáját és utility osztályait importálja;
 a `src/` alatt megadott teljes classneveket automatikusan felismeri.
@@ -122,7 +132,7 @@ A hangerőcsúszka saját stílusa a `ui.css` `.audio-volume-control` szabályai
 A `--volume-track-height` a sín vastagsága, a `--volume-thumb-size` a fogantyú mérete;
 az input 32 px magas kezelési területe ezektől független. A WebKit és Firefox
 pszeudoelemei külön szabályokat kapnak, közös CSS-változókkal.
-A `MainMenu` a hangerőből számítja a `--volume-whiteness` értékét: a sín 0%-nál
+A `MainMenuSettings` a hangerőből számítja a `--volume-whiteness` értékét: a sín 0%-nál
 semleges, 80%-ra fehérré válik. A `data-volume-high` 80%-tól fehér ragyogást kapcsol be.
 A projekt sima CSS-t használ; Sass `@mixin` / `@include` nincs beállítva.
 
@@ -165,7 +175,7 @@ nyilvános repóba vagy publikus buildbe kerülés előtt a feltételek ellenőr
 A `plans/` további próbaszámai (energysound „Dark Cyberpunk Synthwave”, Jamii
 „Warhammer Background Music”) nem részei a futásidejű zenekatalógusnak;
 forrásaik a [plans/license.txt](../../plans/license.txt) fájlban vannak.
-A főmenü [gördülő stáblistája](../../src/ui/MenuCredits.tsx) a beépített zene,
+A főmenü [gördülő stáblistája](../../src/ui/main-menu/MenuCredits.tsx) a beépített zene,
 a Kenney képi effektek, a Freesound hangforrás és a betűtípusok ismert adatait mutatja.
 A nem használt próbaanyagok és az ismeretlen szerzőjű háttérképek nincsenek felsorolva;
 a stáblista nem helyettesíti a hiányzó fájlonkénti forrás- és licencellenőrzést.

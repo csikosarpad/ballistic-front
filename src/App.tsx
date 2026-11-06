@@ -3,7 +3,7 @@ import { useGameStore } from "@/game/state/gameStore";
 import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { GameCanvas } from "@/ui/GameCanvas";
 import { Hud } from "@/ui/Hud";
-import { MainMenu } from "@/ui/MainMenu";
+import { MainMenu } from "@/ui/main-menu/MainMenu";
 import { ResultScreen } from "@/ui/ResultScreen";
 import { CampaignMap } from "@/ui/CampaignMap";
 
