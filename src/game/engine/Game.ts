@@ -127,6 +127,7 @@ export class Game {
   private sector: Sector = TRAINING_SECTOR;
   private matchActive = true;
   private matchProfiles: Record<string, Profile> | null = null;
+  private profilesBeforeMatch: Record<string, Profile> | null = null;
   private lastMultiplayerRevision = 0;
   private pendingMultiplayerEvents: RoomEvent[] = [];
   private pendingMultiplayerStart: { setup: MatchSetup; profiles: Record<string, Profile>; revision: number } | null =
@@ -148,7 +149,7 @@ export class Game {
   async init(host: HTMLElement): Promise<void> {
     await this.app.init({ resizeTo: host, background: this.theme.background, antialias: true });
     // Ha az init közben unmountoltak (StrictMode), azonnal takarítunk.
-    if (this.destroyed) return this.app.destroy(true);
+    if (this.destroyed) return this.app.destroy({ removeView: true });
     host.appendChild(this.app.canvas);
     this.setupDragAim(this.app.canvas);
 
@@ -270,6 +271,12 @@ export class Game {
   /** Új meccs: terep újragenerálása, tankok újraszórása. */
   restart(setup?: MatchSetup): void {
     if (!this.terrain) return;
+    this.discardMatchXp();
+    if (!this.multiplayer) {
+      this.profilesBeforeMatch = Object.fromEntries(
+        Object.entries(this.profiles).map(([id, profile]) => [id, { ...profile, levels: { ...profile.levels } }]),
+      );
+    }
     useCommandStore.getState().clear();
     window.clearTimeout(this.victoryTimer);
     this.clearAiTimers();
@@ -317,6 +324,7 @@ export class Game {
     }
     this.pendingMultiplayerStart = null;
     this.multiplayer = true;
+    this.profilesBeforeMatch = null;
     this.matchProfiles = profiles;
     this.profiles = Object.fromEntries(
       Object.entries(profiles).map(([id, profile]) => [id, { xp: profile.xp, levels: { ...profile.levels } }]),
@@ -359,6 +367,7 @@ export class Game {
   }
 
   leaveBattle(): void {
+    this.discardMatchXp();
     this.matchActive = false;
     this.clearAiTimers();
     window.clearTimeout(this.victoryTimer);
@@ -370,7 +379,14 @@ export class Game {
     this.acc = 0;
     this.dragPointerId = null;
     useCommandStore.getState().clear();
-    useGameStore.getState().sync({ canControl: false });
+    useGameStore.getState().sync({ canControl: false, profiles: this.profiles, matchStats: this.matchStats });
+  }
+
+  private discardMatchXp(): void {
+    if (!this.profilesBeforeMatch) return;
+    this.profiles = this.profilesBeforeMatch;
+    this.profilesBeforeMatch = null;
+    this.matchStats = newMatchStats(Object.keys(this.profiles));
   }
 
   private statsFor(id: string) {
@@ -398,11 +414,12 @@ export class Game {
   private award(id: string, xp: number): void {
     this.profiles[id] = awardXp(this.profiles[id]!, xp);
     this.matchStats = recordXp(this.matchStats, id, xp);
-    saveProfiles(this.profiles);
+    if (this.multiplayer) saveProfiles(this.profiles);
   }
 
   /** Minden játékos XP-jének és fejlesztéseinek törlése. */
   resetProgress(): void {
+    this.profilesBeforeMatch = null;
     this.profiles = Object.fromEntries(Object.keys(this.profiles).map((id) => [id, newProfile()]));
     saveProfiles(this.profiles);
     useCampaignStore.getState().reset();
@@ -541,9 +558,12 @@ export class Game {
     const target = this.tanks.find((t) => t.id === "P1");
     if (!this.terrain || !this.aiBrain || !target) return;
     const wind = useGameStore.getState().wind;
-    const smartAim = this.previewAllowance.canUse("P2") && Math.random() < AI_PREVIEW_CHANCE;
-    if (smartAim) this.activatePreview();
-    const plan = this.aiBrain.decide(this.current, target, this.terrain.mask, wind, DEFAULT_WORLD.gravity, smartAim);
+    const trySmartAim = this.previewAllowance.canUse("P2") && Math.random() < AI_PREVIEW_CHANCE;
+    const precise = trySmartAim
+      ? this.aiBrain.decide(this.current, target, this.terrain.mask, wind, DEFAULT_WORLD.gravity, true)
+      : null;
+    if (precise) this.activatePreview();
+    const plan = precise ?? this.aiBrain.decide(this.current, target, this.terrain.mask, wind, DEFAULT_WORLD.gravity);
     const angle = Math.round(plan?.angle ?? 135);
     const power = Math.round(plan?.power ?? this.current.stats.maxPower * 0.6);
     useGameStore.getState().setAim(angle, power);
@@ -600,13 +620,14 @@ export class Game {
       })),
       profiles: { ...this.profiles },
       matchStats: this.matchStats,
-      previewAvailable: this.turns.phase === "aiming" && this.previewAllowance.canUse(this.turns.current),
+      previewAvailable:
+        this.turns.phase === "aiming" && !this.previewActive && this.previewAllowance.canUse(this.turns.current),
       previewRemaining: this.previewAllowance.remainingFor(this.turns.current),
       previewActive: this.previewActive,
     });
   }
 
-  /** Meccsenként és játékosonként egyszer: az aktuális kör végéig mutatja a várható röppályát. */
+  /** Aktiválásonként egy töltetért az aktuális kör végéig mutatja a várható röppályát. */
   requestPreview(): void {
     if (this.turns.inputLocked || !this.canControlCurrentTurn()) return;
     this.activatePreview();
@@ -614,7 +635,7 @@ export class Game {
 
   /** Bekapcsolja a röppálya-előnézetet. */
   private activatePreview(): void {
-    if (!this.previewAllowance.use(this.turns.current)) return;
+    if (this.previewActive || !this.previewAllowance.use(this.turns.current)) return;
     this.previewActive = true;
     this.previewLocked = false;
     useCommandStore.getState().announce("command.smartAim", undefined, "info", this.turns.current);
@@ -825,6 +846,10 @@ export class Game {
         this.finishAiMatch();
         this.announceVictory(this.turns.winner);
       }
+      if (!this.multiplayer) {
+        saveProfiles(this.profiles);
+        this.profilesBeforeMatch = null;
+      }
       const onlineRoom = useMultiplayerStore.getState();
       if (this.multiplayer && onlineRoom.credentials?.playerId === "P1" && onlineRoom.session?.status === "playing") {
         void useMultiplayerStore.getState().publish("match_finished", { winner: this.turns.winner });
@@ -1009,6 +1034,6 @@ export class Game {
     this.unsubscribeAim = null;
     this.pendingMultiplayerEvents = [];
     this.audio?.destroy();
-    if (this.app.renderer) this.app.destroy(true, { children: true });
+    if (this.app.renderer) this.app.destroy({ removeView: true }, { children: true });
   }
 }

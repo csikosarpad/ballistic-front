@@ -71,12 +71,12 @@ describe("MainMenu", () => {
     render(<MainMenu />);
     fireEvent.click(screen.getByRole("button", { name: "Beállítások" }));
 
-    const soundButton = screen.getByRole("button", { name: "Hang: be (M)" });
+    const soundButton = screen.getByRole("button", { name: "Kommunikáció: aktív (M)" });
     expect(soundButton).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(soundButton);
 
     expect(useGameStore.getState().muted).toBe(true);
-    expect(screen.getByRole("button", { name: "Hang: ki (M)" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "Kommunikáció: némítva (M)" })).toHaveAttribute("aria-pressed", "false");
   });
 
   it("az online játék gomb megnyitja a szobalobbyt", () => {
@@ -96,10 +96,10 @@ describe("MainMenu", () => {
     expect(screen.getByText("35%")).toBeInTheDocument();
     expect(useAudioSettings.getState().volume).toBe(0.35);
     expect(JSON.parse(localStorage.getItem("ballistic-front:audio-settings")!).volume).toBe(0.35);
-    fireEvent.click(screen.getByRole("button", { name: "Hang: be (M)" }));
+    fireEvent.click(screen.getByRole("button", { name: "Kommunikáció: aktív (M)" }));
     fireEvent.change(slider, { target: { value: "0" } });
     expect(useGameStore.getState().muted).toBe(true);
-    fireEvent.click(screen.getByRole("button", { name: "Hang: ki (M)" }));
+    fireEvent.click(screen.getByRole("button", { name: "Kommunikáció: némítva (M)" }));
     expect(slider).toHaveValue("0");
     expect(useAudioSettings.getState().volume).toBe(0);
   });

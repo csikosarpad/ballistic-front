@@ -6,17 +6,19 @@ import { useMultiplayerStore } from "@/game/state/multiplayerStore";
 import { useT } from "@/i18n";
 import { gameRef } from "./gameRef";
 import { requestLandscape } from "./orientation";
+import { CampaignStarfieldCanvas } from "./CampaignStarfieldCanvas";
+import { CampaignSectorCard } from "./CampaignSectorCard";
 import "./CampaignMap.css";
 
 export function CampaignMap() {
   const t = useT();
   const { completedIds, selectedId, select, error, reset } = useCampaignStore();
   const [inspectedId, setInspectedId] = useState<SectorId>(selectedId);
-  const sector = sectorById(inspectedId);
-  const status = sectorStatus(inspectedId, completedIds);
   const setScreen = useGameStore((s) => s.setScreen);
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState(false);
+  const [warpSequence, setWarpSequence] = useState(0);
+  const [departingId, setDepartingId] = useState<SectorId | null>(null);
   const start = () => {
     if (!gameRef.current) {
       setStartError(true);
@@ -52,6 +54,7 @@ export function CampaignMap() {
         )}
         <div className="campaign-layout">
           <section className="campaign-star-map" aria-label={t("campaign.title")}>
+            <CampaignStarfieldCanvas warpSequence={warpSequence} />
             <svg className="campaign-orbits" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               {SECTORS.flatMap((target) =>
                 target.prerequisites.map((id) => {
@@ -80,6 +83,8 @@ export function CampaignMap() {
                   aria-pressed={selected}
                   aria-label={`${entry.code}, ${entry.name}, ${t(`campaign.${state}`)}`}
                   onClick={() => {
+                    setDepartingId(inspectedId);
+                    setWarpSequence((sequence) => sequence + 1);
                     setInspectedId(entry.id);
                     setStartError(false);
                     if (state !== "locked") select(entry.id);
@@ -94,42 +99,15 @@ export function CampaignMap() {
               );
             })}
           </section>
-          <section className="campaign-sector-card" aria-labelledby="campaign-sector-name">
-            <div className="sector-code">{sector.code}</div>
-            <h2 id="campaign-sector-name">{sector.name}</h2>
-            <p>{t(sector.briefing)}</p>
-            <dl>
-              <div>
-                <dt>{t("campaign.status")}</dt>
-                <dd>{t(`campaign.${status}`)}</dd>
-              </div>
-              {sector.prerequisites.length > 0 && (
-                <div>
-                  <dt>{t("campaign.requires")}</dt>
-                  <dd>{sector.prerequisites.map((id) => sectorById(id).name).join(` ${t("campaign.or")} `)}</dd>
-                </div>
-              )}
-              <div>
-                <dt>{t("menu.opponent")}</dt>
-                <dd>{t("campaign.opponent")}</dd>
-              </div>
-              <div>
-                <dt>{t("campaign.rules")}</dt>
-                <dd>{t("campaign.baseRules")}</dd>
-              </div>
-              <div>
-                <dt>{t("campaign.rewards")}</dt>
-                <dd>{t("campaign.baseRewards")}</dd>
-              </div>
-            </dl>
-            <button
-              className="btn"
-              disabled={starting || status === "locked" || error === "campaign.loadError"}
-              onClick={start}
-            >
-              {t(status === "completed" ? "campaign.replay" : "campaign.deploy")}
-            </button>
-          </section>
+          <CampaignSectorCard
+            inspectedId={inspectedId}
+            completedIds={completedIds}
+            starting={starting}
+            loadError={error === "campaign.loadError"}
+            warpSequence={warpSequence}
+            departingId={departingId}
+            onStart={start}
+          />
         </div>
         {error && (
           <p className="lobby-error" role="alert">

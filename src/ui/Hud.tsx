@@ -12,6 +12,7 @@ import { gameRef } from "./gameRef";
 import { RepeatButton } from "./RepeatButton";
 import { CommandConsole } from "./CommandConsole";
 import { WindIndicator } from "./WindIndicator";
+import { BattleExitDialog } from "./BattleExitDialog";
 
 const toCss = (color?: number) => (color === undefined ? "#ffffff" : `#${color.toString(16).padStart(6, "0")}`);
 
@@ -51,10 +52,17 @@ export function Hud() {
   const soundState = muted ? t("hud.soundOff") : t("hud.soundOn");
   const soundLabel = t(touch ? "hud.soundTouch" : "hud.sound", { state: soundState });
   const [hintDismissed, setHintDismissed] = useState(false);
+  const [exitDestination, setExitDestination] = useState<"menu" | "campaignMap" | null>(null);
 
   // Bal/jobb: mozgás, Ctrl+bal/jobb: szög (Shift: x5), fel/le: erő (Shift: x5), szóköz: tűz.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (exitDestination) return;
+      if (e.key === "Escape" && !online && !e.repeat) {
+        e.preventDefault();
+        setExitDestination("menu");
+        return;
+      }
       const { phase, canControl, nudgePower, nudgeAngle } = useGameStore.getState();
       if (e.key === "m" || e.key === "M") {
         useGameStore.getState().toggleMuted();
@@ -94,7 +102,7 @@ export function Hud() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [exitDestination, online]);
 
   return (
     <div
@@ -233,7 +241,9 @@ export function Hud() {
             </div>
           </div>
         </div>
-        <div className={`hud-actions${matchMode === "campaign" ? " hud-campaign-actions" : ""}`}>
+        <div
+          className={`hud-actions${!online ? " hud-offline-actions" : ""}${!online && matchMode === "campaign" ? " hud-campaign-actions" : ""}`}
+        >
           <RepeatButton
             aria-label={t("hud.moveLeft")}
             title={t("hud.moveLeft")}
@@ -260,7 +270,7 @@ export function Hud() {
           </RepeatButton>
           <button
             aria-pressed={previewActive}
-            disabled={locked || !previewAvailable}
+            disabled={locked || previewActive || !previewAvailable}
             onClick={() => gameRef.current?.requestPreview()}
           >
             <span className="hud-action-icon" aria-hidden="true">
@@ -286,14 +296,23 @@ export function Hud() {
             </span>
             <span>{soundLabel}</span>
           </button>
-          {matchMode === "campaign" && (
+          {!online && (
+            <button
+              title={t("result.mainMenu")}
+              aria-label={t("result.mainMenu")}
+              onClick={() => setExitDestination("menu")}
+            >
+              <span className="hud-action-icon" aria-hidden="true">
+                ⌂
+              </span>
+              <span>{t("result.mainMenu")}</span>
+            </button>
+          )}
+          {!online && matchMode === "campaign" && (
             <button
               title={t("campaign.return")}
               onClick={() => {
-                if (window.confirm(t("campaign.abandonConfirm"))) {
-                  gameRef.current?.leaveBattle();
-                  useGameStore.getState().setScreen("campaignMap");
-                }
+                setExitDestination("campaignMap");
               }}
             >
               <span className="hud-action-icon" aria-hidden="true">
@@ -309,6 +328,16 @@ export function Hud() {
           <span>{t("hud.rotateHint")}</span>
           <button onClick={() => setHintDismissed(true)}>{t("hud.rotateHintDismiss")}</button>
         </div>
+      )}
+      {exitDestination && !online && (
+        <BattleExitDialog
+          onCancel={() => setExitDestination(null)}
+          onConfirm={() => {
+            gameRef.current?.leaveBattle();
+            useGameStore.getState().setScreen(exitDestination);
+            setExitDestination(null);
+          }}
+        />
       )}
     </div>
   );

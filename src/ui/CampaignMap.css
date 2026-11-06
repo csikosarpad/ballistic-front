@@ -52,6 +52,7 @@
 
 .campaign-star-map {
   position: relative;
+  isolation: isolate;
   overflow: hidden;
 
   background:
@@ -128,8 +129,38 @@
   }
 }
 
+.campaign-starfield {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.campaign-starfield canvas {
+  display: block;
+}
+
+.campaign-star-map:has(.campaign-starfield[data-ready="true"]) {
+  background:
+    radial-gradient(ellipse at 35% 45%, rgba(16, 78, 106, 0.22), transparent 75%),
+    linear-gradient(180deg, rgb(2, 8, 20), rgb(4, 16, 34));
+}
+
+.campaign-star-map:has(.campaign-starfield[data-ready="true"])::before,
+.campaign-star-map:has(.campaign-starfield[data-ready="true"])::after {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .campaign-star-map::after {
+    animation: none;
+  }
+}
+
 .campaign-orbits {
   position: absolute;
+  z-index: 1;
   width: 100%;
   height: 100%;
   fill: none;
@@ -150,6 +181,7 @@
 
 .campaign-node {
   position: absolute;
+  z-index: 2;
   transform: translate(-50%, -50%);
   width: 42%;
   max-width: 190px;
@@ -222,9 +254,70 @@
 }
 
 .campaign-sector-card {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  overflow: clip;
+  isolation: isolate;
   padding: 16px;
   border: 1px solid var(--bf-divider);
   background: rgba(7, 14, 33, 0.7);
+}
+
+.campaign-sector-content {
+  /* Overlapping panels reserve the tallest translated content at the current width. */
+  grid-area: 1 / 1;
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  visibility: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.campaign-sector-content.is-active {
+  visibility: visible;
+}
+
+.campaign-sector-content.is-arriving {
+  animation: campaign-sector-arrival 1.5s ease-out both;
+}
+
+.campaign-sector-content.is-departing {
+  visibility: visible;
+  pointer-events: none;
+  animation: campaign-sector-departure 0.525s ease-in both;
+}
+
+@keyframes campaign-sector-departure {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes campaign-sector-arrival {
+  0%,
+  35% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .campaign-sector-content.is-departing {
+    display: none;
+    animation: none;
+  }
+
+  .campaign-sector-content.is-arriving {
+    animation: none;
+  }
 }
 
 .campaign-sector-card h2 {
@@ -256,6 +349,7 @@
 
 .campaign-sector-card .btn {
   width: 100%;
+  margin-top: auto;
 }
 
 @media (max-width: 700px) {

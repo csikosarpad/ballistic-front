@@ -136,7 +136,45 @@ A `MainMenuSettings` a hangerőből számítja a `--volume-whiteness` értékét
 semleges, 80%-ra fehérré válik. A `data-volume-high` 80%-tól fehér ragyogást kapcsol be.
 A projekt sima CSS-t használ; Sass `@mixin` / `@include` nincs beállítva.
 
+## Csata megszakítása
+
+Offline csata és kampány közben a HUD főmenügombja natív, a játék témájához igazított
+megerősítő dialógust nyit. A kampánytérképre visszalépés ugyanezt használja.
+Offline csata közben az Escape is megnyitja a főmenübe lépés megerősítését, lövés vagy az AI köre alatt is.
+Az ablak alatt a HUD gyorsbillentyűi nem aktívak; újabb Escape vagy a folytatás gomb megszakítja a kilépést.
+A csata ettől nem szünetel. Offline az aktuális csata XP-je csak a befejezéskor kerül mentésre;
+félbehagyáskor a korábbi profil áll vissza, a korábbi XP és fejlesztések megmaradnak.
+Az online játékmenet kilépése és XP-kezelése nem változik.
+
+## AI célzástámogatás
+
+Az AI csak akkor fogyaszt célzástámogatási töltetet, ha a pontos tervező az aktuális
+terepen és szélben közvetlen találatot jelez. Ilyenkor a kiszámolt szöggel és erővel,
+célzási zaj nélkül lő. Ha nincs találó terv, a töltet megmarad, és a normál,
+tapasztalatfüggő célzás érvényesül.
+
 ## Skinezhetőség
+
+A kampánytérkép kísérleti [Pixi csillagmezője](../../src/ui/CampaignStarfieldCanvas.tsx)
+160 halvány csillagot mozgat lassú perspektivikus sodródással, legfeljebb 30 FPS-sel.
+A játék és a dekorációk külön Pixi alkalmazást használnak. Egyetlen canvas bezárásakor
+`app.destroy({ removeView: true }, { children: true })` szükséges: az első argumentumként
+adott `true` a globális erőforrásokat is felszabadítaná, sértve a többi aktív renderelőt.
+A szektorgombok kattintása 1,5 másodperces, 45-szörös sebességű térugrást indít;
+újabb kattintás újraindítja az időtartamot. Csökkentett mozgás mellett nincs gyorsítás.
+A [szektorkártya](../../src/ui/CampaignSectorCard.tsx) ugyanekkor 1,5 másodperces,
+fade-out/fade-in szövegváltást kap, forgatás és elmosás nélkül; csökkentett mozgás mellett azonnal vált.
+A korábbi tartalom az első 525 ms alatt elhalványul, ezután jelenik
+meg az új szöveg az 1,5 másodperces átmenet hátralévő részében. A távozó réteg
+nem interaktív, nem hozzáférhető és nem befolyásolja a kártya méretét.
+A kártyatartalmak azonos CSS-grid cellát foglalnak el: a legmagasabb aktuális
+fordítás határozza meg a helyigényt, így szektorváltáskor nincs magasságugrás.
+Csak a kiválasztott tartalom látható és hozzáférhető; a többi indítógomb tiltott.
+A szektorgombok és SVG-útvonalak továbbra is HTML/SVG elemek, a canvas nem fogad bemenetet.
+Csökkentett mozgás mellett statikus képet rajzol; rejtett dokumentumnál leáll a ticker.
+A térkép elhagyásakor a saját renderer és a figyelők felszabadulnak.
+A CSS-háttér az inicializálásig és inicializálási hiba esetén megmarad;
+a hiba a konzolon megjelenik. Új külső kép vagy függőség nem szükséges hozzá.
 
 A [ui.css](../../src/ui/ui.css) elején CSS változók vannak, például `--bf-panel`,
 `--bf-text`, `--bf-primary`. Egy változóalapú felülírás:

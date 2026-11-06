@@ -45,15 +45,34 @@ describe("i18n", () => {
 
   it("a nyelvváltás elmentődik, és átállítja a dokumentum nyelvét", () => {
     useLocaleStore.getState().setLocale("en");
-    expect(t("hud.fire")).toBe("Fire!");
+    expect(t("hud.fire")).toBe("FIRE!");
     expect(localStorage.getItem("ballistic-front:locale")).toBe("en");
     expect(document.documentElement.lang).toBe("en");
     useLocaleStore.getState().setLocale("hu");
-    expect(t("hud.fire")).toBe("Tűz!");
+    expect(t("hud.fire")).toBe("TÜZET!");
     expect(document.documentElement.lang).toBe("hu");
     useLocaleStore.getState().setLocale("de");
-    expect(t("hud.fire")).toBe("Feuer!");
+    expect(t("hud.fire")).toBe("FEUER!");
     expect(localStorage.getItem("ballistic-front:locale")).toBe("de");
     expect(document.documentElement.lang).toBe("de");
+  });
+
+  it.each([
+    {
+      locale: "en" as const,
+      sound: "Comms: muted (M)",
+      critical: "Critical hit! Unit P2 has sustained system damage",
+      victory: "Mission successful. Victor: P1",
+    },
+    {
+      locale: "de" as const,
+      sound: "Funk: stummgeschaltet (M)",
+      critical: "Kritischer Treffer! Systemschaden bei Einheit P2",
+      victory: "Einsatz erfolgreich. Sieger: P1",
+    },
+  ])("a katonai HUD és eseménynapló helyőrzői működnek: $locale", ({ locale, sound, critical, victory }) => {
+    expect(translate(locale, "hud.sound", { state: translate(locale, "hud.soundOff") })).toBe(sound);
+    expect(translate(locale, "command.critical", { id: "P2" })).toBe(critical);
+    expect(translate(locale, "command.victory", { name: "P1" })).toBe(victory);
   });
 });

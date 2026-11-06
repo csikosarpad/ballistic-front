@@ -15,6 +15,11 @@ vi.mock("./gameRef", () => ({
   gameRef: { current: { startCampaign: vi.fn(() => true), leaveBattle: vi.fn(), restart: vi.fn() } },
 }));
 vi.mock("./result/ResultDecorCanvas", () => ({ ResultDecorCanvas: () => null }));
+vi.mock("./CampaignStarfieldCanvas", () => ({
+  CampaignStarfieldCanvas: ({ warpSequence }: { warpSequence: number }) => (
+    <div data-testid="starfield" data-warp-sequence={warpSequence} />
+  ),
+}));
 
 describe("Campaign Map UI", () => {
   beforeEach(() => {
@@ -92,13 +97,13 @@ describe("Campaign Map UI", () => {
   it("allows abandoning a campaign battle only after confirmation", () => {
     useGameStore.setState({ screen: "playing", matchMode: "campaign" });
     render(<Hud />);
-    const confirm = vi.spyOn(window, "confirm").mockReturnValueOnce(false).mockReturnValueOnce(true);
     fireEvent.click(screen.getByRole("button", { name: "Vissza a térképre" }));
+    fireEvent.click(screen.getByRole("button", { name: "Harc folytatása" }));
     expect(useGameStore.getState().screen).toBe("playing");
     fireEvent.click(screen.getByRole("button", { name: "Vissza a térképre" }));
+    fireEvent.click(screen.getByRole("button", { name: "Bevetés megszakítása" }));
     expect(useGameStore.getState().screen).toBe("campaignMap");
     expect(useCampaignStore.getState().completedIds).toEqual([]);
-    confirm.mockRestore();
   });
 
   it("surfaces unsaved progress on the map", () => {
@@ -107,12 +112,50 @@ describe("Campaign Map UI", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("mentése sikertelen");
   });
 
+  it("triggers a new warp on every node click, including repeated and locked selections", () => {
+    render(<CampaignMap />);
+    const starfield = screen.getByTestId("starfield");
+    expect(starfield).toHaveAttribute("data-warp-sequence", "0");
+    fireEvent.click(screen.getByRole("button", { name: /SECTOR ALPHA-01,/ }));
+    expect(starfield).toHaveAttribute("data-warp-sequence", "1");
+    fireEvent.click(screen.getByRole("button", { name: /SECTOR ALPHA-01,/ }));
+    expect(starfield).toHaveAttribute("data-warp-sequence", "2");
+    fireEvent.click(screen.getByRole("button", { name: /SECTOR PRIME-00,/ }));
+    expect(starfield).toHaveAttribute("data-warp-sequence", "3");
+    expect(screen.getByRole("button", { name: "Művelet indítása" })).toBeDisabled();
+  });
+
   it("allows inspection but not launch of locked sectors", () => {
     render(<CampaignMap />);
     fireEvent.click(screen.getByRole("button", { name: /SECTOR PRIME-00,/ }));
     expect(screen.getByRole("heading", { name: "Capital Perimeter" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Művelet indítása" })).toBeDisabled();
     expect(useCampaignStore.getState().selectedId).toBe("alpha-01");
+  });
+
+  it("reserves all card layouts but exposes only the active one and restarts its arrival effect", () => {
+    const { container } = render(<CampaignMap />);
+    const cards = container.querySelectorAll(".campaign-sector-content");
+    expect(cards).toHaveLength(5);
+    expect(container.querySelector(".campaign-sector-content.is-arriving")).toBeNull();
+    const node = screen.getByRole("button", { name: /SECTOR PRIME-00,/ });
+    fireEvent.click(node);
+    const active = container.querySelector(".campaign-sector-content.is-active");
+    const departing = container.querySelector(".campaign-sector-content.is-departing");
+    expect(departing).toHaveTextContent("Training Grounds");
+    expect(departing).toHaveAttribute("aria-hidden", "true");
+    expect(departing?.querySelector("button")).toBeDisabled();
+    expect(active).toHaveClass("is-arriving");
+    expect(active).toHaveAttribute("aria-hidden", "false");
+    expect(screen.queryByRole("heading", { name: "Training Grounds" })).not.toBeInTheDocument();
+    container.querySelectorAll('.campaign-sector-content[aria-hidden="true"] button').forEach((button) => {
+      expect(button).toBeDisabled();
+    });
+    fireEvent.click(node);
+    expect(container.querySelectorAll(".campaign-sector-content.is-departing")).toHaveLength(1);
+    expect(container.querySelector(".campaign-sector-content.is-departing")).toHaveTextContent("Capital Perimeter");
+    expect(container.querySelector(".campaign-sector-content.is-active")).not.toBe(active);
+    expect(screen.getAllByRole("button", { name: "Művelet indítása" })).toHaveLength(1);
   });
 
   it("launches an unlocked branch and persists its operation in the main menu", () => {

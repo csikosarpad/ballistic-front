@@ -137,6 +137,13 @@ describe("AiBrain", () => {
     expect(impact?.hitTarget).toBe(true);
   });
 
+  it("Smart Aim esetén nem ad vissza pontatlan tartaléktervet elérhetetlen célpontra", () => {
+    const { mask, shooter, target } = setup();
+    shooter.stats = { ...shooter.stats, maxPower: 100 };
+    const brain = new AiBrain({ skill: 0.3, random: sequence([0.2, 0.7]) });
+    expect(brain.decide(shooter, target, mask, 0, DEFAULT_WORLD.gravity, true)).toBeNull();
+  });
+
   it("a mellélövésből tanul: a korrekció az ellenkező irányba tolja a célpontot", () => {
     const { mask, shooter, target } = setup();
     const brain = new AiBrain({ skill: 0.5, random: sequence([0.3, 0.6]) });

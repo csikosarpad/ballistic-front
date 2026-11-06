@@ -301,8 +301,12 @@
   gap: 6px;
 }
 
-.hud-campaign-actions {
+.hud-offline-actions {
   grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.hud-campaign-actions {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
 .hud-actions button {

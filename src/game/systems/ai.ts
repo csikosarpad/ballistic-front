@@ -186,7 +186,7 @@ export class AiBrain {
     return this.correctionX;
   }
 
-  /** A következő lövés szöge és ereje; null, ha nincs értelmes megoldás. */
+  /** Smart Aim esetén csak igazolt közvetlen találatot ad; egyébként zajos célzást. */
   decide(
     shooter: Tank,
     target: Tank,
@@ -201,6 +201,7 @@ export class AiBrain {
         this.lastAimX = target.x;
         return { angle: precise.angle, power: precise.power, error: precise.error };
       }
+      return null;
     }
 
     const plan = planShot({
